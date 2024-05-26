@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     volumes:
-      - /goinfre/postgres_data:/var/lib/postgresql/data
+      - ~./sgoinfre/postgres_data:/var/lib/postgresql/data
     networks:
       - transendence-network
 
@@ -31,7 +31,7 @@ services:
     networks:
       - transendence-network
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - web
 
