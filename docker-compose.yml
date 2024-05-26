@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: transendence
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - /goinfre/postgres_data:/var/lib/postgresql/data
+    networks:
+      - transendence-network
+
+  web:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgres://user:password@db:5432/transendence
+    networks:
+      - transendence-network
+    depends_on:
+      - db
+
+  frontend:
+    image: nginx:latest
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    networks:
+      - transendence-network
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+
+networks:
+  transendence-network:
+
