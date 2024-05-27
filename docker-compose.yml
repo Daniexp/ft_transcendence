@@ -1,40 +1,41 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_DB: transendence
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    volumes:
-      - ~./sgoinfre/postgres_data:/var/lib/postgresql/data
-    networks:
-      - transendence-network
+#  db:
+#    image: postgres:13
+#    container_name: db
+#    environment:
+#      - .env
+#    volumes:
+#      - ~./sgoinfre/postgres_data:/var/lib/postgresql/data
+#    networks:
+#      - Transcendence-network
 
   web:
     build: ./backend
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - ./backend:/app
-    environment:
-      - DATABASE_URL=postgres://user:password@db:5432/transendence
-    networks:
-      - transendence-network
-    depends_on:
-      - db
-
-  frontend:
-    image: nginx:latest
-    volumes:
-      - ./frontend:/usr/share/nginx/html:ro
-    networks:
-      - transendence-network
+    container_name: web
     ports:
-      - "8080:80"
-    depends_on:
-      - web
+      - "8081:8081"
+    #command: python manage.py runserver 0.0.0.0:8000
+    #volumes:
+     # - ./project:/app
+    environment:
+      - .env
+    networks:
+      - Transcendence-network
+    #depends_on:
+     # - db
+
+#  #frontend:
+#    image: nginx:latest
+#    volumes:
+#      - ./frontend:/usr/share/nginx/html:ro
+#    networks:
+#      - Transcendence-network
+#    ports:
+#      - "8080:80"
+#    depends_on:
+#      - web
 
 networks:
-  transendence-network:
-
+  Transcendence-network:
