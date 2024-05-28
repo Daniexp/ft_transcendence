@@ -8,13 +8,7 @@ WORKDIR /
 COPY requirements.txt /
  #/project/
 
-COPY django/project/* /project/project/
-
-COPY django/app/migrations /project/app/migrations
-
-COPY django/app/*.py /project/app/
-
-COPY django/manage.py /project/
+COPY ./django/ /project/
 
 COPY ./entrypoint.sh /entrypoint.sh
 
