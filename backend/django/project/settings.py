@@ -20,11 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-2b5+s@d_pu*@23cc!3o^d+lk6e07&fcdi&thqi*%v1tvk32(v&'
+SECRET_KEY = 'django-insecure-!5f0zf0%=q$7n^$z-n52=uk=1m*&=9#q(1bx)qgy3y4@9(0xdf'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+#Esto es las direcciones permitidas dentro de la red para acceder a nuestra pagina | El argumento que pasamos se trata de la IP que esta asociada al servidor de nuestra web
 ALLOWED_HOSTS = ['*']
 
 

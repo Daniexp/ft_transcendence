@@ -10,8 +10,11 @@ fix_settings_file() {
 }
 
 ## Perform initialization if manage.py does not exist
-#if [ ! -f "/app/manage.py" ]; then
-#    django-admin startproject Transcendence /app
+#if [ ! -f "/project/manage.py " ]; then
+ #   django-admin startproject project /project
+    #python3 /project/manage.py migrate
+  #  cd /project
+   # python3 manage.py startapp app
 #    sed -i "s/'ENGINE': 'django.db.backends.sqlite3'/'ENGINE': 'django.db.backends.postgresql'/g" /app/Transcendence/settings.py
 #    sed -i "s/'NAME': BASE_DIR \/ 'db.sqlite3'/'NAME': 'Transcendence'/g" /app/Transcendence/settings.py
 #    sed -i "/'NAME': 'Transcendence'/a\        'USER': 'user',\n        'PASSWORD': 'password',\n        'HOST': 'db',\n        'PORT': '5432'," /app/Transcendence/settings.py

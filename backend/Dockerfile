@@ -5,16 +5,21 @@ FROM python:3.9-slim
 WORKDIR /
 
 # Copy the requirements.txt first, to leverage Docker cache
-COPY requirements.txt /project/
+COPY requirements.txt /
+ #/project/
 
 COPY django/project/* /project/project/
+
+COPY django/app/migrations /project/app/migrations
+
+COPY django/app/*.py /project/app/
 
 COPY django/manage.py /project/
 
 COPY ./entrypoint.sh /entrypoint.sh
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r /project/requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt
 
 # Copy the current directory contents into the container at /app
 COPY . /app
