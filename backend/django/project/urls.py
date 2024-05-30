@@ -20,7 +20,8 @@ from app import views
 
 urlpatterns = [
     path("", views.index, name='index'),
-    #path("sections/<int:num>", views.section, name='section'),
+    #REGISTRANDO UNA NUEVA VISTA DESDE VIEW
+    path("somethingHappened/", views.somethingHappened, name='somethingHappened'),
     path('admin/', admin.site.urls),
     #path('', include("singlepage.urls")),
 ]
