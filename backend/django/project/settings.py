@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app'
+    'app',
+    'bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -78,10 +79,10 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pongdb',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': 'postgresql',
+        'NAME': 'pongdb',  # TODO REGISTER ENV
+        'USER': 'postgres', # TODO REGISTER ENV
+        'PASSWORD': '1234',  # TODO REGISTER ENV 
+        'HOST': 'postgresql',  # TODO REGISTER ENV
         'PORT': '5432',
     }
 }

@@ -1,3 +1,14 @@
+<!DOCTYPE html>
 <html>
-    <h1>PATATA</h1>
+    <head> 
+        {% load bootstrap5 %}
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
+        {% load static %}
+    </head>
+    <body>
+        <script src="{% static 'js/button.js' %}"></script>
+        <h1>PATATA</h1>
+        <button type="button" class="btn btn-danger" onclick="saludar()">Danger</button>
+    </body>
 </html>
