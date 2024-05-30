@@ -1,15 +1,16 @@
 version: '3.8'
 
 services:
-#  db:
-#    image: postgres:13
-#    container_name: db
-#    environment:
-#      - .env
+  db:
+    build: ./database
+    container_name: postgresql
+    environment:
+      - .env
+    #todo provisional pero lo estoy pensando para poder tirar de esto | averiguar dnd esta el data de postgres
 #    volumes:
 #      - ~./sgoinfre/postgres_data:/var/lib/postgresql/data
-#    networks:
-#      - Transcendence-network
+    networks:
+      - Transcendence-network
 
   web:
     build: ./backend
@@ -17,25 +18,18 @@ services:
     ports:
       - "8080:8080"
     #command: python manage.py runserver 0.0.0.0:8000
-    #volumes:
-     # - ./backend/django:/project
+    volumes:
+      - ./backend/django:/project
     environment:
       - .env
     networks:
       - Transcendence-network
-    #depends_on:
-     # - db
-
-#  #frontend:
-#    image: nginx:latest
-#    volumes:
-#      - ./frontend:/usr/share/nginx/html:ro
-#    networks:
-#      - Transcendence-network
-#    ports:
-#      - "8080:80"
-#    depends_on:
-#      - web
+      #pendiente evitar carrera de scripts con healthy_check
+    depends_on:
+      - db
 
 networks:
   Transcendence-network:
+    ipam:
+      config:
+        - subnet: 172.18.0.0/24

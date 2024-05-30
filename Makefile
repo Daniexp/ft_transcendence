@@ -22,4 +22,4 @@ re: down build up
 web:
 	docker exec -it web /bin/bash
 db:
-	docker exec -it db /bin/bash
+	docker exec -it postgresql /bin/bash

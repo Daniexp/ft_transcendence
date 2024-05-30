@@ -28,5 +28,5 @@ fix_settings_file() {
 #fi
 
 #exec "$@"
-tail -f
+exec tail -f
 
