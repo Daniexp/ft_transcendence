@@ -1,30 +1,29 @@
-version: '3.8'
-
 services:
   db:
     build: ./database
     container_name: postgresql
     env_file:
       - ./.env
-    #todo provisional pero lo estoy pensando para poder tirar de esto | averiguar dnd esta el data de postgres
-#    volumes:
-#      - ~./sgoinfre/postgres_data:/var/lib/postgresql/data
     networks:
       - Transcendence-network
+
+  # redis:
+  #   image: redis:alpine
+  #   container_name: redis
+  #   networks:
+  #     - Transcendence-network
 
   web:
     build: ./backend
     container_name: web
     ports:
       - "8080:8080"
-    #command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend/django:/project
     env_file:
       - .env
     networks:
       - Transcendence-network
-      #pendiente evitar carrera de scripts con healthy_check
     depends_on:
       - db
 

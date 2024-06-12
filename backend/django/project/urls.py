@@ -16,14 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from app import views
+from home import views
 
 urlpatterns = [
-    path("", views.index, name='index'),
-    #REGISTRANDO UNA NUEVA VISTA DESDE VIEW
-    path("somethingHappened/", views.somethingHappened, name='somethingHappened'),
     path('admin/', admin.site.urls),
-    #path('', include("singlepage.urls")),
+    path("", views.index, name='index'),
+    path("somethingHappened/", views.somethingHappened, name='somethingHappened'),
 ]
 
 #https://patata.com/admin/dfrwfwefwewefwfe

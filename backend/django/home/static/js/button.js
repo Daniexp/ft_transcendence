@@ -1,3 +1,6 @@
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("sendButtonToSendMsg").addEventListener("click", sendMessage);
+});
 
 function saludar() {
     obtenerHTMLDesdeDjango();
@@ -26,4 +29,11 @@ function obtenerHTMLDesdeDjango() {
     }
 }
 
-
+function sendMessage() {
+    const inputText = document.querySelector('.form-control').value;
+    if (gameSocket.readyState === WebSocket.OPEN) {
+        gameSocket.send(JSON.stringify({ message: inputText }));
+    } else {
+        console.error('La conexión WebSocket no está abierta.');
+    }
+};
