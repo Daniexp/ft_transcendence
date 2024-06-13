@@ -1,4 +1,5 @@
-document.addEventListener("DOMContentLoaded", function() {
+
+function initWebSocket(){
     var connectionString = 'ws://' + window.location.host + '/ws/pong/';
     var gameSocket = new WebSocket(connectionString);
 
@@ -17,4 +18,6 @@ document.addEventListener("DOMContentLoaded", function() {
     gameSocket.onclose = function(event) {
         console.log('Conexión cerrada');
     };
-});
+
+    window.gameSocket = gameSocket;
+}

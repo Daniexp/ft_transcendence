@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -100,6 +101,7 @@ DATABASES = {
         'PASSWORD': '1234',  # TODO REGISTER ENV 
         'HOST': 'postgresql',  # TODO REGISTER ENV
         'PORT': '5432',
+        'CONN_MAX_AGE': 60,
     }
 }
 
