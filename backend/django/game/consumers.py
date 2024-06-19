@@ -9,51 +9,54 @@ class PongConsumer(AsyncWebsocketConsumer):
     RUNNING = 0
 
     async def connect(self):
+        self.user_id = self.scope['url_route']['kwargs']['user_id']
         
-        self.group_name = f'pongGame{self.__class__.groupID}'
-        print(self.group_name)
-        self.user_id = self.scope['user'].id if self.scope['user'].is_authenticated else self.channel_name
+        await self.accept()
+
+        if self.user_id not in self.users:
+            self.group_name = f'pongGame{self.__class__.groupID}'
+            await self.add_user(self.user_id, self.channel_name)
+        
+
+        self.active_groups.setdefault(self.group_name, []).append(self.user_id)
         
         await self.channel_layer.group_add(
             self.group_name,
             self.channel_name
-        ) 
-        await self.accept()
-        await self.add_user(self.user_id, self.channel_name)
-        self.active_groups.setdefault(self.group_name, []).append(self.user_id)
-
-        if len(self.users) % 2 == 0 and len(self.users):
-            print(f'len(self.users):{len(self.users)}')
-            self.__class__.groupID += 1
-
+        )
+        
         await self.send(text_data=json.dumps({
             'message': f'Connected to group: {self.group_name}'
         }))
 
-        asyncio.ensure_future(self.game_loop())
-        
+        if len(self.active_groups[self.group_name]) == 2:
+            self.__class__.groupID += 1
+            asyncio.ensure_future(self.game_loop(2))
 
-    async def game_loop(self):
-        self.RUNNING = 1
-        while self.RUNNING:
-            if len(self.active_groups.get(self.group_name, [])) >= 2:
-                await self.channel_layer.group_send(
-                    self.group_name,
-                    {
-                        'type': 'game_message',
-                        'message': f'Game is running group: {self.group_name}'
-                    }
-                )
-            await asyncio.sleep(0.5)
+    async def game_loop(self, num_players):
+        while len(self.active_groups[self.group_name]) == num_players:
+            await self.channel_layer.group_send(
+                self.group_name,
+                {
+                    'type': 'game_message',
+                    'message': f'Game is running group: {self.group_name}'
+                }
+            )
+            await asyncio.sleep(0.1)
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.group_name,
             self.channel_name
         )
-        self.RUNNING = 0
-        print("DISCONNECTED FOR REAL")
+
         await self.remove_user(self.user_id)
+
+        if self.group_name in self.active_groups:
+            self.active_groups[self.group_name].remove(self.user_id)
+            if not self.active_groups[self.group_name]:
+                del self.active_groups[self.group_name]
+                self.RUNNING = 0
 
     async def add_user(self, user_id, channel_name):
         self.users[user_id] = channel_name 
@@ -62,10 +65,15 @@ class PongConsumer(AsyncWebsocketConsumer):
         if user_id in self.users:
             del self.users[user_id]
 
+    async def get_user_group(self, user_id):
+        for group_name, users in self.active_groups.items():
+            if user_id in users:
+                return group_name
+        return None
+
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
-        print("RECEIVED MESSAGE:", message)
         await self.channel_layer.group_send(
             self.group_name,
             {
