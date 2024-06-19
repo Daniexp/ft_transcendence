@@ -2,21 +2,21 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import asyncio
 import json
 
+#DUPLICAR LA TAB CONNECTADA GENERA PROBLEMAS
+
 class PongConsumer(AsyncWebsocketConsumer):
     users = {}
     groupID = 0
     active_groups = {}
-    RUNNING = 0
 
     async def connect(self):
         self.user_id = self.scope['url_route']['kwargs']['user_id']
         
         await self.accept()
 
-        if self.user_id not in self.users:
-            self.group_name = f'pongGame{self.__class__.groupID}'
-            await self.add_user(self.user_id, self.channel_name)
-        
+        self.group_name = f'pongGame{self.__class__.groupID}'
+        await self.add_user(self.user_id, self.channel_name)
+
 
         self.active_groups.setdefault(self.group_name, []).append(self.user_id)
         
@@ -26,9 +26,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
         
         await self.send(text_data=json.dumps({
-            'message': f'Connected to group: {self.group_name}'
+            'message': f'Connected to group: {self.group_name}  \n  \n User ID {self.user_id}'
         }))
-
+        
         if len(self.active_groups[self.group_name]) == 2:
             self.__class__.groupID += 1
             asyncio.ensure_future(self.game_loop(2))
@@ -39,7 +39,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 self.group_name,
                 {
                     'type': 'game_message',
-                    'message': f'Game is running group: {self.group_name}'
+                    'message': f'Game is running group: {self.group_name} \n User ID {self.user_id}'
                 }
             )
             await asyncio.sleep(0.1)
@@ -56,7 +56,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.active_groups[self.group_name].remove(self.user_id)
             if not self.active_groups[self.group_name]:
                 del self.active_groups[self.group_name]
-                self.RUNNING = 0
 
     async def add_user(self, user_id, channel_name):
         self.users[user_id] = channel_name 
