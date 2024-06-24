@@ -4,3 +4,4 @@ django-bootstrap-v5
 channels>=3.0
 channels_redis>=3.2
 daphne
+requests

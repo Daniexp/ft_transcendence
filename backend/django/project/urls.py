@@ -17,11 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from home import views
+from login import views as loginViews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", views.index, name='index'),
+    path("login/", loginViews.intraLogin, name="authentication"),
     path("somethingHappened/", views.somethingHappened, name='somethingHappened'),
+    path("oauth2/login/redirect", views.loginSuccess, name='loginSuccess'),
 ]
 
 #https://patata.com/admin/dfrwfwefwewefwfe

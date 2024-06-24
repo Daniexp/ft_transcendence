@@ -9,3 +9,7 @@ def index(request):
 #DECLAEANDO LA VISTA PARA LA REQUEST ENTRANTE
 def somethingHappened(request):
     return render(request, 'aux.html')
+
+
+def loginSuccess(request):
+    return render(request, 'aux.html')
