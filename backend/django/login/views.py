@@ -16,12 +16,19 @@ grant_type="client_credentials"
 def intraLogin(request):
     return redirect(authorize_url)
 
-def printAuthRequest(request):
+def authRequest(request):
     code = request.GET.get('code')
     response = exchange_code(code)
     #if (response == 200):
         #return provisional a patata, el buen return es a la pagina principal
-    return views.loginSuccess(request)
+    print("ahi va la response:")
+    print(response.status_code)
+    print("a ver si es esta request")
+    print(request)
+    if (request.GET.get('error')):
+        return views.index(request)
+    else:
+        return views.loginSuccess(request)
     #elif (response == 401):
         #panel de access denied
      #   return views.index(request)
@@ -29,10 +36,10 @@ def printAuthRequest(request):
 def exchange_code(code):
     data = {
         "grant_type":grant_type,
-        "client_id": env['CLIENT_ID'], # "u-s4t2ud-7f23e63d9f57af46395fc37255f56e7ad8e8c11b19428dc7518a02725743582e",
-        "client_secret": env['CLIENT_SECRET'], #"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", ## deleteado por securite, hay que hablar hasta que punto se podria liar y como evitarlo
+        "client_id": env['CLIENT_ID'],
+        "client_secret": env['CLIENT_SECRET'],
         "code": code,
-        "redirect_uri": env['REDIRECT_URI'], #"http://localhost:8080/oauth/login/redirect",
+        "redirect_uri": env['REDIRECT_URI'],
         #"state": state,
     }
     headers = {
@@ -40,8 +47,9 @@ def exchange_code(code):
     }
     
     response = requests.post("https://api.intra.42.fr/oauth/token", data=data, headers=headers)
+    print("AAAAAAAAAAAAAAAA")
     print(response)
-    print(code)
+    #print(code)
     credentials = response.json()
     print(credentials)
     return response

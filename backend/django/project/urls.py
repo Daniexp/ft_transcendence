@@ -24,7 +24,7 @@ urlpatterns = [
     path("", views.index, name='index'),
     path("login/", loginViews.intraLogin, name="authentication"),
     path("somethingHappened/", views.somethingHappened, name='somethingHappened'),
-    path("oauth2/login/redirect", views.loginSuccess, name='loginSuccess'),
+    path("oauth2/login/redirect", loginViews.authRequest, name='loginSuccess'),
 ]
 
 #https://patata.com/admin/dfrwfwefwewefwfe

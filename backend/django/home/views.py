@@ -12,4 +12,4 @@ def somethingHappened(request):
 
 
 def loginSuccess(request):
-    return render(request, 'aux.html')
+    return render(request, 'home.html')
