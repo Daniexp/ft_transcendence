@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head> 
+        {% load bootstrap5 %}
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
+        {% load static %}
+    </head>
+    <body>
+        <script src="{% static 'js/button.js' %}"></script>
+        <script src="{% static 'js/pong.js' %}"></script>
+        <h1>PATATA</h1>
+        <button type="button" class="btn btn-danger" onclick="saludar()">Danger</button>
+        <div id="placeholder"></div>
+
+        <div class="input-group">
+            <input type="text" class="form-control" aria-label="Text input">
+            <button type="button" class="btn btn-outline-secondary" id="sendButtonToSendMsg">send</button>
+        </div>
+          
+    </body>
+</html>

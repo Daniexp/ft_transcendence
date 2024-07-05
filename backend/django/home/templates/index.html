@@ -6,56 +6,7 @@
         {% bootstrap_css %}
         {% bootstrap_javascript %}
         {% load static %}
-        <style>
-            :root {
-                --container-padding-top: 10vh;
-                /* Padding superior del contenedor en vh */
-                --form-padding: 2rem;
-                /* Padding del formulario en rem */
-                --form-max-width: 20rem;
-                /* Ancho máximo del formulario en rem */
-                --button-padding: 0.625rem 1.25rem;
-                /* Padding del botón en rem */
-                --button-font-size: 1rem;
-                /* Tamaño de fuente del botón en rem */
-            }
-        
-            .login-container {
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                height: 100vh;
-                padding-top: var(--container-padding-top);
-                /* Controla la altura relativa desde el tope */
-                background-color: #f8f9fa;
-            }
-        
-            .login-form {
-                padding: var(--form-padding);
-                background: #fff;
-                box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
-                border-radius: 0.5rem;
-                width: 80vw;
-                /* Ancho relativo a la pantalla */
-                max-width: var(--form-max-width);
-                /* Ancho máximo */
-                text-align: center;
-                /* Centra el contenido del formulario */
-            }
-        
-            .custom-button {
-                padding: var(--button-padding);
-                border-radius: 0.3125rem;
-                cursor: pointer;
-                font-size: var(--button-font-size);
-                margin-top: 1.25rem;
-                /* Espacio entre el botón y los elementos anteriores en rem */
-            }
-        
-            .custom-button:hover {
-                background-color: #626568;
-            }
-        </style>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}">
     </head>
         
         <body>
