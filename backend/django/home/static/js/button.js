@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function() {
     initWebSocket();
     document.getElementById("sendButtonToSendMsg").addEventListener("click", sendMessage);

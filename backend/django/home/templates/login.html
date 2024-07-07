@@ -1,7 +1,27 @@
-<div class="container-fluid login-container">
-    <div class="login-form">
-        <h2>Pong Login.</h2>
-        <button type="button" class="btn btn-dark custom-button" onclick="login()" id="loginButton">Login.</button>
-    </div>
-</div>
-<div id="placeholder"></div>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pong Login</title>
+        {% load bootstrap5 %}
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
+        {% load static %}
+        {% csrf_token %}
+        <link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+    </head>
+        
+        <body>
+            <script src="{% static 'js/login.js' %}"></script>
+            <script src="{% static 'js/button.js' %}"></script>
+            <script src="{% static 'js/pong.js' %}"></script>
+            <div class="container-fluid login-container">
+                <div class="login-form">
+                    <h2>Pong Login.</h2>
+                        <button type="button" class="btn btn-dark custom-button" onclick="login()"id="loginButton">Login.</button>
+                </div>
+            </div>
+            <div id="placeholder"></div>
+        </body>
+        
+</html>

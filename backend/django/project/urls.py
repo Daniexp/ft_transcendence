@@ -21,7 +21,7 @@ from login import views as loginViews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", views.index, name='index'),
+    path("", views.login, name='index'),
     path("login/", loginViews.intraLogin, name="authentication"),
     path("somethingHappened/", views.somethingHappened, name='somethingHappened'),
     path("oauth2/login/redirect", loginViews.authRequest, name='loginSuccess'),
