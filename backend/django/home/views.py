@@ -16,5 +16,5 @@ def somethingHappened(request):
     return render(request, 'aux.html')
 
 
-def loginSuccess(request):
-    return render(request, 'home.html')
+def loginSuccess(request, picture):
+    return render(request, 'home.html', {'picture': picture})
