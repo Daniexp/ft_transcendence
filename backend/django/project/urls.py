@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", views.login, name='index'),
     path("login/", loginViews.intraLogin, name="authentication"),
+    path("loginPage/", views.loginPage , name="authentication"),
     path("somethingHappened/", views.somethingHappened, name='somethingHappened'),
     path("oauth2/login/redirect", loginViews.authRequest, name='loginSuccess'),
 ]

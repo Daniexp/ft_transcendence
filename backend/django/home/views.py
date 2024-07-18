@@ -18,3 +18,6 @@ def somethingHappened(request):
 
 def loginSuccess(request, picture):
     return render(request, 'home.html', {'picture': picture})
+
+def loginPage(request):
+    return render(request, 'login.html')

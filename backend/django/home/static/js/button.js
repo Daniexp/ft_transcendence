@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
+    loadHTML("/loginPage/", "placeholder");
     initWebSocket();
     document.getElementById("sendButtonToSendMsg").addEventListener("click", sendMessage);
 });
@@ -7,17 +8,17 @@ function saludar() {
     obtenerHTMLDesdeDjango();
 }
 
-function obtenerHTMLDesdeDjango() {
+function loadHTML(url, placeholderID) {
     // REQUEST A LA VISTA
-    if(document.getElementById('placeholder').innerHTML === ""){
+    if(document.getElementById(placeholderID).innerHTML === ""){
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/somethingHappened/', true);
+        xhr.open('GET', url, true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     var htmlContent = xhr.responseText;
                     // SUBSTITUIR EL PLACEHOLDER DEL HTML POR EL NUEVO TEXTO
-                    document.getElementById('placeholder').innerHTML = htmlContent;
+                    document.getElementById(placeholderID).innerHTML = htmlContent;
                 } else {
                     console.error('Error al hacer la solicitud AJAX:', xhr.status);
                 }
@@ -26,7 +27,7 @@ function obtenerHTMLDesdeDjango() {
         xhr.send();
     }
     else{
-        document.getElementById('placeholder').innerHTML = ""
+        document.getElementById(placeholderID).innerHTML = ""
     }
 }
 

@@ -1,32 +1,32 @@
 <!DOCTYPE html>
-<html>
-    <head> 
-        {% load bootstrap5 %}
-        {% bootstrap_css %}
-        {% bootstrap_javascript %}
-        {% load static %}
-    </head>
-    <body>
-        <script src="{% static 'js/button.js' %}"></script>
-        <script src="{% static 'js/pong.js' %}"></script>
-        <h1>PATATA</h1>
-        <ul class="nav justify-content-end">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Active
-              <img src="{{ picture }}" width="42" height="42" class="d-inline-block align-top" alt="">
-              Bootstrap
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-            </li>
-        </ul>
-         
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Página</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% load static %}
+    {% csrf_token %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Pong.</a>
+        <div class="collapse navbar-collapse justify-content-end">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <img src="{{picture}}" alt="Foto de perfil">
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <hr class="navbar-divider">
+    <div id="placeholder"></div>
+</body>
 </html>
+

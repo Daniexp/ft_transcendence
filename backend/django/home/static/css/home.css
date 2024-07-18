@@ -1,0 +1,22 @@
+ .navbar .navbar-brand {
+     font-size: 1.5rem;
+     font-weight: bold;
+ }
+
+ .navbar .navbar-nav .nav-item .nav-link {
+     padding-right: 0;
+ }
+
+ .navbar .navbar-nav .nav-item .nav-link img {
+     width: 2.5vw;
+     /* 5% del ancho de la ventana */
+     height: 2.5vw;
+     /* 5% del ancho de la ventana */
+     object-fit: cover;
+     border-radius: 50%;
+ }
+
+ .navbar-divider {
+     border-top: 1px solid #dee2e6;
+     margin-top: 0;
+ }
