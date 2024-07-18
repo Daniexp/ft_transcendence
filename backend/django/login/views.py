@@ -10,7 +10,11 @@ authorize_url = env['AUTH_URL']
 grant_type="authorization_code"
 
 
+def login(request):
+    return render
+
 def intraLogin(request):
+    print("TUKOOOO")
     return redirect(authorize_url)
 
 def authRequest(request):
@@ -20,9 +24,7 @@ def authRequest(request):
 
     if "error" in response.json() or request.GET.get('error'):
         return views.login(request)
-    else:
-        picture = getProfilePicture(response)
-        return views.loginSuccess(request, picture)
+    return views.home(request, response)
 
 def getProfilePicture(response):
     data_request = requests.get("https://api.intra.42.fr/v2/me", data=response.json())

@@ -2,6 +2,7 @@ from django.shortcuts import render
 from . import models
 from django.contrib.auth.decorators import login_required
 import os
+from login import views as loginViews
 
 
 # Create your views here.
@@ -16,8 +17,19 @@ def somethingHappened(request):
     return render(request, 'aux.html')
 
 
-def loginSuccess(request, picture):
-    return render(request, 'home.html', {'picture': picture})
+def home(request, response = ""):
+    print("AAA")
+    print(response)
+    if response != "":
+        if response.status_code == 200 and "access_token" in response.json():
+            picture = loginViews.getProfilePicture(response)
+            print("FOTO")
+            return render(request, 'home.html', {'picture': picture})
+        else:
+            return home(request)
+    else:
+        return login(request)
+
 
 def loginPage(request):
     return render(request, 'login.html')

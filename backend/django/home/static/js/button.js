@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     loadHTML("/loginPage/", "placeholder");
+    //console.log("primeira")
     initWebSocket();
     document.getElementById("sendButtonToSendMsg").addEventListener("click", sendMessage);
 });
