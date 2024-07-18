@@ -1,6 +1,7 @@
  .navbar .navbar-brand {
-     font-size: 1.5rem;
+     font-size: 2rem;
      font-weight: bold;
+     margin-left: 15rem;
  }
 
  .navbar .navbar-nav .nav-item .nav-link {
@@ -8,15 +9,19 @@
  }
 
  .navbar .navbar-nav .nav-item .nav-link img {
-     width: 2.5vw;
+     width: 3.5rem;
      /* 5% del ancho de la ventana */
-     height: 2.5vw;
+     height: 3.5rem;
      /* 5% del ancho de la ventana */
      object-fit: cover;
      border-radius: 50%;
+     margin-right: 15rem;
  }
 
  .navbar-divider {
-     border-top: 1px solid #dee2e6;
+     color: black;
+     border-top: 1px solid black;
      margin-top: 0;
+     margin: 0 auto;
+     width: 85%; 
  }
