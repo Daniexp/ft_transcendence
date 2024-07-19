@@ -10,6 +10,8 @@
     {% load static %}
     {% csrf_token %}
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <script src="{% static 'js/game/pong.js' %}"></script>
+    <script src="{% static 'js/utils.js' %}"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -28,4 +30,3 @@
     <div id="placeholder"></div>
 </body>
 </html>
-

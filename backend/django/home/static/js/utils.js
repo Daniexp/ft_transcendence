@@ -1,14 +1,3 @@
-document.addEventListener("DOMContentLoaded", function() {
-    loadHTML("/loginPage/", "placeholder");
-    //console.log("primeira")
-    initWebSocket();
-    document.getElementById("sendButtonToSendMsg").addEventListener("click", sendMessage);
-});
-
-function saludar() {
-    obtenerHTMLDesdeDjango();
-}
-
 function loadHTML(url, placeholderID) {
     // REQUEST A LA VISTA
     if(document.getElementById(placeholderID).innerHTML === ""){
@@ -29,15 +18,5 @@ function loadHTML(url, placeholderID) {
     }
     else{
         document.getElementById(placeholderID).innerHTML = ""
-    }
-}
-
-function sendMessage() {
-
-    const inputText = document.querySelector('.form-control').value;
-    if (window.gameSocket.readyState === WebSocket.OPEN) {
-        window.gameSocket.send(JSON.stringify({ message: inputText }));
-    } else {
-        console.error('La conexión WebSocket no está abierta.');
     }
 }

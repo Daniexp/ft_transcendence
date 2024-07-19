@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from home import views
 from login import views as loginViews
+from game import views as gameViews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +27,7 @@ urlpatterns = [
     path("loginPage/", views.loginPage , name="authentication"),
     path("somethingHappened/", views.somethingHappened, name='somethingHappened'),
     path("oauth2/login/redirect", loginViews.authRequest, name='loginSuccess'),
+    path("gameButtonsDisplay/", gameViews.gameButtons , name='gameButtons'),
 ]
 
 #https://patata.com/admin/dfrwfwefwewefwfe

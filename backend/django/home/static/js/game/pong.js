@@ -1,3 +1,7 @@
+document.addEventListener("DOMContentLoaded", function() {
+    loadHTML("/gameButtonsDisplay/", "placeholder");
+});
+
 
 function getOrGenerateUniqueID() {
     let uniqueID = localStorage.getItem('uniqueID');

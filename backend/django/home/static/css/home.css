@@ -1,27 +1,110 @@
- .navbar .navbar-brand {
-     font-size: 2rem;
-     font-weight: bold;
-     margin-left: 15rem;
- }
+.navbar .navbar-brand {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-left: 15rem;
+}
 
- .navbar .navbar-nav .nav-item .nav-link {
-     padding-right: 0;
- }
+.navbar .navbar-nav .nav-item .nav-link {
+    padding-right: 0;
+}
 
- .navbar .navbar-nav .nav-item .nav-link img {
-     width: 3.5rem;
-     /* 5% del ancho de la ventana */
-     height: 3.5rem;
-     /* 5% del ancho de la ventana */
-     object-fit: cover;
-     border-radius: 50%;
-     margin-right: 15rem;
- }
+.navbar .navbar-nav .nav-item .nav-link img {
+    width: 3.5rem;
+    height: 3.5rem;
+    object-fit: cover;
+    border-radius: 90%;
+    margin-right: 15rem;
+}
 
- .navbar-divider {
-     color: black;
-     border-top: 1px solid black;
-     margin-top: 0;
-     margin: 0 auto;
-     width: 85%; 
- }
+.navbar-divider {
+    color: black;
+    border-top: 1px solid black;
+    margin-top: 0;
+    margin: 0 auto;
+    width: 85%;
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 10%;
+}
+
+.button-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    width: 80%;
+    flex-wrap: wrap;
+}
+
+.btn-custom {
+    width: 45%; /* Ajusta el ancho según tus necesidades */
+    height: 600px; /* Ajusta la altura según tus necesidades */
+    margin: 10px;
+    border-radius: 20px;
+    font-size: 24px; /* Tamaño de la fuente para el texto dentro del botón */
+    background-color: white; /* Color de fondo del botón */
+    color: black; /* Color del texto del botón */
+    border: 2px solid black; /* Borde del botón */
+    transition: background-color 0.3s, border-color 0.3s; /* Añadir transición para el cambio de color */
+}
+
+.btn-custom:hover {
+    background-color: lightgray; 
+    border-color: lightgray;
+}
+
+.btn-custom:active, .btn-custom:focus {
+    background-color: lightgray; /* Color de fondo al hacer clic y al estar enfocado */
+    color: black; /* Cambiar el color del texto al hacer clic y al estar enfocado */
+    border-color: lightgray;
+}
+
+@media (max-width: 768px) {
+    .navbar .navbar-brand {
+        margin-left: 0;
+        font-size: 1.5rem;
+    }
+
+    .navbar .navbar-nav .nav-item .nav-link img {
+        margin-right: 0;
+    }
+
+    .navbar-divider {
+        width: 100%;
+    }
+
+    .container {
+        margin-top: 5%;
+    }
+
+    .button-row {
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-custom {
+        width: 80%; /* Ajusta el ancho para pantallas más pequeñas */
+        height: 200px; /* Ajusta la altura para pantallas más pequeñas */
+        font-size: 18px; /* Tamaño de la fuente para pantallas más pequeñas */
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-custom {
+        width: 90%; /* Ajusta el ancho para pantallas muy pequeñas */
+        height: 150px; /* Ajusta la altura para pantallas muy pequeñas */
+        font-size: 16px; /* Tamaño de la fuente para pantallas muy pequeñas */
+    }
+}
