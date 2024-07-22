@@ -41,7 +41,6 @@ body, html {
 
 .button-row {
     display: flex;
-    justify-content: space-around;
     align-items: flex-start;
     width: 80%;
     flex-wrap: wrap;

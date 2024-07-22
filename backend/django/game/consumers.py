@@ -56,6 +56,13 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.active_groups[self.group_name].remove(self.user_id)
             if not self.active_groups[self.group_name]:
                 del self.active_groups[self.group_name]
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                'type': 'game_message',
+                'message': "disconnected"
+            }
+        )
 
     async def add_user(self, user_id, channel_name):
         self.users[user_id] = channel_name 

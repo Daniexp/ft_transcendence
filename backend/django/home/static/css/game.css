@@ -1,0 +1,22 @@
+#gameContainer {
+    width: 90%;
+    max-width: 1200rem; 
+    height: 70vh;
+    background-color: #FFF;
+    border: 2px solid #111;
+    margin: 20px auto 0; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+    #gameContainer {
+        width: 85%;
+        max-width: 900px;
+        height: 60vh;
+        margin: 15px auto 0;
+    }
+}
