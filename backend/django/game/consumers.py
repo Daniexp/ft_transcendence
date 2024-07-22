@@ -87,6 +87,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 'message': message
             }
         )
+        
 
     async def game_message(self, event):
         message = event['message']

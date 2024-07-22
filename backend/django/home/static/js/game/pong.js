@@ -33,12 +33,15 @@ function hideShowGameSelect(classSelector, mode){
     }
 }
 
+gameRunning = 0;
 
 function startGame(mode){
     hideShowGameSelect(".gameSelectionButtons", "hide");
     if(mode === '1vs1'){
         initWebSocket()
         hideShowGameSelect(".gamePong", "show");
+        document.getElementById('gameContainer').addEventListener('keydown', handleKeysOnePlayer);
+
     }
 }
 
@@ -51,12 +54,15 @@ function initWebSocket(){
     };
 
     gameSocket.onmessage = function(event) {
-        console.log('Mensaje recibido:', event.data);
+        console.log('Mensaje recibido:', event.data); //TODO remove debug
         try {
             var data = JSON.parse(event.data);
+            if(data.message === "Game started")
+                gameRunning = 1;
             if(data.message === "disconnected") {
                 hideShowGameSelect('.gameSelectionButtons', 'show');
                 hideShowGameSelect('.gamePong', 'hide');
+                gameRunning = 0;
             }
         } catch (error) {
             console.error('Error al parsear el mensaje:', error);
@@ -66,11 +72,13 @@ function initWebSocket(){
     gameSocket.onerror = function(error) {
         console.error('Error en la conexión WebSocket:', error);
         hideShowGameSelect(".gameSelectionButtons", "show");
+        gameRunning = 0;
     };
 
     gameSocket.onclose = function(event) {
         console.log('Conexión cerrada');
         hideShowGameSelect(".gameSelectionButtons", "show");
+        gameRunning = 0;
     };
 
     window.gameSocket = gameSocket;
