@@ -52,9 +52,9 @@ async function waitForGameStart(mode) {
         document.getElementById('gameContainer').addEventListener('keydown', handleKeysOnePlayer);
     }
 }
+const uniqueID = getOrGenerateUniqueID();
 
 function initWebSocket(){
-    const uniqueID = getOrGenerateUniqueID();
     var gameSocket = new WebSocket(`ws://${window.location.host}/ws/pong/${uniqueID}/`);
 
     gameSocket.onopen = function(event) {
