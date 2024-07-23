@@ -20,3 +20,7 @@ function loadHTML(url, placeholderID) {
         document.getElementById(placeholderID).innerHTML = ""
     }
 }
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

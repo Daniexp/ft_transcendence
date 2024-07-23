@@ -32,6 +32,13 @@ class PongConsumer(AsyncWebsocketConsumer):
         if len(self.active_groups[self.group_name]) == 2:
             self.__class__.groupID += 1
             asyncio.ensure_future(self.game_loop(2))
+            await self.channel_layer.group_send(
+            self.group_name,
+                {
+                    'type': 'game_message',
+                    'message': "Game started"
+                }
+            )
 
     async def game_loop(self, num_players):
         while len(self.active_groups[self.group_name]) == num_players:

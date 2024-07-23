@@ -40,8 +40,16 @@ function startGame(mode){
     if(mode === '1vs1'){
         initWebSocket()
         hideShowGameSelect(".gamePong", "show");
-        document.getElementById('gameContainer').addEventListener('keydown', handleKeysOnePlayer);
+        waitForGameStart(mode);
+    }
+}
 
+async function waitForGameStart(mode) {
+    while (gameRunning === 0) {
+        await sleep(50); 
+    }
+    if(mode === '1vs1'){
+        document.getElementById('gameContainer').addEventListener('keydown', handleKeysOnePlayer);
     }
 }
 
@@ -57,8 +65,9 @@ function initWebSocket(){
         console.log('Mensaje recibido:', event.data); //TODO remove debug
         try {
             var data = JSON.parse(event.data);
-            if(data.message === "Game started")
+            if(data.message === "Game started"){
                 gameRunning = 1;
+            }
             if(data.message === "disconnected") {
                 hideShowGameSelect('.gameSelectionButtons', 'show');
                 hideShowGameSelect('.gamePong', 'hide');
