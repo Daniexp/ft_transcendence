@@ -8,26 +8,25 @@ function sendMessage(message) {
     }
 }
 
+function sendPlayerMessage(uniqueId, value) {
+    const data = {
+        "inputMsg": {
+            "player": {}
+        }
+    };
+    data.inputMsg.player[uniqueId] = value;
+    console.log("Enviando mensaje:", JSON.stringify(data));
+    sendMessage(JSON.stringify(data));
+}
+
+//SAME FOR 2 PLAYERS LOCALY BUT WE ADD NEW KEYs TO LISTEN IN ANOTHER FUNCTION
 function handleKeysOnePlayer(event) {
     if (event.key === 'ArrowUp' || event.keyCode === 38) {
         console.log('Flecha arriba presionada');
-        sendMessage(JSON.stringify({
-        "message": { 
-                "player": {
-                [uniqueID]: "1"
-                }
-            }
-        }));
-
-        
+        sendPlayerMessage(uniqueID, "1");
     } else if (event.key === 'ArrowDown' || event.keyCode === 40) {
         console.log('Flecha abajo presionada');
-        sendMessage(JSON.stringify({
-            "message": { 
-                    "player": {
-                    [uniqueID]: "-1"
-                    }
-                }
-            }));
+        sendPlayerMessage(uniqueID, "-1");
     }
 }
+

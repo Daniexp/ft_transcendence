@@ -68,10 +68,11 @@ function initWebSocket(){
             if(data.message === "Game started"){
                 gameRunning = 1;
             }
-            if(data.message === "disconnected") {
+            if(data.message === "User disconnected") {
                 hideShowGameSelect('.gameSelectionButtons', 'show');
                 hideShowGameSelect('.gamePong', 'hide');
                 gameRunning = 0;
+                gameSocket.close();
             }
         } catch (error) {
             console.error('Error al parsear el mensaje:', error);
@@ -81,12 +82,14 @@ function initWebSocket(){
     gameSocket.onerror = function(error) {
         console.error('Error en la conexión WebSocket:', error);
         hideShowGameSelect(".gameSelectionButtons", "show");
+        hideShowGameSelect('.gamePong', 'hide');
         gameRunning = 0;
     };
 
     gameSocket.onclose = function(event) {
         console.log('Conexión cerrada');
         hideShowGameSelect(".gameSelectionButtons", "show");
+        hideShowGameSelect('.gamePong', 'hide');
         gameRunning = 0;
     };
 
