@@ -64,16 +64,37 @@ function initWebSocket(){
     gameSocket.onmessage = function(event) {
         console.log('Mensaje recibido:', event.data); //TODO remove debug
         try {
-            var data = JSON.parse(event.data);
-            if(data.message === "Game started"){
-                gameRunning = 1;
+            try {
+                var data = JSON.parse(event.data);
+                console.log('Datos parseados:', data);
+                
+                if (data && typeof data.message === 'object' && data.message !== null) {
+                    if (data.message.game_started) {
+                        gameRunning = 1;
+                        console.log('Juego iniciado: players=', data.message.game_started);
+                    } else if (data.message.players) {
+                        players = data.message.players;
+                        console.log('Jugadores:', players);
+                    } else {
+                        console.log('Mensaje recibido sin propiedad relevante');
+                    }
+                } else if (typeof data.message === 'string') {
+                    console.log('Mensaje de texto recibido:', data.message);
+                    if(data.message === "User disconnected") {
+                        hideShowGameSelect('.gameSelectionButtons', 'show');
+                        hideShowGameSelect('.gamePong', 'hide');
+                        gameRunning = 0;
+                        gameSocket.close();
+                    }
+                } else {
+                    console.log('Mensaje recibido no es un objeto válido');
+                }
+                
+            } catch (error) {
+                console.error('Error al parsear el mensaje:', error);
             }
-            if(data.message === "User disconnected") {
-                hideShowGameSelect('.gameSelectionButtons', 'show');
-                hideShowGameSelect('.gamePong', 'hide');
-                gameRunning = 0;
-                gameSocket.close();
-            }
+            
+            
         } catch (error) {
             console.error('Error al parsear el mensaje:', error);
         }

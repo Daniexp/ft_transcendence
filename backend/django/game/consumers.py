@@ -56,12 +56,14 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.init_game_state(self.group_name)
             asyncio.ensure_future(self.game_loop(2))
             await self.channel_layer.group_send(
-                self.group_name,
-                {
-                    'type': 'game_message',
-                    'message': "Game started"
+            self.group_name,
+            {
+                'type': 'game_message',
+                'message': {
+                    'game_started': self.game_states[self.group_name]["players"]
                 }
-            )
+            }
+        )
 
     async def disconnect(self, close_code):
         if hasattr(self, 'group_name'):
