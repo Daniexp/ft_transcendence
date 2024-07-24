@@ -7,6 +7,8 @@ from math import cos, sin, pi
 
 GAME_TICK_RATE = 0.1  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
+BALL_ACCELERATION = 1.01 # Acceleracion de la bola
+BALL_VELOCITY_INTERVAl = 2 * pi # Rango de valores desde 0 que coge para determinar las velocidades iniciales desde 0
 BALL_MIN_POSITION = 0  # Posición mínima de la pelota
 BALL_MAX_POSITION_X = 100  # Posición máxima de la pelota en X
 BALL_MAX_POSITION_Y = 100  # Posición máxima de la pelota en Y
@@ -173,15 +175,17 @@ class PongConsumer(AsyncWebsocketConsumer):
         ball = self.game_states[group_name]['ball']
 
         if ball['position'][1] - BALL_RADIUS <= BALL_MIN_POSITION or ball['position'][1] + BALL_RADIUS >= BALL_MAX_POSITION_Y:
-            ball['velocity'][1] *= -1
+            ball['velocity'][1] *= (-1 * BALL_ACCELERATION)
 
         for player_id, player in self.game_states[group_name]['players'].items():
             if self.check_collision(ball['position'], player['position']):
-                ball['velocity'][0] *= -1
+                ball['velocity'][0] *= (-1 * BALL_ACCELERATION)
 
-        # if ball['position'][0] - BALL_RADIUS <= BALL_MIN_POSITION or ball['position'][0] + BALL_RADIUS >= BALL_MAX_POSITION_X:
+        # if ball['position'][0] - BALL_RADIUS <= BALL_MIN_POSITION:
         #     ##AÑADIR GOL TODO
-        ball['position'][0] += ball['velocity'][0]
+        # if ball['position'][0] + BALL_RADIUS >= BALL_MAX_POSITION_X:
+        #     ##AÑADIR GOL TODO
+        ball['position'][0] += ball['velocity'][0] 
         ball['position'][1] += ball['velocity'][1]
 
     def update_player_position(self, player_id, move_value):
@@ -194,13 +198,13 @@ class PongConsumer(AsyncWebsocketConsumer):
     ###########################GAME_UTILS###########################
 
     def random_velocity(self):
-        angle = random.uniform(0, 2 * pi)
+        angle = random.uniform(0, BALL_VELOCITY_INTERVAl)
         return [random.choice([-1, 1]) * random.uniform(1, 2) * 3 * cos(angle), random.choice([-1, 1]) * random.uniform(1, 2) * 3 * sin(angle)]
 
     def check_collision(self, ball_position, player_position):
         ball_x, ball_y = ball_position
         player_x, player_y = player_position
-        return ( # TODO ADD AREA
+        return ( # TODO ADD RADIO
             player_x <= ball_x <= player_x + PLAYER_WIDTH and
             player_y <= ball_y <= player_y + PLAYER_HEIGHT
         )
