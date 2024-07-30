@@ -23,10 +23,10 @@ function sendPlayerMessage(uniqueId, value) {
 function handleKeysOnePlayer(event) {
     if (event.key === 'ArrowUp' || event.keyCode === 38) {
         console.log('Flecha arriba presionada');
-        sendPlayerMessage(uniqueID, "1");
+        sendPlayerMessage(uniqueID, "-1");
     } else if (event.key === 'ArrowDown' || event.keyCode === 40) {
         console.log('Flecha abajo presionada');
-        sendPlayerMessage(uniqueID, "-1");
+        sendPlayerMessage(uniqueID, "1");
     }
 }
 

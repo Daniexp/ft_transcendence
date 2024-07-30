@@ -9,8 +9,10 @@ function loadHTML(url, placeholderID) {
                     var htmlContent = xhr.responseText;
                     // SUBSTITUIR EL PLACEHOLDER DEL HTML POR EL NUEVO TEXTO
                     document.getElementById(placeholderID).innerHTML = htmlContent;
+                    return 200;
                 } else {
                     console.error('Error al hacer la solicitud AJAX:', xhr.status);
+                    return 400;
                 }
             }
         };
@@ -18,7 +20,9 @@ function loadHTML(url, placeholderID) {
     }
     else{
         document.getElementById(placeholderID).innerHTML = ""
+        return 200;
     }
+    return 400;
 }
 
 function sleep(ms) {

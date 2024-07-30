@@ -23,6 +23,7 @@ def authRequest(request):
     response = exchange_code(code)
 
     if "error" in response.json() or request.GET.get('error'):
+        print("ERROR ON LOGIN")
         return views.login(request)
     return views.home(request, response)
 

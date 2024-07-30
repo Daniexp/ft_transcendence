@@ -62,23 +62,66 @@ function initWebSocket(){
     };
 
     gameSocket.onmessage = function(event) {
-        console.log('Mensaje recibido:', event.data); //TODO remove debug
         try {
-            try {
-                var data = JSON.parse(event.data);
-                console.log('Datos parseados:', data);
-                
-                if (data && typeof data.message === 'object' && data.message !== null) {
-                    if (data.message.game_started) {
+            var data = JSON.parse(event.data);
+            console.log('Datos parseados:', data);
+            
+            if (data && typeof data.message === 'object' && data.message !== null) {
+                if (data.message.game_started && typeof data.message.game_started === 'object') { // Verificar si es un objeto
+                    console.log('Juego iniciado: players=', data.message.game_started);
+                    const gameContainer = document.getElementById('gameContainer');
+                    console.log('gameContainer encontrado:', gameContainer);
+                    
+                    if (gameContainer) {
+                        gameContainer.innerHTML = '';
+    
+                        Object.keys(data.message.game_started).forEach(key => {
+                            const element = data.message.game_started[key];
+                            const newDiv = document.createElement('div');
+                                
+                            newDiv.id = key;
+                            newDiv.classList.add('gamePlayer');
+                            
+                            gameContainer.appendChild(newDiv);
+                            
+                            console.log('Nuevo div añadido:', newDiv);
+                        });
+                        
                         gameRunning = 1;
-                        console.log('Juego iniciado: players=', data.message.game_started);
-                    } else if (data.message.players) {
-                        players = data.message.players;
-                        console.log('Jugadores:', players);
                     } else {
-                        console.log('Mensaje recibido sin propiedad relevante');
+                        console.error('gameContainer no encontrado');
                     }
-                } else if (typeof data.message === 'string') {
+    
+                } else if (data.message.players && typeof data.message.players === 'object') {
+                    console.log('Actualizando posiciones de jugadores:', data.message.players);
+                    const gameContainer = document.getElementById('gameContainer');
+    
+                    if (gameContainer) {
+                        Object.keys(data.message.players).forEach(key => {
+                            const player = data.message.players[key];
+                            const playerDiv = document.getElementById(key);
+    
+                            if (playerDiv) {
+                                playerDiv.style.left = `${player.position[0]}%`;
+                                playerDiv.style.top = `${player.position[1]}%`;
+                                
+                                console.log('Posición actualizada para:', key, 'a', player.position);
+                            } else {
+                                console.error('Div no encontrado para el jugador:', key);
+                            }
+                        });
+                    } else {
+                        console.error('gameContainer no encontrado');
+                    }
+                } else {
+                    console.log('Datos de jugadores no encontrados o no es un objeto:', data.message.players);
+                }
+                
+                if (data.message.ball) {
+                    console.log('Posición de la bola:', data.message.ball.position);
+                }
+    
+                if (typeof data.message === 'string') {
                     console.log('Mensaje de texto recibido:', data.message);
                     if(data.message === "User disconnected") {
                         hideShowGameSelect('.gameSelectionButtons', 'show');
@@ -90,16 +133,16 @@ function initWebSocket(){
                     console.log('Mensaje recibido no es un objeto válido');
                 }
                 
-            } catch (error) {
-                console.error('Error al parsear el mensaje:', error);
+            } else {
+                console.log('Mensaje recibido no tiene una propiedad message válida');
             }
-            
             
         } catch (error) {
             console.error('Error al parsear el mensaje:', error);
         }
-    };
-
+    };    
+    
+    
     gameSocket.onerror = function(error) {
         console.error('Error en la conexión WebSocket:', error);
         hideShowGameSelect(".gameSelectionButtons", "show");

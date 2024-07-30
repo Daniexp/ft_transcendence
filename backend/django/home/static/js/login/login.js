@@ -4,7 +4,7 @@ function login_page() {
     // REQUEST A LA VISTA
     if(document.getElementById('placeholder').innerHTML === ""){
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/somethingHappened/', true);
+        xhr.open('GET', '/login/', true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
