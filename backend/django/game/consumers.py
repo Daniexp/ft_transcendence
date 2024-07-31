@@ -5,19 +5,20 @@ import random
 from math import cos, sin, pi
 
 
-GAME_TICK_RATE = 0.1  # Velocidad de actualización del juego en segundos
+GAME_TICK_RATE = 0  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
 BALL_ACCELERATION = 1.01 # Acceleracion de la bola
-BALL_VELOCITY_INTERVAl = 2 * pi # Rango de valores desde 0 que coge para determinar las velocidades iniciales desde 0
+BALL_VELOCITY_INTERVAl_MAX = 0.007 # Rango de valores desde 0 que coge para determinar las velocidades iniciales desde 0
+BALL_VELOCITY_INTERVAl_MIN = 0.002 # Rango de valores desde 0 que coge para determinar las velocidades iniciales desde 0
 BALL_MIN_POSITION = 0  # Posición mínima de la pelota
 BALL_MAX_POSITION_X = 100  # Posición máxima de la pelota en X
 BALL_MAX_POSITION_Y = 100  # Posición máxima de la pelota en Y
-PLAYER_WIDTH = 5  # Ancho del jugador
-PLAYER_HEIGHT = 20  # Altura del jugador
-BALL_RADIUS = 3  # Radio de la pelota
+PLAYER_WIDTH = 1  # Ancho del jugador
+PLAYER_HEIGHT = 21.5  # Altura del jugador
+BALL_RADIUS = 1.1  # Radio de la pelota
 BOARD_WIDTH = 100  # Ancho del tablero
 BOARD_HEIGHT = 100  # Altura del tablero
-BOARD_X_MARGIN = 5 # Margen de los players al muro por posicion inicial
+BOARD_X_MARGIN = 2 # Margen de los players al muro por posicion inicial
 
 class PongConsumer(AsyncWebsocketConsumer):
     users = {}
@@ -94,6 +95,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 }
             )
         await self.close()
+
     
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -140,8 +142,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         x_positions = []
         if num_players == 2:
             x_positions = [
-                BOARD_X_MARGIN + PLAYER_WIDTH // 2,  #Izquierda
-                BOARD_WIDTH - BOARD_X_MARGIN - PLAYER_WIDTH // 2  #Derecha
+                BOARD_X_MARGIN - PLAYER_WIDTH,  #Izquierda
+                BOARD_WIDTH - BOARD_X_MARGIN #Derecha
             ]
 
         self.game_states[group_name] = {
@@ -176,7 +178,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     def update_game_state(self, group_name):
         ball = self.game_states[group_name]['ball']
 
-        if ball['position'][1] - BALL_RADIUS <= BALL_MIN_POSITION or ball['position'][1] + BALL_RADIUS >= BALL_MAX_POSITION_Y:
+        if ball['position'][1] <= BALL_MIN_POSITION or ball['position'][1] + (2 ** BALL_RADIUS) + 1 >= BALL_MAX_POSITION_Y:
             ball['velocity'][1] *= (-1 * BALL_ACCELERATION)
 
         for player_id, player in self.game_states[group_name]['players'].items():
@@ -194,19 +196,36 @@ class PongConsumer(AsyncWebsocketConsumer):
         if player_id in self.game_states[self.group_name]['players']:
             current_position = self.game_states[self.group_name]['players'][player_id]['position']
             new_position_y = current_position[1] + int(move_value) * PLAYER_MOVE_INCREMENT
-            new_position_y = max(BALL_MIN_POSITION + PLAYER_HEIGHT, min(new_position_y, BOARD_HEIGHT - PLAYER_HEIGHT))
+            new_position_y = max(BALL_MIN_POSITION, min(new_position_y, BOARD_HEIGHT - PLAYER_HEIGHT))
             self.game_states[self.group_name]['players'][player_id]['position'][1] = new_position_y
 
     ###########################GAME_UTILS###########################
 
     def random_velocity(self):
-        angle = random.uniform(0, BALL_VELOCITY_INTERVAl)
-        return [random.choice([-1, 1]) * random.uniform(1, 2) * 3 * cos(angle), random.choice([-1, 1]) * random.uniform(1, 2) * 3 * sin(angle)]
-
+        angle = random.uniform(0, 2 * pi) 
+        magnitude = random.uniform(BALL_VELOCITY_INTERVAl_MIN, BALL_VELOCITY_INTERVAl_MAX)
+        return [random.choice([-1, 1]) * magnitude * cos(angle), random.choice([-1, 1]) * magnitude * sin(angle)]
+    
     def check_collision(self, ball_position, player_position):
         ball_x, ball_y = ball_position
         player_x, player_y = player_position
-        return ( # TODO ADD RADIO
-            player_x <= ball_x <= player_x + PLAYER_WIDTH and
-            player_y <= ball_y <= player_y + PLAYER_HEIGHT
-        )
+
+        player_left = player_x
+        player_right = player_x + PLAYER_WIDTH
+        player_top = player_y
+        player_bottom = player_y + PLAYER_HEIGHT
+
+        ball_center_x = ball_x + BALL_RADIUS
+        ball_center_y = ball_y + BALL_RADIUS
+
+        closest_x = max(player_left, min(ball_center_x, player_right))
+        closest_y = max(player_top, min(ball_center_y, player_bottom))
+
+        distance_x = ball_center_x - closest_x
+        distance_y = ball_center_y - closest_y
+        distance_squared = distance_x ** 2 + distance_y ** 2
+
+        return distance_squared <= BALL_RADIUS ** 2
+
+
+

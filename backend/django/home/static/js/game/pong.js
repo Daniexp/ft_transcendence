@@ -84,8 +84,14 @@ function initWebSocket(){
                             
                             gameContainer.appendChild(newDiv);
                             
-                            console.log('Nuevo div añadido:', newDiv);
                         });
+
+                        gameContainer
+
+                        const ball = document.createElement('div');
+                        ball.id = "gameBall";
+
+                        gameContainer.appendChild(ball);
                         
                         gameRunning = 1;
                     } else {
@@ -110,6 +116,14 @@ function initWebSocket(){
                                 console.error('Div no encontrado para el jugador:', key);
                             }
                         });
+                        const ball = document.getElementById("gameBall");
+                        if(ball){
+                            ball.style.left = `${data.message.ball.position[0]}%`;
+                            ball.style.top = `${data.message.ball.position[1]}%`;
+                        }
+                        else{
+                            console.error("NO BALL");
+                        }
                     } else {
                         console.error('gameContainer no encontrado');
                     }
@@ -120,21 +134,18 @@ function initWebSocket(){
                 if (data.message.ball) {
                     console.log('Posición de la bola:', data.message.ball.position);
                 }
-    
-                if (typeof data.message === 'string') {
-                    console.log('Mensaje de texto recibido:', data.message);
-                    if(data.message === "User disconnected") {
-                        hideShowGameSelect('.gameSelectionButtons', 'show');
-                        hideShowGameSelect('.gamePong', 'hide');
-                        gameRunning = 0;
-                        gameSocket.close();
-                    }
-                } else {
-                    console.log('Mensaje recibido no es un objeto válido');
-                }
                 
+            } else if (typeof data.message === 'string') {
+                console.log('Mensaje de texto recibido:', data.message);
+                if(data.message === "User disconnected") {
+                    hideShowGameSelect('.gameSelectionButtons', 'show');
+                    hideShowGameSelect('.gamePong', 'hide');
+                    document.getElementById('gameContainer').innerHTML = "";
+                    gameRunning = 0;
+                    gameSocket.close();
+                }
             } else {
-                console.log('Mensaje recibido no tiene una propiedad message válida');
+                console.log('Mensaje recibido no es un objeto válido');
             }
             
         } catch (error) {
@@ -147,6 +158,7 @@ function initWebSocket(){
         console.error('Error en la conexión WebSocket:', error);
         hideShowGameSelect(".gameSelectionButtons", "show");
         hideShowGameSelect('.gamePong', 'hide');
+        document.getElementById('gameContainer').innerHTML = "";
         gameRunning = 0;
     };
 
@@ -154,6 +166,7 @@ function initWebSocket(){
         console.log('Conexión cerrada');
         hideShowGameSelect(".gameSelectionButtons", "show");
         hideShowGameSelect('.gamePong', 'hide');
+        document.getElementById('gameContainer').innerHTML = "";
         gameRunning = 0;
     };
 
