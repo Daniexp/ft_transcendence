@@ -179,7 +179,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     def update_game_state(self, group_name):
         ball = self.game_states[group_name]['ball']
 
-        if ball['position'][1] <= BALL_MIN_POSITION or ball['position'][1] + BALL_RADIUS * 2 >= BALL_MAX_POSITION_Y:
+        if ball['position'][1] <= BALL_MIN_POSITION or ball['position'][1] + (BALL_RADIUS * 2) + 1 >= BALL_MAX_POSITION_Y:
             ball['velocity'][1] *= (-1 * BALL_ACCELERATION)
 
         ball['position'][0] += ball['velocity'][0]
