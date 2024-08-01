@@ -8,8 +8,8 @@ from math import cos, sin, pi
 GAME_TICK_RATE = 0  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
 BALL_ACCELERATION = 1.01 # Acceleracion de la bola
-BALL_VELOCITY_INTERVAl_MAX = 0.007 # Rango de valores desde 0 que coge para determinar las velocidades iniciales desde 0
-BALL_VELOCITY_INTERVAl_MIN = 0.002 # Rango de valores desde 0 que coge para determinar las velocidades iniciales desde 0
+BALL_VELOCITY_INTERVAl_MAX = 0.01 # Rango de valores desde 0 que coge para determinar las velocidades iniciales desde 0
+BALL_VELOCITY_INTERVAl_MIN = 0.005 # Rango de valores desde 0 que coge para determinar las velocidades iniciales desde 0
 BALL_MIN_POSITION = 0  # Posición mínima de la pelota
 BALL_MAX_POSITION_X = 100  # Posición máxima de la pelota en X
 BALL_MAX_POSITION_Y = 100  # Posición máxima de la pelota en Y
@@ -175,22 +175,34 @@ class PongConsumer(AsyncWebsocketConsumer):
                 break
             await asyncio.sleep(GAME_TICK_RATE)
 
+ 
     def update_game_state(self, group_name):
         ball = self.game_states[group_name]['ball']
 
-        if ball['position'][1] <= BALL_MIN_POSITION or ball['position'][1] + (2 ** BALL_RADIUS) + 1 >= BALL_MAX_POSITION_Y:
+        if ball['position'][1] <= BALL_MIN_POSITION or ball['position'][1] + BALL_RADIUS * 2 >= BALL_MAX_POSITION_Y:
             ball['velocity'][1] *= (-1 * BALL_ACCELERATION)
 
-        for player_id, player in self.game_states[group_name]['players'].items():
+        ball['position'][0] += ball['velocity'][0]
+        ball['position'][1] += ball['velocity'][1]
+
+        collision_detected = False
+        for _, player in self.game_states[group_name]['players'].items():
             if self.check_collision(ball['position'], player['position']):
-                ball['velocity'][0] *= (-1 * BALL_ACCELERATION)
+                if not collision_detected:
+                    ball['velocity'][0] *= -1 * BALL_ACCELERATION
+                    ball['velocity'][1] *= BALL_ACCELERATION
+                    collision_detected = True
+
+                while self.check_collision(ball['position'], player['position']):
+                    ball['position'][0] += ball['velocity'][0]
+                    ball['position'][1] += ball['velocity'][1]
 
         # if ball['position'][0] - BALL_RADIUS <= BALL_MIN_POSITION:
         #     ##AÑADIR GOL TODO
         # if ball['position'][0] + BALL_RADIUS >= BALL_MAX_POSITION_X:
         #     ##AÑADIR GOL TODO
-        ball['position'][0] += ball['velocity'][0] 
-        ball['position'][1] += ball['velocity'][1]
+
+
 
     def update_player_position(self, player_id, move_value):
         if player_id in self.game_states[self.group_name]['players']:
