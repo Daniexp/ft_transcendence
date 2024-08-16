@@ -2,12 +2,14 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import asyncio
 import json
 import random
-from math import cos, sin, pi
+from math import cos, sin, pi, copysign, sqrt
 
 # Constantes del juego con relación 1:3 entre X e Y
-GAME_TICK_RATE = 0.02  # Velocidad de actualización del juego en segundos
+GAME_TICK_RATE = 0.01  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
-BALL_ACCELERATION = 1.01  # Aceleración de la bola
+BALL_ACCELERATION = 1.05  # Aceleración de la bola
+BALL_DECELERATION = 0.99  # Desaceleración mínima al rebotar
+MAX_BALL_SPEED = 2.0  # Velocidad máxima de la bola
 BALL_VELOCITY_RANGE = (0.5, 1)  # Rango de valores para determinar las velocidades iniciales
 BALL_RADIUS  = 1.15  # Radio de la pelota en X
 BOARD_WIDTH, BOARD_HEIGHT = 300, 100  # Dimensiones del tablero
@@ -184,6 +186,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 break
             await asyncio.sleep(GAME_TICK_RATE)
 
+
     def update_game_state(self, group_name):
         ball = self.game_states[group_name]['ball']
 
@@ -192,22 +195,29 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         if ball['position'][1] <= 0 or ball['position'][1] >= BOARD_HEIGHT - BALL_RADIUS * 2 * 3:
             ball['position'][1] = max(0, min(ball['position'][1], BOARD_HEIGHT - BALL_RADIUS * 2 * 3))
-            ball['velocity'][1] *= -BALL_ACCELERATION
+            ball['velocity'][1] *= -BALL_DECELERATION
 
-        collision_detected = False
         for player_data in self.game_states[group_name]['players'].values():
             if self.check_collision(ball['position'], player_data['position']):
-                if not collision_detected:
-                    ball['velocity'][0] *= -BALL_ACCELERATION
-                    collision_detected = True
-
                 while self.check_collision(ball['position'], player_data['position']):
-                    ball['position'][0] += ball['velocity'][0]
-                    ball['position'][1] += ball['velocity'][1]
-        
-        if ball['position'][0] <= 0 or ball['position'][0] >= BOARD_WIDTH - BALL_RADIUS * 2 * 3:
-            ball['position'][0] = max(0, min(ball['position'][0], BOARD_WIDTH - BALL_RADIUS * 2 * 3))
-            ball['velocity'][0] *= -BALL_ACCELERATION
+                    ball['position'][0] -= ball['velocity'][0]
+                    ball['position'][1] -= ball['velocity'][1]
+                
+                paddle_center_y = player_data['position'][1] + PLAYER_HEIGHT_Y / 2
+                contact_point = (ball['position'][1] + BALL_RADIUS - paddle_center_y) / (PLAYER_HEIGHT_Y / 2)
+
+                angle = contact_point * (pi / 4)  
+                speed = sqrt(ball['velocity'][0]**2 + ball['velocity'][1]**2) * BALL_ACCELERATION
+                speed = min(speed, MAX_BALL_SPEED)  
+
+                ball['velocity'][0] = -copysign(speed * cos(angle), ball['velocity'][0])
+                ball['velocity'][1] = speed * sin(angle)
+                #ball['velocity'][1] += random.uniform(-0.1, 0.1)
+            
+            if ball['position'][0] <= 0 or ball['position'][0] >= BOARD_WIDTH - BALL_RADIUS * 2 * 3:
+                ball['position'][0] = max(0, min(ball['position'][0], BOARD_WIDTH - BALL_RADIUS * 2 * 3))
+                ball['velocity'][0] *= -BALL_DECELERATION
+
 
     def update_player_position(self, player_id, move_value):
         if player_id in self.game_states[self.group_name]['players']:
