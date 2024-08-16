@@ -212,7 +212,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 
                 ball['velocity'][0] = -copysign(speed * cos(angle), ball['velocity'][0])
                 ball['velocity'][1] = speed * sin(angle)
-                #ball['velocity'][1] += random.uniform(-0.1, 0.1)
             
             if ball['position'][0] <= 0 or ball['position'][0] >= BOARD_WIDTH - BALL_RADIUS * 2 * 3:
                 ball['position'][0] = max(0, min(ball['position'][0], BOARD_WIDTH - BALL_RADIUS * 2 * 3))
@@ -227,6 +226,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.game_states[self.group_name]['players'][player_id]['position'][1] = new_position_y
 
     
+    import math
+
     def check_collision(self, ball_position, player_position):
         ball_x, ball_y = ball_position
         ball_radius = BALL_RADIUS
@@ -242,11 +243,18 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         ball_left = ball_x
         ball_right = ball_x + (ball_radius * 2 * 3)
-        ball_top = ball_y 
+        ball_top = ball_y
         ball_bottom = ball_y + ball_radius
 
-        return not (ball_right < player_left or
-                    ball_left > player_right or
-                    ball_bottom < player_top or
-                    ball_top > player_bottom)
+        closest_x = max(player_left, min(ball_x + ball_radius * 3, player_right))
+        closest_y = max(player_top, min(ball_y + ball_radius, player_bottom))
+
+        distance_x = ball_x + ball_radius * 3 - closest_x
+        distance_y = ball_y + ball_radius - closest_y
+        distance = sqrt(distance_x ** 2 + distance_y ** 2)
+
+        if distance <= ball_radius * 3:
+            return True
+        return False
+
 
