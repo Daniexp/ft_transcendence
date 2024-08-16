@@ -226,8 +226,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.game_states[self.group_name]['players'][player_id]['position'][1] = new_position_y
 
     
-    import math
-
     def check_collision(self, ball_position, player_position):
         ball_x, ball_y = ball_position
         ball_radius = BALL_RADIUS
