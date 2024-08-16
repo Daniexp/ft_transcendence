@@ -214,8 +214,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                 ball['velocity'][1] = speed * sin(angle)
             
             if ball['position'][0] <= 0 or ball['position'][0] >= BOARD_WIDTH - BALL_RADIUS * 2 * 3:
-                ball['position'][0] = max(0, min(ball['position'][0], BOARD_WIDTH - BALL_RADIUS * 2 * 3))
                 ball['velocity'][0] *= -BALL_DECELERATION
+                ball['position'][0] = max(0, min(ball['position'][0], BOARD_WIDTH - BALL_RADIUS * 2 * 3))
 
 
     def update_player_position(self, player_id, move_value):
@@ -225,34 +225,47 @@ class PongConsumer(AsyncWebsocketConsumer):
             new_position_y = max(0, min(new_position_y, BOARD_HEIGHT - PLAYER_HEIGHT_Y))
             self.game_states[self.group_name]['players'][player_id]['position'][1] = new_position_y
 
-    
-    def check_collision(self, ball_position, player_position):
+        
+    def check_collision_x(self, ball_position, player_position):
         ball_x, ball_y = ball_position
-        ball_radius = BALL_RADIUS
+        ball_radius_x = BALL_RADIUS * 3
 
         player_x, player_y = player_position
-        player_width = PLAYER_WIDTH_X
-        player_height = PLAYER_HEIGHT_Y
+        player_width = PLAYER_WIDTH_X * 3
 
         player_left = player_x
-        player_right = player_x + (player_width * 3)
+        player_right = player_x + player_width
+
+        ball_left = ball_x
+        ball_right = ball_x + ball_radius_x * 2
+
+        closest_x = max(player_left, min(ball_x + ball_radius_x, player_right))
+
+        distance_x = abs(ball_x + ball_radius_x - closest_x)
+
+        return distance_x <= ball_radius_x
+
+    def check_collision_y(self, ball_position, player_position):
+        ball_x, ball_y = ball_position
+        ball_radius_y = BALL_RADIUS * 3
+
+        player_x, player_y = player_position
+        player_height = PLAYER_HEIGHT_Y
+
         player_top = player_y
         player_bottom = player_y + player_height
 
-        ball_left = ball_x
-        ball_right = ball_x + (ball_radius * 2 * 3)
         ball_top = ball_y
-        ball_bottom = ball_y + ball_radius
+        ball_bottom = ball_y + ball_radius_y * 2
 
-        closest_x = max(player_left, min(ball_x + ball_radius * 3, player_right))
-        closest_y = max(player_top, min(ball_y + ball_radius, player_bottom))
+        closest_y = max(player_top, min(ball_y + ball_radius_y, player_bottom))
 
-        distance_x = ball_x + ball_radius * 3 - closest_x
-        distance_y = ball_y + ball_radius - closest_y
-        distance = sqrt(distance_x ** 2 + distance_y ** 2)
+        distance_y = abs(ball_y + ball_radius_y - closest_y)
 
-        if distance <= ball_radius * 3:
-            return True
-        return False
+        return distance_y <= ball_radius_y
 
+    def check_collision(self, ball_position, player_position):
+        collision_x = self.check_collision_x(ball_position, player_position)
+        collision_y = self.check_collision_y(ball_position, player_position)
 
+        return collision_x and collision_y
