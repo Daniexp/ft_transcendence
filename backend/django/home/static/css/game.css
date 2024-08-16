@@ -1,6 +1,6 @@
 #gameContainer {
     width: 90%;
-    max-width: 1200rem;
+    max-width: 1200rem; /* Cambiado de rem a px */
     aspect-ratio: 3 / 1;
     background-color: #FFF;
     border: 2px solid #111;
@@ -14,19 +14,17 @@
 }
 
 .gamePlayer {
-    width: 1vw; 
-    height: 15%; 
+    width: 1%; /* 1% de la anchura del contenedor = PLAYER_WIDTH_X (3 px en un contenedor de 300 px de ancho) */
+    height: 15%; /* 15% de la altura del contenedor = PLAYER_HEIGHT_Y (15 px en un contenedor de 100 px de alto) */
     background-color: #000;
     position: absolute;
-    border: 2px solid #000;
-    border-radius: 12px;
 }
 
 #gameBall {
-    width: 2.3%;
-    aspect-ratio: 1 / 1;
+    width: 2.3%; /* 2.3% de la anchura del contenedor para que coincida con el diámetro de la bola */
+    aspect-ratio: 1 / 1; /* Proporción de aspecto para mantener la bola circular */
     background-color: #000;
     position: absolute;
     border: 2px solid #000;
-    border-radius: 50%; 
+    border-radius: 50%; /* La bola debe ser completamente redonda */
 }
