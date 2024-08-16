@@ -7,7 +7,7 @@ from math import cos, sin, pi, copysign, sqrt
 # Constantes del juego con relación 1:3 entre X e Y
 GAME_TICK_RATE = 0.001  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
-BALL_ACCELERATION = 1.05  # Aceleración de la bola
+BALL_ACCELERATION = 1.1  # Aceleración de la bola
 BALL_DECELERATION = 0.99  # Desaceleración mínima al rebotar
 MAX_BALL_SPEED = 2.0  # Velocidad máxima de la bola
 BALL_VELOCITY_RANGE = (0.05, 0.2)  # Rango de valores para determinar las velocidades iniciales
@@ -186,6 +186,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 break
             await asyncio.sleep(GAME_TICK_RATE)
 
+    collition = 0
 
     def update_game_state(self, group_name):
         ball = self.game_states[group_name]['ball']
@@ -199,6 +200,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         for player_data in self.game_states[group_name]['players'].values():
             if self.check_collision(ball['position'], player_data['position']):
+                self.collition = 0
                 while self.check_collision(ball['position'], player_data['position']):
                     ball['position'][0] -= ball['velocity'][0]
                     ball['position'][1] -= ball['velocity'][1]
@@ -225,6 +227,39 @@ class PongConsumer(AsyncWebsocketConsumer):
             new_position_y = max(0, min(new_position_y, BOARD_HEIGHT - PLAYER_HEIGHT_Y))
             self.game_states[self.group_name]['players'][player_id]['position'][1] = new_position_y
 
+            ball_position = self.game_states[self.group_name]['ball']['position']
+            ball_velocity = self.game_states[self.group_name]['ball']['velocity']
+            player_position = self.game_states[self.group_name]['players'][player_id]['position']
+
+            if self.check_collision(ball_position, player_position):
+                ball_radius_x = BALL_RADIUS * 3
+                ball_radius_y = BALL_RADIUS * 3
+                player_width = PLAYER_WIDTH_X * 3
+                player_height = PLAYER_HEIGHT_Y
+                self.collition = 1
+
+                if ball_velocity[0] > 0:
+                    overlap_x = (ball_position[0] + ball_radius_x * 2) - player_position[0]
+                    ball_position[0] -= min(overlap_x, abs(ball_velocity[0]))
+                else:
+                    overlap_x = player_position[0] + player_width - ball_position[0]
+                    ball_position[0] += min(overlap_x, abs(ball_velocity[0]))
+
+                if self.check_collision_y(ball_position, player_position):
+                    if ball_position[1] < player_position[1]:
+                        overlap_y = (ball_position[1] + ball_radius_y * 2) - player_position[1]
+                        ball_position[1] -= min(overlap_y, abs(ball_velocity[1]))
+                    else:
+                        overlap_y = player_position[1] + player_height - ball_position[1]
+                        ball_position[1] += min(overlap_y, abs(ball_velocity[1]))
+
+                if self.check_collision_x(ball_position, player_position):
+                    if ball_velocity[0] > 0:
+                        overlap_x = (ball_position[0] + ball_radius_x * 2) - player_position[0]
+                        ball_position[0] -= min(overlap_x, abs(ball_velocity[0]))
+                    else:
+                        overlap_x = player_position[0] + player_width - ball_position[0]
+                        ball_position[0] += min(overlap_x, abs(ball_velocity[0]))
         
     def check_collision_x(self, ball_position, player_position):
         ball_x, ball_y = ball_position
@@ -268,4 +303,4 @@ class PongConsumer(AsyncWebsocketConsumer):
         collision_x = self.check_collision_x(ball_position, player_position)
         collision_y = self.check_collision_y(ball_position, player_position)
 
-        return collision_x and collision_y
+        return collision_x and collision_y or self.collition
