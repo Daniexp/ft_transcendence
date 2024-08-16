@@ -5,12 +5,12 @@ import random
 from math import cos, sin, pi, copysign, sqrt
 
 # Constantes del juego con relación 1:3 entre X e Y
-GAME_TICK_RATE = 0.01  # Velocidad de actualización del juego en segundos
+GAME_TICK_RATE = 0.001  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
 BALL_ACCELERATION = 1.05  # Aceleración de la bola
 BALL_DECELERATION = 0.99  # Desaceleración mínima al rebotar
 MAX_BALL_SPEED = 2.0  # Velocidad máxima de la bola
-BALL_VELOCITY_RANGE = (0.5, 1)  # Rango de valores para determinar las velocidades iniciales
+BALL_VELOCITY_RANGE = (0.05, 0.2)  # Rango de valores para determinar las velocidades iniciales
 BALL_RADIUS  = 1.15  # Radio de la pelota en X
 BOARD_WIDTH, BOARD_HEIGHT = 300, 100  # Dimensiones del tablero
 PLAYER_WIDTH_X = 1  # Ancho del jugador en X
