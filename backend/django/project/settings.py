@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'channels',
     'home',
     'game',
+    'login',
 ]
 
 CHANNEL_LAYERS = {

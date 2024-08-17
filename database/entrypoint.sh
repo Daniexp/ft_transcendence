@@ -5,6 +5,11 @@ echo "host all all 172.18.0.0/24 md5" >> /etc/postgresql/15/main/pg_hba.conf
 
 echo "CREATE DATABASE $POSTGRES_DB;" > /psql.init
 
+echo "CREATE TABLE IF NOT EXISTS nombre_tabla (
+    id INTEGER,
+    login VARCHAR(255),
+);" > /psql.init
+
 echo  "ALTER USER postgres WITH ENCRYPTED PASSWORD '"$DB_PSSWRD"';" >> /psql.init
 
 service postgresql start

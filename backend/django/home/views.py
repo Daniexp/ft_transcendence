@@ -3,6 +3,7 @@ from . import models
 from django.contrib.auth.decorators import login_required
 import os
 from login import views as loginViews
+from login.models import User as pongdb
 
 
 # Create your views here.
@@ -12,18 +13,18 @@ def login(request):
 
 #DECLAEANDO LA VISTA PARA LA REQUEST ENTRANTE
 def somethingHappened(request):
-    print("HEADERS:")
-    print(request.headers)
     return render(request, 'aux.html')
 
 
 def home(request, response = ""):
-    print("AAA")
-    print(response)
     if response != "":
         if response.status_code == 200 and "access_token" in response.json():
             picture = loginViews.getProfilePicture(response)
-            print("FOTO")
+            login = loginViews.getLogin(response)
+            id = loginViews.getId(response)
+            user_data, created = pongdb.objects.get_or_create(uid=id, login=login)
+            if (not created):
+                user_data.save()
             return render(request, 'home.html', {'picture': picture})
         else:
             return home(request)

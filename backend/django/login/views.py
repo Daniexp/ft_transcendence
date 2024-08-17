@@ -14,7 +14,6 @@ def login(request):
     return render
 
 def intraLogin(request):
-    print("TUKOOOO")
     return redirect(authorize_url)
 
 def authRequest(request):
@@ -23,7 +22,6 @@ def authRequest(request):
     response = exchange_code(code)
 
     if "error" in response.json() or request.GET.get('error'):
-        print("ERROR ON LOGIN")
         return views.login(request)
     return views.home(request, response)
 
@@ -38,7 +36,23 @@ def getProfilePicture(response):
                 return picture
     return ""
 
+def getId(response):
+    data_request = requests.get("https://api.intra.42.fr/v2/me", data=response.json())
+    if data_request.status_code == 200:
+        user_data = data_request.json()
+        if isinstance(user_data, dict):
+            id = user_data.get('id')
+            return id
+    return ""
 
+def getLogin(response):
+    data_request = requests.get("https://api.intra.42.fr/v2/me", data=response.json())
+    if data_request.status_code == 200:
+        user_data = data_request.json()
+        if isinstance(user_data, dict):
+            login = user_data.get('login')
+            return login
+    return ""
 
 def exchange_code(code):
     data = {
