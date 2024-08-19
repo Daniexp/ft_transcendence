@@ -16,6 +16,21 @@
     margin-right: 15rem;
 }
 
+.navbar .navbar-nav .nav-item .dropdown-menu {
+    right: 0; /* Alinea el menú con el borde derecho del contenedor del dropdown */
+    left: auto;
+    top: 100%; /* Posiciona el menú justo debajo del elemento activador */
+    transform: translateX(-15rem); /* Alinea el menú sin desplazamiento adicional */
+}
+
+.navbar .navbar-nav .nav-item .dropdown-toggle::after {
+    right: 0; /* Alinea el menú con el borde derecho del contenedor del dropdown */
+    visibility: hidden;
+    left: auto;
+    top: 100%; /* Posiciona el menú justo debajo del elemento activador */
+    transform: translateX(-15rem); /* Alinea el menú sin desplazamiento adicional */
+}
+
 .navbar-divider {
     color: black;
     border-top: 1px solid black;

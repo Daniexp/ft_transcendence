@@ -69,6 +69,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Este backend funciona con el modelo de usuario personalizado
+]
+
+AUTH_USER_MODEL = 'login.UserRegister'
+
+
 ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
@@ -94,6 +101,8 @@ ASGI_APPLICATION = 'project.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 DATABASES = {
     'default': {
