@@ -11,6 +11,8 @@ from io import BytesIO
 
 authorize_url = env['AUTH_URL']
 grant_type="authorization_code"
+get_token_url = "https://api.intra.42.fr/oauth/token"
+check_token_url = "https://api.intra.42.fr/oauth/token/info"
 
 def intraLogin(request):
     return redirect(authorize_url)
@@ -25,17 +27,31 @@ def create_http_response(request):
     #response.begin()
     return response
 
-
+def is_token_active(response):
+    data_request = requests.get("https://api.intra.42.fr/v2/me", data=response)
+    if data_request.status_code == 200:
+        user_data = data_request.json()
+        print(user_data)
+        return 1
+    return 0
+    
 
 def authRequest(request):
+    code = request.GET.get('code')
     if request.user.is_authenticated:
+        active_token = is_token_active(request.user.api_data)
+    if request.user.is_authenticated and active_token:
         response = UserRegister.objects.get(uid=request.user.uid)
         return views.home(request, dict(response.api_data))
-    code = request.GET.get('code')
+    elif request.user.is_authenticated and not active_token:
+        views.logout(request)
+        return redirect("/")
 
-    response = exchange_code(code)
+    response = exchange_code(code, get_token_url)
+    print(response.json())
 
     if "error" in response.json() or request.GET.get('error') or response.status_code != 200:
+        print("Hay error....")
         return views.login(request)
     return views.home(request, response)
 
@@ -68,7 +84,7 @@ def getLogin(response):
             return login
     return ""
 
-def exchange_code(code):
+def exchange_code(code, url):
     data = {
         "grant_type": grant_type,
         "client_id": env['CLIENT_ID'],
@@ -80,5 +96,6 @@ def exchange_code(code):
         'Content-Type': 'application/x-www-form-urlencoded',
     }
     
-    response = requests.post("https://api.intra.42.fr/oauth/token", data=data, headers=headers)
+    response = requests.post(url, data=data, headers=headers)
+    print(response)
     return response

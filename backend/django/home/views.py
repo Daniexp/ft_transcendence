@@ -39,14 +39,11 @@ def revoke_token(request):
         'client_id': env['CLIENT_ID'],
     }
 
-# A veces es necesario autenticar la solicitud con client_id y client_secret
     #auth = (env["CLIENT_ID"], env["CLIENT_SECRET"])
     #print(auth)
 
-# Hacer la solicitud POST
     response = requests.post(revoke_url, data=payload, headers=headers)
 
-# Verificar el código de estado para saber si la revocación fue exitosa
     print(response.reason)
     if response.status_code == 200:
         print('Token revocado exitosamente')
@@ -61,7 +58,7 @@ def logout(request):
 
 
         data_request = requests.get("https://api.intra.42.fr/oauth/token/info", data=user_api_data)
-        revoke_token(request)
+#        revoke_token(request)
         print(data_request.json())
         #data_request = requests.get("https://api.intra.42.fr/v2/apps", data=user_api_data)
         #data_request = requests.get("https://api.intra.42.fr/v2/me", data=user_api_data)
@@ -69,7 +66,7 @@ def logout(request):
          #   print("Something fail when login out")
           #  return render(request, 'aux.html')
         auth_logout(request)
-    print(request.user.is_active)
+    print(request.user.is_authenticated)
     return redirect('/')
 
 def register_user(request, login_name, id, response):
