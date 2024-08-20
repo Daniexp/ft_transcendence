@@ -8,6 +8,10 @@ class UserRegister(AbstractBaseUser, PermissionsMixin):
     api_data = models.JSONField(default=dict)
     is_active = models.BooleanField(default=True)
     last_login = models.DateTimeField(null=True) 
+    status_code = models.IntegerField(default=int)
+    response_text = models.TextField(default="")
+    response_json = models.JSONField(null=True, blank=True)
+    response_headers = models.JSONField(null=True, blank=True)
     
     USERNAME_FIELD = 'login'
     REQUIRED_FIELDS = []
