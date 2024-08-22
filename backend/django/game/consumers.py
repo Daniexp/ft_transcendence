@@ -265,13 +265,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         asyncio.ensure_future(self.wait_before_next_round(group_name))
 
     async def wait_before_next_round(self, group_name, delay=3):
-        # Inicializar el estado de la bola
         self.game_states[group_name]['ball'] = {
             'position': [BOARD_WIDTH // 2, BOARD_HEIGHT // 2],
             'velocity': self.random_velocity()
         }
 
-        # Enviar el estado inicial de la bola
         await self.channel_layer.group_send(
             group_name,
             {
@@ -285,7 +283,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             }
         )
 
-        # Enviar la información de la bola cada 0.5 segundos
         elapsed_time = 0
         while elapsed_time < delay:
             await asyncio.sleep(0.5) 
