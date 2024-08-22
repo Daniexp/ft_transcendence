@@ -13,6 +13,16 @@
     position: relative;
 }
 
+#countdown {
+    font-size: 24px;
+    color: black;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+}
+
 .gamePlayer {
     width: 1%; /* 1% de la anchura del contenedor = PLAYER_WIDTH_X (3 px en un contenedor de 300 px de ancho) */
     height: 15%; /* 15% de la altura del contenedor = PLAYER_HEIGHT_Y (15 px en un contenedor de 100 px de alto) */
