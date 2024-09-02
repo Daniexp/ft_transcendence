@@ -26,3 +26,8 @@ function login_page() {
 function login() {
     window.location.href = '/login';
 }
+
+function logout() {
+    console.log("se pira");
+    window.location.href = '/logout';
+}

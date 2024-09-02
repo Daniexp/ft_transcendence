@@ -14,20 +14,24 @@
     <script src="{% static 'js/game/pong.js' %}"></script>
     <script src="{% static 'js/game/gameKeys.js' %}"></script>
     <script src="{% static 'js/utils.js' %}"></script>
+    <script src="{% static 'js/login/login.js' %}"></script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Pong.</a>
-        <div class="collapse navbar-collapse justify-content-end">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <img src="{{picture}}" alt="Foto de perfil">
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+   <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Pong.</a>
+    <div class="collapse navbar-collapse justify-content-end">
+        <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="pictureButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="{{picture}}" alt="Foto de perfil">
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="pictureButton">
+                    <li><a class="dropdown-item" href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav> 
     <hr class="navbar-divider">
     <div id="placeholder"></div>
 </body>

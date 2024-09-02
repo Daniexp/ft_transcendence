@@ -16,7 +16,7 @@ services:
       test: ["CMD", "pg_isready", "--host=localhost", "--username=postgres", "--port=5432"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 7
 
   # redis:
   #   image: redis:alpine

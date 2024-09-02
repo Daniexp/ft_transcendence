@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'channels',
     'home',
     'game',
+    'login',
 ]
 
 CHANNEL_LAYERS = {
@@ -67,6 +68,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Este backend funciona con el modelo de usuario personalizado
+]
+
+AUTH_USER_MODEL = 'login.UserRegister'
+
 
 ROOT_URLCONF = 'project.urls'
 
@@ -93,6 +101,8 @@ ASGI_APPLICATION = 'project.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 DATABASES = {
     'default': {
