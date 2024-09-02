@@ -42,7 +42,8 @@ async function waitForGameStart(mode) {
         await sleep(50);
     }
     if (mode === '1vs1') {
-        document.getElementById('gameContainer').addEventListener('keydown', handleKeysOnePlayer);
+        gameContainer.addEventListener('keydown', handleKeysOnePlayer);
+        gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
     }
 }
 
