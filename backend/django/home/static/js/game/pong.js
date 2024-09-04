@@ -71,8 +71,14 @@ function initWebSocket() {
                 } else if (data.message.players) {
                     updatePlayerPositions(data.message.players);
                     updateBallPosition(data.message.ball);
+                } else if (data.message.goal_scored){
+                    startCountdown();
+                    console.log("GOOOOOL");
+                } else if (data.message.game_over){
+                    resetGame();
+                    gameSocket.close();
                 } else {
-                    console.log('Datos de jugadores no encontrados o no es un objeto:', data.message.players);
+                    console.log('Datos de jugadores no encontrados o no es un objeto:', data.message);
                 }
             } else if (typeof data.message === 'string') {
                 handleStringMessage(data.message, gameSocket);
@@ -132,7 +138,7 @@ function updatePlayerPositions(players) {
             if (playerDiv) {
                 playerDiv.style.left = `${player.position[0]}%`;
                 playerDiv.style.top = `${player.position[1]}%`;
-                console.log('Posición actualizada para:', key, 'a', player.position);
+                //console.log('Posición actualizada para:', key, 'a', player.position);
             } else {
                 console.error('Div no encontrado para el jugador:', key);
             }
@@ -147,7 +153,7 @@ function updateBallPosition(ball) {
     if (ballDiv) {
         ballDiv.style.left = `${ball.position[0]}%`;
         ballDiv.style.top = `${ball.position[1]}%`;
-        console.log('Posición de la bola actualizada a:', ball.position);
+        //console.log('Posición de la bola actualizada a:', ball.position);
     } else {
         console.error("Bola no encontrada en el DOM");
     }

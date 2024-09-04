@@ -48,9 +48,16 @@ async function handleKeysUpOnePlayer(event) {
     } else if (event.key === 'ArrowDown' || event.keyCode === 40) {
         keysPressed['ArrowDown'] = false;
     }
-
+    
     if (!keysPressed['ArrowUp'] && !keysPressed['ArrowDown']) {
         clearInterval(intervalId);
         intervalId = null;
     }
 }
+
+window.addEventListener("blur", async () => {
+    keysPressed['ArrowUp'] = false;
+    keysPressed['ArrowDown'] = false;
+    clearInterval(intervalId);
+    intervalId = null;
+})
