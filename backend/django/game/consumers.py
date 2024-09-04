@@ -10,7 +10,7 @@ PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
 BALL_ACCELERATION = 1.1  # Aceleración de la bola
 BALL_DECELERATION = 0.995  # Desaceleración mínima al rebotar
 MAX_BALL_SPEED = 2.0  # Velocidad máxima de la bola
-BALL_VELOCITY_RANGE = (0.05, 0.2)  # Rango de valores para determinar las velocidades iniciales
+BALL_VELOCITY_RANGE = (0.15, 0.2)  # Rango de valores para determinar las velocidades iniciales
 BALL_RADIUS = 1.15  # Radio de la pelota en X
 BOARD_WIDTH, BOARD_HEIGHT = 300, 100  # Dimensiones del tablero
 PLAYER_WIDTH_X = 1  # Ancho del jugador en X
@@ -115,11 +115,18 @@ class PongConsumer(AsyncWebsocketConsumer):
             if user_id in users:
                 return group_name
         return None
-
+    
     def random_velocity(self):
-        angle = random.uniform(0, 2 * pi)
+        angle_ranges = [(0, pi / 4), (3 * pi / 4, 5 * pi / 4), (7 * pi / 4, 2 * pi)]
+        
+        angle_range = random.choice(angle_ranges)
+        
+        angle = random.uniform(angle_range[0], angle_range[1])
+        
         magnitude = random.uniform(*BALL_VELOCITY_RANGE)
+        
         return [random.choice([-1, 1]) * magnitude * cos(angle), random.choice([-1, 1]) * magnitude * sin(angle)]
+
 
     def init_game_state(self, group_name):
         players = self.active_groups.get(group_name, [])
@@ -211,9 +218,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         for player_id, player_data in self.game_states[group_name]['players'].items():
             if self.check_collision(ball['position'], player_data['position']):
-                while self.check_collision(ball['position'], player_data['position']):
-                    ball['position'][0] -= ball['velocity'][0]
-                    ball['position'][1] -= ball['velocity'][1]
+                # while self.check_collision(ball['position'], player_data['position']):
+                #     ball['position'][0] -= ball['velocity'][0]
+                #     ball['position'][1] -= ball['velocity'][1]
 
                 paddle_center_y = player_data['position'][1] + PLAYER_HEIGHT_Y / 2
                 contact_point = (ball['position'][1] + BALL_RADIUS - paddle_center_y) / (PLAYER_HEIGHT_Y / 2)
@@ -365,9 +372,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         player_left = player_x
         player_right = player_x + player_width
 
-        ball_left = ball_x
-        ball_right = ball_x + ball_radius_x * 2
-
         closest_x = max(player_left, min(ball_x + ball_radius_x, player_right))
 
         distance_x = abs(ball_x + ball_radius_x - closest_x)
@@ -383,9 +387,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         player_top = player_y
         player_bottom = player_y + player_height
-
-        ball_top = ball_y
-        ball_bottom = ball_y + ball_radius_y * 2
 
         closest_y = max(player_top, min(ball_y + ball_radius_y, player_bottom))
 
