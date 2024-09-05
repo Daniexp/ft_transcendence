@@ -31,6 +31,17 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+# Seteos pertinentes para el https
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 3600
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Localizacion de certificados
+SSL_CERTIFICATE = os.path.join('/etc/ssl/certs', 'Server.crt')
+SSL_KEY = os.path.join('/etc/ssl/certs', 'server.key')
+
 # Application definition
 
 INSTALLED_APPS = [

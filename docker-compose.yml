@@ -25,12 +25,14 @@ services:
   #     - Transcendence-network
 
   web:
-    build: ./backend
+    build: 
+      context: ./backend
     container_name: web
-    ports:
-      - "8080:8080"
+    #ports:
+     # - "8080:8080"
     volumes:
       - ./backend/django:/project
+      - ./nginx/certs:/etc/ssl/certs
     env_file:
       - .env
     networks:
@@ -38,6 +40,22 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx/certs:/etc/nginx/ssl
+    env_file:
+      - .env
+    networks:
+      - Transcendence-network
+
 
 networks:
   Transcendence-network:
