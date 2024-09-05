@@ -39,3 +39,24 @@
     border: 2px solid #000;
     border-radius: 50%; /* La bola debe ser completamente redonda */
 }
+
+.playerRounds {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.roundCircle {
+    width: 40px;
+    height: 40px;
+    background-color: grey; /* Color inicial */
+    border-radius: 50%;
+}
+
+.roundCircle.won {
+    background-color: green;
+}
+
+.roundCircle.lost {
+    background-color: red;
+}

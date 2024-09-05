@@ -177,22 +177,20 @@ class PongConsumer(AsyncWebsocketConsumer):
         return normalized_game_state
 
     async def game_loop(self, num_players):
-        self.game_states[self.group_name]['ball']['velocity'] = [0, 0]
-        
-        await self.channel_layer.group_send(
-            self.group_name,
-            {
-                'type': 'game_message',
-                'message': self.get_normalized_game_state()
-            }
-        )
-        
-        await self.wait_before_next_round(self.group_name)
-        
-        self.game_states[self.group_name]['ball']['velocity'] = self.random_velocity()
+        try:
+            self.game_states[self.group_name]['ball']['velocity'] = [0, 0]
+            await self.channel_layer.group_send(
+                self.group_name,
+                {
+                    'type': 'game_message',
+                    'message': self.get_normalized_game_state()
+                }
+            )
+            
+            await self.wait_before_next_round(self.group_name)
+            self.game_states[self.group_name]['ball']['velocity'] = self.random_velocity()
 
-        while len(self.active_groups[self.group_name]) == num_players:
-            try:
+            while len(self.active_groups[self.group_name]) == num_players:
                 self.update_game_state(self.group_name)
                 
                 await self.channel_layer.group_send(
@@ -202,10 +200,11 @@ class PongConsumer(AsyncWebsocketConsumer):
                         'message': self.get_normalized_game_state()
                     }
                 )
-            except KeyError as e:
-                print(f"KeyError: {e} - The game state for the group might not be initialized properly.")
-                break
-            await asyncio.sleep(GAME_TICK_RATE)
+                await asyncio.sleep(GAME_TICK_RATE)
+        except Exception as e:
+            print(f"Error in game loop: {e}")
+            await self.disconnect(4000)
+
 
     countRetry = 0
     def update_game_state(self, group_name):
@@ -240,8 +239,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif ball['position'][0] >= BOARD_WIDTH:
             asyncio.create_task(self.handle_goal(group_name, scored_by='left_player'))
 
-
-
     async def handle_goal(self, group_name, scored_by):
         if scored_by == 'right_player':
             print("GOL DE LA DERECHA")
@@ -267,10 +264,12 @@ class PongConsumer(AsyncWebsocketConsumer):
         for player, score in self.game_states[group_name]['scores'].items():
             if score >= 2:
                 self.game_states[group_name]['round_wins'][player] += 1
-                self.game_states[group_name]['scores'] = {player: 0 for player in self.game_states[group_name]['players'].keys()}
+
+                self.game_states[group_name]['scores'] = {p: 0 for p in self.game_states[group_name]['players'].keys()}
 
                 if self.game_states[group_name]['round_wins'][player] >= 3:
                     self.game_states[group_name]['game_over'] = True
+
                     await self.channel_layer.group_send(
                         group_name,
                         {
@@ -295,11 +294,10 @@ class PongConsumer(AsyncWebsocketConsumer):
                         }
                     }
                 )
-
-                #await self.wait_before_next_round(group_name)
                 return
 
         await self.wait_before_next_round(group_name)
+
 
     async def wait_before_next_round(self, group_name):
         self.game_states[group_name]['ball'] = {

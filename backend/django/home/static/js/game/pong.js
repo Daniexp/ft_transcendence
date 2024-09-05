@@ -52,6 +52,8 @@ function sleep(ms) {
 }
 
 const uniqueID = getOrGenerateUniqueID();
+let playerScore = 0;
+let opponentScore = 0;
 
 function initWebSocket() {
     var gameSocket = new WebSocket(`ws://${window.location.host}/ws/pong/${uniqueID}/`);
@@ -71,10 +73,20 @@ function initWebSocket() {
                 } else if (data.message.players) {
                     updatePlayerPositions(data.message.players);
                     updateBallPosition(data.message.ball);
-                } else if (data.message.goal_scored){
+                } else if (data.message.goal_scored) {
                     startCountdown();
                     console.log("GOOOOOL");
-                } else if (data.message.game_over){
+                    
+                    if (data.message.scorer === 'player') {
+                        playerScore++;
+                        console.error("GOOOOOL1");
+                        updateScoreCircles(playerScore, true);
+                    } else { 
+                        console.error("GOOOOOL2");
+                        opponentScore++;
+                        updateScoreCircles(opponentScore, false);
+                    }
+                } else if (data.message.game_over) {
                     resetGame();
                     gameSocket.close();
                 } else {
@@ -89,7 +101,7 @@ function initWebSocket() {
             console.error('Error al parsear el mensaje:', error);
         }
     };
-
+                    
     gameSocket.onerror = function(error) {
         console.error('Error en la conexión WebSocket:', error);
         resetGame();
@@ -102,7 +114,7 @@ function initWebSocket() {
 
     window.gameSocket = gameSocket;
 }
-
+                            
 function handleGameStart(players) {
     console.log('Juego iniciado: players=', players);
     const gameContainer = document.getElementById('gameContainer');
@@ -116,17 +128,17 @@ function handleGameStart(players) {
             newDiv.classList.add('gamePlayer');
             gameContainer.appendChild(newDiv);
         });
-
+        
         const ball = document.createElement('div');
         ball.id = "gameBall";
         gameContainer.appendChild(ball);
-
+        
         startCountdown();
     } else {
         console.error('gameContainer no encontrado');
     }
 }
-
+            
 function updatePlayerPositions(players) {
     const gameContainer = document.getElementById('gameContainer');
 
@@ -134,11 +146,10 @@ function updatePlayerPositions(players) {
         Object.keys(players).forEach(key => {
             const player = players[key];
             const playerDiv = document.getElementById(key);
-
+            
             if (playerDiv) {
                 playerDiv.style.left = `${player.position[0]}%`;
                 playerDiv.style.top = `${player.position[1]}%`;
-                //console.log('Posición actualizada para:', key, 'a', player.position);
             } else {
                 console.error('Div no encontrado para el jugador:', key);
             }
@@ -147,18 +158,17 @@ function updatePlayerPositions(players) {
         console.error('gameContainer no encontrado');
     }
 }
-
+                    
 function updateBallPosition(ball) {
     const ballDiv = document.getElementById("gameBall");
     if (ballDiv) {
         ballDiv.style.left = `${ball.position[0]}%`;
         ballDiv.style.top = `${ball.position[1]}%`;
-        //console.log('Posición de la bola actualizada a:', ball.position);
     } else {
         console.error("Bola no encontrada en el DOM");
     }
 }
-
+        
 function handleStringMessage(message, gameSocket) {
     console.log('Mensaje de texto recibido:', message);
     if (message === "User disconnected") {
@@ -166,19 +176,21 @@ function handleStringMessage(message, gameSocket) {
         gameSocket.close();
     }
 }
-
+                
 function resetGame() {
     hideShowGameSelect('.gameSelectionButtons', 'show');
     hideShowGameSelect('.gamePong', 'hide');
     document.getElementById('gameContainer').innerHTML = "";
+    document.getElementById('countdown').innerHTML = "";
     gameRunning = 0;
 }
-
+    
 function startCountdown() {
     const countdownElement = document.getElementById('countdown');
     countdownElement.style.display = 'block';
-    let countdownValue = 3;
 
+    let countdownValue = 3;
+    
     function updateCountdown() {
         if (countdownValue > 0) {
             countdownElement.textContent = countdownValue;
@@ -192,6 +204,34 @@ function startCountdown() {
             }, 1000);
         }
     }
-
+                    
     updateCountdown();
+}   
+
+let playerRoundsWon = 0;
+let opponentRoundsWon = 0;
+
+function updateScoreCircles(score, isPlayer) {
+    if (isPlayer) {
+        updateRoundCircles('left', playerRoundsWon); 
+    } else {
+        updateRoundCircles('right', opponentRoundsWon); 
+    }
+}
+
+function updateRoundCircles(side, roundWins) {
+    for (let i = 1; i <= 3; i++) {
+        let circle = document.getElementById(`${side}Round${i}`);
+        circle.classList.remove('won', 'lost');
+        if (roundWins >= i) {
+            circle.classList.add('won');
+        }
+    }
+}
+
+function resetRoundCircles() {
+    for (let i = 1; i <= 3; i++) {
+        document.getElementById('leftRound' + i).classList.remove('won', 'lost');
+        document.getElementById('rightRound' + i).classList.remove('won', 'lost');
+    }
 }
