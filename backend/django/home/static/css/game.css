@@ -47,11 +47,13 @@
 }
 
 .roundCircle {
-    width: 40px;
-    height: 40px;
-    background-color: grey; /* Color inicial */
+    width: 4vw;
+    height: 4vw;
+    background-color: white; 
     border-radius: 50%;
+    border: 0.5vw solid black;
 }
+
 
 .roundCircle.won {
     background-color: green;

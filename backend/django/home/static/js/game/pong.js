@@ -38,12 +38,12 @@ function startGame(mode){
 }
 
 async function waitForGameStart(mode) {
-    while (gameRunning === 0) {
-        await sleep(50);
-    }
     if (mode === '1vs1') {
         gameContainer.addEventListener('keydown', handleKeysOnePlayer);
         gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
+    }
+    while (gameRunning === 0) {
+        await sleep(50);
     }
 }
 
@@ -74,18 +74,7 @@ function initWebSocket() {
                     updatePlayerPositions(data.message.players);
                     updateBallPosition(data.message.ball);
                 } else if (data.message.goal_scored) {
-                    startCountdown();
-                    console.log("GOOOOOL");
-                    
-                    if (data.message.scorer === 'player') {
-                        playerScore++;
-                        console.error("GOOOOOL1");
-                        updateScoreCircles(playerScore, true);
-                    } else { 
-                        console.error("GOOOOOL2");
-                        opponentScore++;
-                        updateScoreCircles(opponentScore, false);
-                    }
+                    handleGoal(data.message);
                 } else if (data.message.game_over) {
                     resetGame();
                     gameSocket.close();
@@ -114,7 +103,17 @@ function initWebSocket() {
 
     window.gameSocket = gameSocket;
 }
-                            
+
+function handleGoal(data) {
+    startCountdown();
+    
+    if (data.scored_by === 'left_player') {
+        updateScoreCircles(playerScore, true);
+    } else { 
+        updateScoreCircles(opponentScore, false);
+    }
+}
+
 function handleGameStart(players) {
     console.log('Juego iniciado: players=', players);
     const gameContainer = document.getElementById('gameContainer');
@@ -176,13 +175,27 @@ function handleStringMessage(message, gameSocket) {
         gameSocket.close();
     }
 }
+
+let playerRoundsWon = 0;
+let opponentRoundsWon = 0;
+let playerRoundGoals = 0;
+let opponentRoundGoals = 0;
+let currentRound = 1;  
                 
 function resetGame() {
     hideShowGameSelect('.gameSelectionButtons', 'show');
     hideShowGameSelect('.gamePong', 'hide');
     document.getElementById('gameContainer').innerHTML = "";
-    document.getElementById('countdown').innerHTML = "";
+    const countdownElement = document.getElementById('countdown');
+    countdownElement.style.display = 'none';  
+    countdownElement.textContent = "";
     gameRunning = 0;
+    playerRoundsWon = 0;
+    opponentRoundsWon = 0;
+    playerRoundGoals = 0;
+    opponentRoundGoals = 0;
+    currentRound = 1;  
+    resetRoundCircles();
 }
     
 function startCountdown() {
@@ -200,6 +213,12 @@ function startCountdown() {
             countdownElement.textContent = 'Pong!';
             setTimeout(() => {
                 countdownElement.style.display = 'none';
+                console.error("LEFT: "+ opponentRoundGoals + " RIGHT: " + playerRoundGoals)
+                if (opponentRoundGoals + playerRoundGoals >= 3){
+                    resetRoundGoals();
+                    resetRoundCircles();
+                    console.error("RESET");
+                }
                 gameRunning = 1;
             }, 1000);
         }
@@ -208,25 +227,39 @@ function startCountdown() {
     updateCountdown();
 }   
 
-let playerRoundsWon = 0;
-let opponentRoundsWon = 0;
 
 function updateScoreCircles(score, isPlayer) {
     if (isPlayer) {
-        updateRoundCircles('left', playerRoundsWon); 
+        playerRoundGoals++;
+        updateRoundCircles('left', opponentRoundGoals + playerRoundGoals, true);
+        updateRoundCircles('right', opponentRoundGoals + playerRoundGoals, false);
+        if (playerRoundGoals >= 2) { 
+            playerRoundsWon++;
+            currentRound++;
+        }
     } else {
-        updateRoundCircles('right', opponentRoundsWon); 
+        opponentRoundGoals++;
+        updateRoundCircles('right', opponentRoundGoals + playerRoundGoals, true);
+        updateRoundCircles('left', opponentRoundGoals + playerRoundGoals, false);
+        if (opponentRoundGoals >= 2) { 
+            opponentRoundsWon++;
+            currentRound++;
+        }
+    }
+
+    if (playerRoundsWon > 3 || opponentRoundsWon > 3) {
+        gameOver();
     }
 }
 
-function updateRoundCircles(side, roundWins) {
-    for (let i = 1; i <= 3; i++) {
-        let circle = document.getElementById(`${side}Round${i}`);
-        circle.classList.remove('won', 'lost');
-        if (roundWins >= i) {
-            circle.classList.add('won');
-        }
-    }
+function updateRoundCircles(side, roundWins, won = true) {
+    let circle = document.getElementById(`${side}Round${roundWins}`);
+    circle.classList.add(won ? 'won' : 'lost');
+}
+
+function resetRoundGoals() {
+    playerRoundGoals = 0;
+    opponentRoundGoals = 0;
 }
 
 function resetRoundCircles() {
@@ -234,4 +267,9 @@ function resetRoundCircles() {
         document.getElementById('leftRound' + i).classList.remove('won', 'lost');
         document.getElementById('rightRound' + i).classList.remove('won', 'lost');
     }
+}
+
+function gameOver() {
+    console.log("El juego ha terminado");
+    resetGame();
 }
