@@ -62,7 +62,6 @@ const uniqueID = getOrGenerateUniqueID();
 let playerScore = 0;
 let opponentScore = 0;
 let countdownTimeout;
-let overWriteGameEnd = 0;
 
 function initWebSocket() {
     var gameSocket = new WebSocket(`ws://${window.location.host}/ws/pong/${uniqueID}/`);
@@ -85,12 +84,11 @@ function initWebSocket() {
                     handleGoal(data.message);
                 } else if (data.message.game_over) {
                     resetGame();
-                    overWriteGameEnd = 1;
                     gameSocket.close();
                 } else {
                     console.log('Datos de jugadores no encontrados o no es un objeto:', data.message);
                 }
-            } else if (typeof data.message === 'string' && !overWriteGameEnd) {
+            } else if (typeof data.message === 'string') {
                 handleStringMessage(data.message, gameSocket);
             } else {
                 console.log('Mensaje recibido no es un objeto válido');
@@ -107,21 +105,28 @@ function initWebSocket() {
 
     gameSocket.onclose = function(event) {
         console.log('Conexión cerrada');
-        if(!overWriteGameEnd)
-            resetGame();
+        resetGame();
     };
 
     window.gameSocket = gameSocket;
 }
+let playerRoundsWon = 0;
+let opponentRoundsWon = 0;
+let playerRoundGoals = 0;
+let opponentRoundGoals = 0;
+let currentRound = 1;  
+                
 
 function handleGoal(data) {
     startCountdown();
     
     if (data.scored_by === 'left_player') {
         updateScoreCircles(playerScore, true);
-    } else { 
+        } else { 
         updateScoreCircles(opponentScore, false);
     }
+
+    document.getElementById('score').innerHTML = playerRoundsWon + " - " + opponentRoundsWon;
 }
 
 function handleGameStart(players) {
@@ -186,12 +191,6 @@ function handleStringMessage(message, gameSocket) {
     }
 }
 
-let playerRoundsWon = 0;
-let opponentRoundsWon = 0;
-let playerRoundGoals = 0;
-let opponentRoundGoals = 0;
-let currentRound = 1;  
-                
 function resetGame() {
     hideShowGameSelect('.gameSelectionButtons', 'show');
     hideShowGameSelect('.gamePong', 'hide');
@@ -199,9 +198,10 @@ function resetGame() {
     const countdownElement = document.getElementById('countdown');
     countdownElement.style.display = 'none';  
     countdownElement.textContent = "";
-    const balls = document.getElementById('scoreboard');
+    const balls = document.getElementById('gameScoreBalls');
     balls.classList.add("displayNone");
     balls.style.display = "";
+    document.getElementById('score').innerHTML = " 0 - 0 ";
     gameRunning = 0;
     playerRoundsWon = 0;
     opponentRoundsWon = 0;
