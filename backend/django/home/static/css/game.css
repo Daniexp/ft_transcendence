@@ -48,7 +48,7 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    margin-top: 1hv;
+    margin-top: 1%;
     padding: 0 5%;
     box-sizing: border-box; 
 }
@@ -62,11 +62,11 @@
 }
 
 #leftPlayerRounds {
-    justify-content: flex-start; /* Alinea los círculos a la izquierda */
+    justify-content: flex-start;
 }
 
 #rightPlayerRounds {
-    justify-content: flex-end; /* Alinea los círculos a la derecha */
+    justify-content: flex-end;
 }
 
 .roundCircle {
