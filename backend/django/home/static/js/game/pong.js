@@ -28,15 +28,22 @@ function hideShowGameSelect(classSelector, mode){
 
 let gameRunning = 0;
 
-function startGame(mode){
+function startGame(mode) {
     hideShowGameSelect(".gameSelectionButtons", "hide");
+    
     if (mode === '1vs1') {
         initWebSocket();
         hideShowGameSelect(".gamePong", "show");
+
+        const playerRounds = document.querySelectorAll('.displayNone');
+        playerRounds.forEach(function(rounds) {
+            rounds.classList.remove('displayNone');
+            rounds.style.display = "flex";
+        });
+
         waitForGameStart(mode);
     }
 }
-
 async function waitForGameStart(mode) {
     if (mode === '1vs1') {
         gameContainer.addEventListener('keydown', handleKeysOnePlayer);
@@ -189,6 +196,9 @@ function resetGame() {
     const countdownElement = document.getElementById('countdown');
     countdownElement.style.display = 'none';  
     countdownElement.textContent = "";
+    const balls = document.getElementById('scoreboard');
+    balls.classList.add("displayNone");
+    balls.style.display = "";
     gameRunning = 0;
     playerRoundsWon = 0;
     opponentRoundsWon = 0;
@@ -213,11 +223,9 @@ function startCountdown() {
             countdownElement.textContent = 'Pong!';
             setTimeout(() => {
                 countdownElement.style.display = 'none';
-                console.error("LEFT: "+ opponentRoundGoals + " RIGHT: " + playerRoundGoals)
-                if (opponentRoundGoals + playerRoundGoals >= 3){
+                if (opponentRoundGoals + playerRoundGoals >= 3 || opponentRoundGoals == 2 || playerRoundGoals == 2){
                     resetRoundGoals();
                     resetRoundCircles();
-                    console.error("RESET");
                 }
                 gameRunning = 1;
             }, 1000);

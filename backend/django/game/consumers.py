@@ -202,11 +202,10 @@ class PongConsumer(AsyncWebsocketConsumer):
                 )
                 await asyncio.sleep(GAME_TICK_RATE)
         except Exception as e:
-            print(f"Error in game loop: {e}")
-            await self.disconnect(4000)
-
+            await self.disconnect(0)
 
     countRetry = 0
+    noMoreGoal = 1
     def update_game_state(self, group_name):
         ball = self.game_states[group_name]['ball']
 
@@ -233,19 +232,20 @@ class PongConsumer(AsyncWebsocketConsumer):
 
                 ball['velocity'][0] = -copysign(speed * cos(angle), ball['velocity'][0])
                 ball['velocity'][1] = speed * sin(angle)
+
+        if self.noMoreGoal == 0:
+            if ball['position'][0] <= 0 - BALL_RADIUS * 2 * 3:
+                asyncio.create_task(self.handle_goal(group_name, scored_by='right_player'))
+            elif ball['position'][0] >= BOARD_WIDTH:
+                asyncio.create_task(self.handle_goal(group_name, scored_by='left_player'))
         
-        if ball['position'][0] <= 0 - BALL_RADIUS * 2 * 3:
-            asyncio.create_task(self.handle_goal(group_name, scored_by='right_player'))
-        elif ball['position'][0] >= BOARD_WIDTH:
-            asyncio.create_task(self.handle_goal(group_name, scored_by='left_player'))
 
     async def handle_goal(self, group_name, scored_by):
+        self.noMoreGoal = 1
         if scored_by == 'right_player':
-            print("GOL DE LA DERECHA")
             left_player = list(self.game_states[group_name]['players'].keys())[0]
             self.game_states[group_name]['scores'][left_player] += 1
         elif scored_by == 'left_player':
-            print("GOL DE LA IZQUIERDA")
             right_player = list(self.game_states[group_name]['players'].keys())[1]
             self.game_states[group_name]['scores'][right_player] += 1
 
@@ -283,19 +283,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                     )
                     return
 
-                await self.channel_layer.group_send(
-                    group_name,
-                    {
-                        'type': 'game_message',
-                        'message': {
-                            'round_over': True,
-                            'round_winner': player,
-                            'round_wins': self.game_states[group_name]['round_wins']
-                        }
-                    }
-                )
-                return
-
         await self.wait_before_next_round(group_name)
 
 
@@ -327,6 +314,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                 'message': self.get_normalized_game_state()
             }
         )
+
+        self.noMoreGoal = 0
 
 
 

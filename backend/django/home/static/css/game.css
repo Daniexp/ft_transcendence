@@ -25,35 +25,57 @@
 }
 
 .gamePlayer {
-    width: 1%; /* 1% de la anchura del contenedor = PLAYER_WIDTH_X (3 px en un contenedor de 300 px de ancho) */
-    height: 15%; /* 15% de la altura del contenedor = PLAYER_HEIGHT_Y (15 px en un contenedor de 100 px de alto) */
+    width: 1%;
+    height: 15%; 
     background-color: #000;
     position: absolute;
 }
 
 #gameBall {
-    width: 2.3%; /* 2.3% de la anchura del contenedor para que coincida con el diámetro de la bola */
-    aspect-ratio: 1 / 1; /* Proporción de aspecto para mantener la bola circular */
+    width: 2.3%; 
+    aspect-ratio: 1 / 1;
     background-color: #000;
     position: absolute;
     border: 2px solid #000;
-    border-radius: 50%; /* La bola debe ser completamente redonda */
+    border-radius: 50%;
+}
+
+.displayNone{
+    display: none;
+}
+
+#scoreboard {
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 1hv;
+    padding: 0 5%;
+    box-sizing: border-box; 
 }
 
 .playerRounds {
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    align-items: center;
+    gap: 0.5vw; 
+    flex: 1;
+}
+
+#leftPlayerRounds {
+    justify-content: flex-start; /* Alinea los círculos a la izquierda */
+}
+
+#rightPlayerRounds {
+    justify-content: flex-end; /* Alinea los círculos a la derecha */
 }
 
 .roundCircle {
-    width: 4vw;
-    height: 4vw;
+    width: 2vw;
+    height: 2vw;
     background-color: white; 
     border-radius: 50%;
-    border: 0.5vw solid black;
+    border: 0.3vw solid black;
 }
-
 
 .roundCircle.won {
     background-color: green;
