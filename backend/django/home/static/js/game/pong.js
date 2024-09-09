@@ -62,6 +62,7 @@ const uniqueID = getOrGenerateUniqueID();
 let playerScore = 0;
 let opponentScore = 0;
 let countdownTimeout;
+let overWriteGameEnd = 0;
 
 function initWebSocket() {
     var gameSocket = new WebSocket(`ws://${window.location.host}/ws/pong/${uniqueID}/`);
@@ -73,8 +74,7 @@ function initWebSocket() {
     gameSocket.onmessage = function(event) {
         try {
             var data = JSON.parse(event.data);
-            console.log('Datos parseados:', data);
-            
+
             if (data && typeof data.message === 'object' && data.message !== null) {
                 if (data.message.game_started) {
                     handleGameStart(data.message.game_started);
@@ -85,11 +85,12 @@ function initWebSocket() {
                     handleGoal(data.message);
                 } else if (data.message.game_over) {
                     resetGame();
+                    overWriteGameEnd = 1;
                     gameSocket.close();
                 } else {
                     console.log('Datos de jugadores no encontrados o no es un objeto:', data.message);
                 }
-            } else if (typeof data.message === 'string') {
+            } else if (typeof data.message === 'string' && !overWriteGameEnd) {
                 handleStringMessage(data.message, gameSocket);
             } else {
                 console.log('Mensaje recibido no es un objeto válido');
@@ -106,7 +107,8 @@ function initWebSocket() {
 
     gameSocket.onclose = function(event) {
         console.log('Conexión cerrada');
-        resetGame();
+        if(!overWriteGameEnd)
+            resetGame();
     };
 
     window.gameSocket = gameSocket;
@@ -214,7 +216,7 @@ function resetGame() {
 
 function startCountdown() {
     const countdownElement = document.getElementById('countdown');
-    countdownElement.style.display = 'block';
+    countdownElement.style.display = 'flex';
 
     let countdownValue = 3;
     
