@@ -61,6 +61,7 @@ function sleep(ms) {
 const uniqueID = getOrGenerateUniqueID();
 let playerScore = 0;
 let opponentScore = 0;
+let countdownTimeout;
 
 function initWebSocket() {
     var gameSocket = new WebSocket(`ws://${window.location.host}/ws/pong/${uniqueID}/`);
@@ -206,8 +207,11 @@ function resetGame() {
     opponentRoundGoals = 0;
     currentRound = 1;  
     resetRoundCircles();
+    if (countdownTimeout) {
+        clearTimeout(countdownTimeout);
+    }
 }
-    
+
 function startCountdown() {
     const countdownElement = document.getElementById('countdown');
     countdownElement.style.display = 'block';
@@ -218,23 +222,22 @@ function startCountdown() {
         if (countdownValue > 0) {
             countdownElement.textContent = countdownValue;
             countdownValue--;
-            setTimeout(updateCountdown, 1000);
+            countdownTimeout = setTimeout(updateCountdown, 1000);
         } else {
             countdownElement.textContent = 'Pong!';
-            setTimeout(() => {
+            countdownTimeout = setTimeout(() => {
                 countdownElement.style.display = 'none';
-                if (opponentRoundGoals + playerRoundGoals >= 3 || opponentRoundGoals == 2 || playerRoundGoals == 2){
+                if (opponentRoundGoals + playerRoundGoals >= 3 || opponentRoundGoals == 2 || playerRoundGoals == 2) {
                     resetRoundGoals();
                     resetRoundCircles();
                 }
                 gameRunning = 1;
-            }, 1000);
+            }, 1000); 
         }
     }
                     
     updateCountdown();
-}   
-
+}
 
 function updateScoreCircles(score, isPlayer) {
     if (isPlayer) {
