@@ -90,7 +90,7 @@ def exchange_code(code, url):
         "client_id": env['CLIENT_ID'],
         "client_secret": env['CLIENT_SECRET'],
         "code": code,
-        "redirect_uri": env['HOSTNAME'] + "/auth/callback",
+        "redirect_uri": "https://127.0.0.1/auth/callback",#env['HOSTNAME'] + "/auth/callback",
     }
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',

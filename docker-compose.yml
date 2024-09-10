@@ -11,28 +11,19 @@ services:
     networks:
       - Transcendence-network
     healthcheck:
-      #test: ["CMD", "su", "postgres", "-c", "psql -l"]
-      #test: ["CMD", "pg_isready"]
       test: ["CMD", "pg_isready", "--host=localhost", "--username=postgres", "--port=5432"]
       interval: 5s
       timeout: 5s
       retries: 7
 
-  # redis:
-  #   image: redis:alpine
-  #   container_name: redis
-  #   networks:
-  #     - Transcendence-network
-
   web:
     build: 
       context: ./backend
     container_name: web
-    #ports:
-     # - "8080:8080"
     volumes:
       - ./backend/django:/project
       - ./nginx/certs:/etc/ssl/certs
+      - ./staticfiles:/project/staticfiles
     env_file:
       - .env
     networks:
@@ -47,14 +38,17 @@ services:
       context: ./nginx
     container_name: nginx
     ports:
-      - "443:443"
-      - "8080:80"
+      - "8080:443"
+      - "8081:80"
     volumes:
       - ./nginx/certs:/etc/nginx/ssl
+      - ./staticfiles:/project/staticfiles
     env_file:
       - .env
     networks:
       - Transcendence-network
+    depends_on:
+      - web
 
 
 networks:

@@ -13,5 +13,6 @@ if [ ! -f $SSLPATH/Server.crt ]; then
     openssl x509 -req -in $CSR -signkey $KEY -out $SSLPATH/Server.crt
 fi
 
-#exec nginx -g "daemon off;"
-exec tail -f
+exec nginx -g "daemon off;"
+#nginx
+#exec tail -f
