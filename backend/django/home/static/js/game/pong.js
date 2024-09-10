@@ -329,4 +329,8 @@ function resetGameStats() {
     playerRoundGoals = 0;
     opponentRoundGoals = 0;
     currentRound = 1;
+    const countdownElement = document.getElementById('countdown');
+    countdownElement.style.display = 'none';
+    countdownElement.textContent = "";
+    document.getElementById('score').innerHTML = "0 - 0";
 }
