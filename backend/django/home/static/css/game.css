@@ -4,29 +4,11 @@
     margin: 20px auto;
 }
 
-#gameContainer {
-    width: 90%;
-    max-width: 1200rem;
-    aspect-ratio: 3 / 1;
-    background-color: #FFF;
-    border: 2px solid #111;
-    margin-bottom: 0.5%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 12px;
-    box-sizing: border-box;
-    position: relative;
-    overflow: hidden;
-}
-
 #countdown {
-    font-size: 2em;
+    font-size: 2rem;
     text-align: center;
     width: 10vw;
     height: 10vw;
-    max-width: 100px;
-    max-height: 100px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -125,8 +107,9 @@
 }
 
 .endButtons {
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    text-align: center;
     width: 100%;
     padding: 10px;
 }

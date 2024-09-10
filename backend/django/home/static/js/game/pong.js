@@ -24,6 +24,7 @@ function hideShowGameSelect(classSelector, mode) {
     buttons.forEach(button => button.style.display = mode === "show" ? 'block' : 'none');
 }
 
+const uniqueID = getOrGenerateUniqueID();
 let gameRunning = 0;
 let playerRoundsWon = 0;
 let opponentRoundsWon = 0;
@@ -31,12 +32,14 @@ let playerRoundGoals = 0;
 let opponentRoundGoals = 0;
 let currentRound = 1;
 let countdownTimeout;
+var exitOverwrite = 0;
 
 function startGame(mode) {
     hideShowGameSelect(".gameSelectionButtons", "hide");
 
     if (mode === '1vs1') {
         initWebSocket();
+        exitOverwrite = 0;
         hideShowGameSelect(".gamePong", "show");
 
         const playerRounds = document.querySelectorAll('.displayNone');
@@ -50,6 +53,16 @@ function startGame(mode) {
 }
 
 async function waitForGameStart(mode) {
+    const endButton = document.querySelectorAll('.endButtons');
+    endButton.forEach(endButt => endButt.style.display = "none");
+    document.getElementById('score').innerHTML = " 0 - 0 ";
+    gameRunning = 0;
+    playerRoundsWon = 0;
+    opponentRoundsWon = 0;
+    playerRoundGoals = 0;
+    opponentRoundGoals = 0;
+    currentRound = 1;
+    resetRoundCircles();
     if (mode === '1vs1') {
         const gameContainer = document.getElementById('gameContainer');
         if (gameContainer) {
@@ -65,8 +78,6 @@ async function waitForGameStart(mode) {
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-const uniqueID = getOrGenerateUniqueID();
 
 function initWebSocket() {
     let gameSocket = window.gameSocket || new WebSocket(`ws://${window.location.host}/ws/pong/${uniqueID}/`);
@@ -193,6 +204,7 @@ function handleGameOver() {
     document.getElementById('gameContainer').removeEventListener('keydown', handleKeysOnePlayer);
     document.getElementById('gameContainer').removeEventListener('keyup', handleKeysUpOnePlayer);
     gameSocket.close();
+    window.gameSocket = undefined;
     exitOverwrite = 1;
     gameRunning = 0;
     resetRoundCircles();
@@ -214,8 +226,8 @@ function resetGame() {
     const balls = document.getElementById('gameScoreBalls');
     balls.classList.add("displayNone");
     balls.style.display = "";
-    const engButton = document.querySelectorAll('.endButtons');
-    engButton.forEach(endButt => endButt.style.display = "none");
+    const endButton = document.querySelectorAll('.endButtons');
+    endButton.forEach(endButt => endButt.style.display = "none");
     document.getElementById('score').innerHTML = " 0 - 0 ";
     gameRunning = 0;
     playerRoundsWon = 0;
