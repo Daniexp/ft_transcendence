@@ -5,7 +5,7 @@ import random
 from math import cos, sin, pi, copysign, sqrt
 
 # Constantes del juego con relación 1:3 entre X e Y
-GAME_TICK_RATE = 0.0009  # Velocidad de actualización del juego en segundos
+GAME_TICK_RATE = 0.0005  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
 BALL_ACCELERATION = 1.15  # Aceleración de la bola
 BALL_DECELERATION = 0.995  # Desaceleración mínima al rebotar
