@@ -1,7 +1,9 @@
-document.addEventListener("DOMContentLoaded", function() {
+// Event listener to load HTML content on page load
+document.addEventListener("DOMContentLoaded", () => {
     loadHTML("/gameButtonsDisplay/", "placeholder");
 });
 
+// Function to get or generate a unique ID
 function getOrGenerateUniqueID() {
     let uniqueID = localStorage.getItem('uniqueID');
     if (!uniqueID) {
@@ -11,19 +13,23 @@ function getOrGenerateUniqueID() {
     return uniqueID;
 }
 
+// Function to generate a UUID
 function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = Math.random() * 16 | 0;
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
 }
 
+// Function to show or hide game selection buttons
 function hideShowGameSelect(classSelector, mode) {
-    const buttons = document.querySelectorAll(classSelector);
-    buttons.forEach(button => button.style.display = mode === "show" ? 'block' : 'none');
+    document.querySelectorAll(classSelector).forEach(button => {
+        button.style.display = mode === "show" ? 'block' : 'none';
+    });
 }
 
+// Global variables
 const uniqueID = getOrGenerateUniqueID();
 let gameRunning = 0;
 let playerRoundsWon = 0;
@@ -32,8 +38,9 @@ let playerRoundGoals = 0;
 let opponentRoundGoals = 0;
 let currentRound = 1;
 let countdownTimeout;
-var exitOverwrite = 0;
+let exitOverwrite = 0;
 
+// Function to start the game
 function startGame(mode) {
     hideShowGameSelect(".gameSelectionButtons", "hide");
 
@@ -41,23 +48,21 @@ function startGame(mode) {
         initWebSocket();
         exitOverwrite = 0;
         hideShowGameSelect(".gamePong", "show");
-
-        const playerRounds = document.querySelectorAll('.displayNone');
-        playerRounds.forEach(rounds => {
+        document.querySelectorAll('.displayNone').forEach(rounds => {
             rounds.classList.remove('displayNone');
             rounds.style.display = "flex";
         });
-
         waitForGameStart(mode);
     }
 }
 
+// Function to wait for the game to start
 async function waitForGameStart(mode) {
-    const endButton = document.querySelectorAll('.endButtons');
-    endButton.forEach(endButt => endButt.style.display = "none");
-    document.getElementById('score').innerHTML = " 0 - 0 ";
+    document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
+    document.getElementById('score').innerHTML = "0 - 0";
     resetGameStats();
     resetRoundCircles();
+
     if (mode === '1vs1') {
         const gameContainer = document.getElementById('gameContainer');
         if (gameContainer) {
@@ -65,22 +70,25 @@ async function waitForGameStart(mode) {
             gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
         }
     }
+
     while (gameRunning === 0) {
         await sleep(50);
     }
 }
 
+// Function to pause execution for a specified duration
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Function to initialize WebSocket connection
 function initWebSocket() {
-    let gameSocket = window.gameSocket || new WebSocket(`ws://${window.location.host}/ws/pong/${uniqueID}/`);
+    const gameSocket = window.gameSocket || new WebSocket(`ws://${window.location.host}/ws/pong/${uniqueID}/`);
     window.gameSocket = gameSocket;
 
     gameSocket.onopen = () => console.log('Conexión abierta');
 
-    gameSocket.onmessage = function(event) {
+    gameSocket.onmessage = event => {
         try {
             const data = JSON.parse(event.data);
             handleMessage(data);
@@ -89,11 +97,9 @@ function initWebSocket() {
         }
     };
 
-    gameSocket.onerror = (error) => {
+    gameSocket.onerror = error => {
         console.error('Error en la conexión WebSocket:', error);
         resetGame();
-        document.getElementById('gameContainer').removeEventListener('keydown', handleKeysOnePlayer);
-        document.getElementById('gameContainer').removeEventListener('keyup', handleKeysUpOnePlayer);
     };
 
     gameSocket.onclose = () => {
@@ -101,11 +107,10 @@ function initWebSocket() {
         if (exitOverwrite !== 1) {
             resetGame();
         }
-        document.getElementById('gameContainer').removeEventListener('keydown', handleKeysOnePlayer);
-        document.getElementById('gameContainer').removeEventListener('keyup', handleKeysUpOnePlayer);
     };
 }
 
+// Function to handle messages received from WebSocket
 function handleMessage(data) {
     if (data && typeof data.message === 'object' && data.message !== null) {
         if (data.message.game_started) {
@@ -127,14 +132,15 @@ function handleMessage(data) {
     }
 }
 
+// Function to handle string messages
 function handleStringMessage(message) {
     console.log('Mensaje de texto recibido:', message);
     if (message === "User disconnected") {
-        resetGame();
-        window.gameSocket.close();
+        handleGameOver();
     }
 }
 
+// Function to handle game start
 function handleGameStart(players) {
     console.log('Juego iniciado: players=', players);
     const gameContainer = document.getElementById('gameContainer');
@@ -146,6 +152,7 @@ function handleGameStart(players) {
             newDiv.classList.add('gamePlayer');
             gameContainer.appendChild(newDiv);
         });
+
         const ball = document.createElement('div');
         ball.id = "gameBall";
         gameContainer.appendChild(ball);
@@ -155,6 +162,7 @@ function handleGameStart(players) {
     }
 }
 
+// Function to update player positions
 function updatePlayerPositions(players) {
     const gameContainer = document.getElementById('gameContainer');
     if (gameContainer) {
@@ -173,6 +181,7 @@ function updatePlayerPositions(players) {
     }
 }
 
+// Function to update ball position
 function updateBallPosition(ball) {
     const ballDiv = document.getElementById("gameBall");
     if (ballDiv) {
@@ -183,6 +192,7 @@ function updateBallPosition(ball) {
     }
 }
 
+// Function to handle goal scoring
 function handleGoal(data) {
     startCountdown();
     if (data.scored_by === 'left_player') {
@@ -195,10 +205,11 @@ function handleGoal(data) {
     document.getElementById('score').innerHTML = `${playerRoundsWon} - ${opponentRoundsWon}`;
 }
 
+// Function to handle game over
 function handleGameOver() {
     document.getElementById('gameContainer').removeEventListener('keydown', handleKeysOnePlayer);
     document.getElementById('gameContainer').removeEventListener('keyup', handleKeysUpOnePlayer);
-    gameSocket.close();
+    window.gameSocket.close();
     window.gameSocket = undefined;
     exitOverwrite = 1;
     gameRunning = 0;
@@ -207,10 +218,10 @@ function handleGameOver() {
     const countdownElement = document.getElementById('countdown');
     countdownElement.style.display = 'none';
     countdownElement.textContent = "";
-    const endButton = document.querySelectorAll('.endButtons');
-    endButton.forEach(endButt => endButt.style.display = "flex");
+    document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
 }
 
+// Function to reset the game
 function resetGame() {
     hideShowGameSelect('.gameSelectionButtons', 'show');
     hideShowGameSelect('.gamePong', 'hide');
@@ -221,14 +232,14 @@ function resetGame() {
     const balls = document.getElementById('gameScoreBalls');
     balls.classList.add("displayNone");
     balls.style.display = "";
-    const endButton = document.querySelectorAll('.endButtons');
-    endButton.forEach(endButt => endButt.style.display = "none");
-    document.getElementById('score').innerHTML = " 0 - 0 ";
+    document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
+    document.getElementById('score').innerHTML = "0 - 0";
     resetGameStats();
     resetRoundCircles();
     if (countdownTimeout) clearTimeout(countdownTimeout);
 }
 
+// Function to start countdown before game begins
 function startCountdown() {
     const countdownElement = document.getElementById('countdown');
     countdownElement.style.display = 'flex';
@@ -255,28 +266,28 @@ function startCountdown() {
     updateCountdown();
 }
 
+// Function to update score circles
 function updateScoreCircles(score, isPlayer) {
+    const roundWins = opponentRoundGoals + playerRoundGoals;
     if (isPlayer) {
-        updateRoundCircles('left', opponentRoundGoals + playerRoundGoals, true);
-        updateRoundCircles('right', opponentRoundGoals + playerRoundGoals, false);
+        updateRoundCircles('left', roundWins, true);
+        updateRoundCircles('right', roundWins, false);
         if (playerRoundGoals >= 2) {
             playerRoundsWon++;
             currentRound++;
         }
     } else {
-        updateRoundCircles('right', opponentRoundGoals + playerRoundGoals, true);
-        updateRoundCircles('left', opponentRoundGoals + playerRoundGoals, false);
+        updateRoundCircles('right', roundWins, true);
+        updateRoundCircles('left', roundWins, false);
         if (opponentRoundGoals >= 2) {
             opponentRoundsWon++;
             currentRound++;
         }
     }
 
-    if (playerRoundsWon > 3 || opponentRoundsWon > 3) {
-        gameOver();
-    }
 }
 
+// Function to update round circles for a specific side
 function updateRoundCircles(side, roundWins, won = true) {
     const circle = document.getElementById(`${side}Round${roundWins}`);
     if (circle) {
@@ -284,11 +295,13 @@ function updateRoundCircles(side, roundWins, won = true) {
     }
 }
 
+// Function to reset round goals
 function resetRoundGoals() {
     playerRoundGoals = 0;
     opponentRoundGoals = 0;
 }
 
+// Function to reset round circles
 function resetRoundCircles() {
     for (let i = 1; i <= 3; i++) {
         const leftCircle = document.getElementById('leftRound' + i);
@@ -302,11 +315,13 @@ function resetRoundCircles() {
     }
 }
 
+// Function to handle game over state
 function gameOver() {
     console.log("El juego ha terminado");
     resetGame();
 }
 
+// Function to reset game stats
 function resetGameStats() {
     gameRunning = 0;
     playerRoundsWon = 0;
