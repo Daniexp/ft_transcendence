@@ -27,7 +27,7 @@ urlpatterns = [
     path("login/", loginViews.intraLogin, name="authentication"),
     path("loginPage/", views.loginPage , name="authentication"),
     path("somethingHappened/", views.somethingHappened, name='somethingHappened'),
-    path("oauth2/login/redirect", loginViews.authRequest, name='loginSuccess'),
+    path("auth/callback", loginViews.authRequest, name='loginSuccess'),
     path("gameButtonsDisplay/", gameViews.gameButtons , name='gameButtons'),
 ]
 

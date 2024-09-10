@@ -23,3 +23,6 @@ web:
 	docker exec -it web /bin/bash
 db:
 	docker exec -it postgresql /bin/bash
+
+ssl:
+	docker exec -it nginx /bin/bash

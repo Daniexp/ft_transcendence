@@ -48,6 +48,7 @@ def authRequest(request):
         return redirect("/")
 
     response = exchange_code(code, get_token_url)
+    print("AQUI a veces sucede un error, espera un uid y hay ''")
     print(response.json())
 
     if "error" in response.json() or request.GET.get('error') or response.status_code != 200:
@@ -90,7 +91,7 @@ def exchange_code(code, url):
         "client_id": env['CLIENT_ID'],
         "client_secret": env['CLIENT_SECRET'],
         "code": code,
-        "redirect_uri": "http://localhost:8080/oauth2/login/redirect",
+        "redirect_uri": env['HOSTNAME'],
     }
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
