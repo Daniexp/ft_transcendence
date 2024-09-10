@@ -14,5 +14,4 @@ if [ ! -f $SSLPATH/Server.crt ]; then
 fi
 
 exec nginx -g "daemon off;"
-#nginx
 #exec tail -f

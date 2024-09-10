@@ -38,7 +38,7 @@ services:
       context: ./nginx
     container_name: nginx
     ports:
-      - "8080:443"
+      - "5000:443"
       - "8081:80"
     volumes:
       - ./nginx/certs:/etc/nginx/ssl
