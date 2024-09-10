@@ -56,12 +56,7 @@ async function waitForGameStart(mode) {
     const endButton = document.querySelectorAll('.endButtons');
     endButton.forEach(endButt => endButt.style.display = "none");
     document.getElementById('score').innerHTML = " 0 - 0 ";
-    gameRunning = 0;
-    playerRoundsWon = 0;
-    opponentRoundsWon = 0;
-    playerRoundGoals = 0;
-    opponentRoundGoals = 0;
-    currentRound = 1;
+    resetGameStats();
     resetRoundCircles();
     if (mode === '1vs1') {
         const gameContainer = document.getElementById('gameContainer');
@@ -229,12 +224,7 @@ function resetGame() {
     const endButton = document.querySelectorAll('.endButtons');
     endButton.forEach(endButt => endButt.style.display = "none");
     document.getElementById('score').innerHTML = " 0 - 0 ";
-    gameRunning = 0;
-    playerRoundsWon = 0;
-    opponentRoundsWon = 0;
-    playerRoundGoals = 0;
-    opponentRoundGoals = 0;
-    currentRound = 1;
+    resetGameStats();
     resetRoundCircles();
     if (countdownTimeout) clearTimeout(countdownTimeout);
 }
@@ -315,4 +305,13 @@ function resetRoundCircles() {
 function gameOver() {
     console.log("El juego ha terminado");
     resetGame();
+}
+
+function resetGameStats() {
+    gameRunning = 0;
+    playerRoundsWon = 0;
+    opponentRoundsWon = 0;
+    playerRoundGoals = 0;
+    opponentRoundGoals = 0;
+    currentRound = 1;
 }
