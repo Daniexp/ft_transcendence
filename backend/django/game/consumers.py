@@ -8,9 +8,9 @@ from math import cos, sin, pi, copysign, sqrt
 GAME_TICK_RATE = 0.0005  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
 BALL_ACCELERATION = 1.15  # Aceleración de la bola
-BALL_DECELERATION = 0.995  # Desaceleración mínima al rebotar
+BALL_DECELERATION = 0.995  # Desaceleración mínima al rebotaball_speedr
 MAX_BALL_SPEED = 2.0  # Velocidad máxima de la bola
-BALL_speed_RANGE = (0.15, 0.2)  # Rango de valores para determinar las velocidades iniciales
+BALL_SPEED_RANGE = (0.15, 0.2)  # Rango de valores para determinar las velocidades iniciales
 BALL_RADIUS = 1.15  # Radio de la pelota en X
 BOARD_WIDTH, BOARD_HEIGHT = 300, 100  # Dimensiones del tablero
 PLAYER_WIDTH_X = 1  # Ancho del jugador en X
@@ -116,7 +116,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         angle_ranges = [(0, pi / 4), (3 * pi / 4, 5 * pi / 4), (7 * pi / 4, 2 * pi)]
         angle_range = random.choice(angle_ranges)
         angle = random.uniform(*angle_range)
-        magnitude = random.uniform(*BALL_speed_RANGE)
+        magnitude = random.uniform(*BALL_SPEED_RANGE)
         return [random.choice([-1, 1]) * magnitude * cos(angle), random.choice([-1, 1]) * magnitude * sin(angle)]
 
     def init_game_state(self, group_name):
@@ -254,6 +254,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     def update_player_position(self, player_id, move_value):
         ball_position = self.game_states[self.group_name]['ball']['position']
+        ball_speed = self.game_states[self.group_name]['ball']['speed']
         player_position = self.game_states[self.group_name]['players'][player_id]['position']
         if player_id in self.game_states[self.group_name]['players'] and not self.check_collision(ball_position, player_position):
             new_position_y = max(0, min(player_position[1] + float(move_value) * PLAYER_MOVE_INCREMENT, BOARD_HEIGHT - PLAYER_HEIGHT_Y))

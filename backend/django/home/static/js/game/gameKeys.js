@@ -18,7 +18,6 @@ function sendPlayerMessage(uniqueId, value) {
         }
     };
     data.inputMsg.player[uniqueId] = value;
-    console.log("Enviando mensaje:", JSON.stringify(data));
     sendMessage(JSON.stringify(data));
 }
 

@@ -83,7 +83,7 @@ function sleep(ms) {
 
 // Function to initialize WebSocket connection
 function initWebSocket() {
-    const gameSocket = window.gameSocket || new WebSocket(`ws://${window.location.host}/ws/pong/${uniqueID}/`);
+    const gameSocket = window.gameSocket || new WebSocket(`wss://${window.location.host}/ws/pong/${uniqueID}/`);
     window.gameSocket = gameSocket;
 
     gameSocket.onopen = () => console.log('Conexión abierta');
