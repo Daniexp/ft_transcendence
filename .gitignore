@@ -45,3 +45,6 @@ db_data/
 # Ignore VSCode settings
 .vscode/
 
+# Static Files
+nginx/certs/
+staticfiles/
