@@ -17,16 +17,6 @@ check_token_url = "https://api.intra.42.fr/oauth/token/info"
 def intraLogin(request):
     return redirect(authorize_url)
 
-def create_http_response(request):
-    user = UserRegister.objects.get(uid=request.user.uid)
-    content = user.response_text
-    response = HttpResponse(BytesIO(content.encode('utf-8')))
-    response.status = user.status_code
-    response.reason = "OK"
-    response.headers = user.response_headers
-    #response.begin()
-    return response
-
 def is_token_active(response):
     data_request = requests.get("https://api.intra.42.fr/v2/me", data=response)
     if data_request.status_code == 200:
@@ -40,24 +30,21 @@ def authRequest(request):
     code = request.GET.get('code')
     if request.user.is_authenticated:
         active_token = is_token_active(request.user.api_data)
-    if request.user.is_authenticated and active_token:
+    if request.user.is_authenticated and active_token: 
         response = UserRegister.objects.get(uid=request.user.uid)
-        return views.home(request, dict(response.api_data))
+        return views.home(request, response.api_data)
     elif request.user.is_authenticated and not active_token:
         views.logout(request)
         return redirect("/")
 
     response = exchange_code(code, get_token_url)
-    print("AQUI a veces sucede un error, espera un uid y hay ''")
-    print(response.json())
 
     if "error" in response.json() or request.GET.get('error') or response.status_code != 200:
         print("Hay error....")
         return views.login(request)
-    return views.home(request, response)
+    return views.home(request, response.json())
 
-def getProfilePicture(response):
-    data_request = requests.get("https://api.intra.42.fr/v2/me", data=response)
+def getProfilePicture(data_request):
     if data_request.status_code == 200:
         user_data = data_request.json()
         if isinstance(user_data, dict):
@@ -67,8 +54,7 @@ def getProfilePicture(response):
                 return picture
     return ""
 
-def getId(response):
-    data_request = requests.get("https://api.intra.42.fr/v2/me", data=response)
+def getId(data_request):
     if data_request.status_code == 200:
         user_data = data_request.json()
         if isinstance(user_data, dict):
@@ -76,8 +62,7 @@ def getId(response):
             return id
     return ""
 
-def getLogin(response):
-    data_request = requests.get("https://api.intra.42.fr/v2/me", data=response)
+def getLogin(data_request):
     if data_request.status_code == 200:
         user_data = data_request.json()
         if isinstance(user_data, dict):

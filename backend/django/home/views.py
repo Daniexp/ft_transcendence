@@ -39,9 +39,6 @@ def revoke_token(request):
         'client_id': env['CLIENT_ID'],
     }
 
-    #auth = (env["CLIENT_ID"], env["CLIENT_SECRET"])
-    #print(auth)
-
     response = requests.post(revoke_url, data=payload, headers=headers)
 
     print(response.reason)
@@ -54,58 +51,47 @@ def logout(request):
     if (request.user.is_authenticated):
         user_api_data = UserRegister.objects.get(login=request.user.login).api_data 
         print(user_api_data)
-        #Queda revokear el token
+        #Queda revokear el token - abortamos, no hay manera
 
-
+        #la linea siguiente se puede deletear, lo tengo pendiente
         data_request = requests.get("https://api.intra.42.fr/oauth/token/info", data=user_api_data)
-#        revoke_token(request)
-        print(data_request.json())
-        #data_request = requests.get("https://api.intra.42.fr/v2/apps", data=user_api_data)
-        #data_request = requests.get("https://api.intra.42.fr/v2/me", data=user_api_data)
-        #if (data_request is not 200):
-         #   print("Something fail when login out")
-          #  return render(request, 'aux.html')
         auth_logout(request)
     print(request.user.is_authenticated)
     return redirect('/')
 
 def register_user(request, login_name, id, response):
     if not UserRegister.objects.filter(uid=id, login=login_name).exists():
-        user_data = UserRegister.objects.create(uid=id, login=login_name, api_data=response.json())
+        user_data = UserRegister.objects.create(uid=id, login=login_name, api_data=response)
         user_data.backend = 'django.contrib.auth.backends.ModelBackend'
     else:
         user_data = UserRegister.objects.get(uid=id, login=login_name)
-        user_data.api_data = response.json()
+        user_data.api_data = response
     user_data.save()
     auth_login(request, user_data)
 
 
 def get_user_data(request, response):
-    if isinstance(response, dict):
-        resp = UserRegister.objects.get(uid=request.user.uid)
-        picture = loginViews.getProfilePicture(resp.api_data)
-        id = loginViews.getId(resp.api_data)
-        login_name = loginViews.getLogin(resp.api_data)
-    else:
-        picture = loginViews.getProfilePicture(response.json())
-        login_name = loginViews.getLogin(response.json())
-        id = loginViews.getId(response.json())
+    data_request = requests.get("https://api.intra.42.fr/v2/me", data=response)
+    picture = loginViews.getProfilePicture(data_request)
+    id = loginViews.getId(data_request)
+    login_name = loginViews.getLogin(data_request)
     return picture, login_name, id
 
 
 def home(request, response = ""):
     if response != "":
+        print("response lleno")
         if isinstance(response, dict):
+            if "access_token" in response:
                 picture, login_name, id = get_user_data(request, response)
-        else:
-            if "access_token" in response.json():
-                picture, login_name, id = get_user_data(request, response)
-                register_user(request, login_name, id, response)
-            else:
-                return home(request)
-        return render(request, 'home.html', {'picture': picture})
+                if not picture and not login_name and not id:
+                    return home(request)
+                else:
+                    register_user(request, login_name, id, response)
     else:
+        print("response vacio")
         return login(request)
+    return render(request, 'home.html', {'picture': picture})
 
 
 def loginPage(request):
