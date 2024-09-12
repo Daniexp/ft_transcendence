@@ -4,7 +4,7 @@ let intervalId = null;
 
 function sendMessage(message) {
 
-    if (window.gameSocket.readyState === WebSocket.OPEN) {
+    if (window.gameSocket != undefined && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.send(message);
     } else {
         console.error('La conexión WebSocket no está abierta.');
@@ -33,6 +33,7 @@ async function handleKeysOnePlayer(event) {
     if (intervalId === null) {
         intervalId = setInterval(async () => {
             if (keysPressed['ArrowUp']) {
+                console.log("UP BRO")
                 sendPlayerMessage(uniqueID, "-0.20");
             } else if (keysPressed['ArrowDown']) {
                 sendPlayerMessage(uniqueID, "0.20");

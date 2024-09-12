@@ -41,11 +41,12 @@ let countdownTimeout;
 let exitOverwrite = 0;
 
 // Function to start the game
+// Función para iniciar el juego según el modo seleccionado
 function startGame(mode) {
     hideShowGameSelect(".gameSelectionButtons", "hide");
 
-    if (mode === '1vs1') {
-        initWebSocket();
+    if (mode === '1vs1' || mode === '2vs2') {
+        initWebSocket(mode);
         exitOverwrite = 0;
         hideShowGameSelect(".gamePong", "show");
         document.querySelectorAll('.displayNone').forEach(rounds => {
@@ -60,6 +61,8 @@ function startGame(mode) {
 async function waitForGameStart(mode) {
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
     document.getElementById('score').innerHTML = "0 - 0";
+    document.getElementById('PongButton').addEventListener('click', gameOver);
+      
     resetGameStats();
     resetRoundCircles();
 
@@ -82,8 +85,8 @@ function sleep(ms) {
 }
 
 // Function to initialize WebSocket connection
-function initWebSocket() {
-    const gameSocket = window.gameSocket || new WebSocket(`wss://${window.location.host}/ws/pong/${uniqueID}/`);
+function initWebSocket(mode) {
+    const gameSocket = new WebSocket(`wss://${window.location.host}/ws/pong/${uniqueID}/${mode}/`);
     window.gameSocket = gameSocket;
 
     gameSocket.onopen = () => console.log('Conexión abierta');
@@ -237,6 +240,7 @@ function resetGame() {
     resetGameStats();
     resetRoundCircles();
     if (countdownTimeout) clearTimeout(countdownTimeout);
+    document.getElementById('PongButton').removeEventListener('click', gameOver);
 }
 
 // Function to start countdown before game begins
@@ -318,6 +322,10 @@ function resetRoundCircles() {
 // Function to handle game over state
 function gameOver() {
     console.log("El juego ha terminado");
+    if (window.gameSocket != undefined && window.gameSocket.readyState === WebSocket.OPEN){
+        window.gameSocket.close();
+        window.gameSocket = undefined;
+    }
     resetGame();
 }
 

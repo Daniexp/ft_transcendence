@@ -26,6 +26,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.user_id = self.scope['url_route']['kwargs']['user_id']
+        self.game_mode = self.scope['url_route']['kwargs']['game_mode']
         await self.accept()
 
         existing_group = await self.get_user_group(self.user_id)
@@ -33,21 +34,24 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.disconnect(1)
             return
 
-        self.group_name = f'pongGame{PongConsumer.group_id_counter}'
+        max_players = self.get_max_players_for_mode(self.game_mode)
+
+        self.group_name = await self.find_or_create_group(max_players)
         await self.add_user(self.user_id, self.channel_name)
 
-        self.active_groups.setdefault(self.group_name, []).append(self.user_id)
-        
+        self.active_groups[self.group_name].append(self.user_id)
+
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        
+
         await self.send(text_data=json.dumps({
-            'message': f'Connected to group: {self.group_name} \nUser ID: {self.user_id}'
+            'message': f'Connected to group: {self.group_name} \nUser ID: {self.user_id} \nGame Mode: {self.game_mode}'
         }))
-        
-        if len(self.active_groups[self.group_name]) == 2:
+
+        if len(self.active_groups[self.group_name]) == max_players:
             PongConsumer.group_id_counter += 1
             self.init_game_state(self.group_name)
-            asyncio.create_task(self.game_loop(2))
+            asyncio.create_task(self.game_loop(max_players))
+
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -57,6 +61,22 @@ class PongConsumer(AsyncWebsocketConsumer):
                     }
                 }
             )
+
+    def get_max_players_for_mode(self, game_mode):
+        if game_mode == '1vs1':
+            return 2
+        elif game_mode == '2vs2':
+            return 4
+        return 2  
+
+    async def find_or_create_group(self, max_players):
+        for group_name, users in self.active_groups.items():
+            if len(users) < max_players:
+                return group_name
+
+        new_group_name = f'pongGame{PongConsumer.group_id_counter}'
+        self.active_groups[new_group_name] = []
+        return new_group_name
 
     async def disconnect(self, close_code):
         if hasattr(self, 'group_name'):
