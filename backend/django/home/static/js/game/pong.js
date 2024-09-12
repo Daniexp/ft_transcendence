@@ -226,6 +226,10 @@ function handleGameOver() {
 
 // Function to reset the game
 function resetGame() {
+    keysPressed['ArrowUp'] = false;
+    keysPressed['ArrowDown'] = false;
+    clearInterval(intervalId);
+    intervalId = null;
     hideShowGameSelect('.gameSelectionButtons', 'show');
     hideShowGameSelect('.gamePong', 'hide');
     document.getElementById('gameContainer').innerHTML = "";

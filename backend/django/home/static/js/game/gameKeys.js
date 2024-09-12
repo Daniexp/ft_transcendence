@@ -33,7 +33,6 @@ async function handleKeysOnePlayer(event) {
     if (intervalId === null) {
         intervalId = setInterval(async () => {
             if (keysPressed['ArrowUp']) {
-                console.log("UP BRO")
                 sendPlayerMessage(uniqueID, "-0.20");
             } else if (keysPressed['ArrowDown']) {
                 sendPlayerMessage(uniqueID, "0.20");

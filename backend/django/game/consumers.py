@@ -85,8 +85,13 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             if self.group_name in self.active_groups:
                 self.active_groups[self.group_name].remove(self.user_id)
+                
                 if not self.active_groups[self.group_name]:
+                    if self.group_name in self.game_states:
+                        del self.game_states[self.group_name]
+                    
                     del self.active_groups[self.group_name]
+                    
                     await self.channel_layer.group_send(
                         self.group_name,
                         {
@@ -94,14 +99,16 @@ class PongConsumer(AsyncWebsocketConsumer):
                             'message': "Group has been emptied and removed"
                         }
                     )
-
-            await self.channel_layer.group_send(
-                self.group_name,
-                {
-                    'type': 'game_message',
-                    'message': "User disconnected"
-                }
-            )
+                else:
+                    # Enviar mensaje de desconexión del usuario
+                    await self.channel_layer.group_send(
+                        self.group_name,
+                        {
+                            'type': 'game_message',
+                            'message': "User disconnected"
+                        }
+                    )
+        
         await self.close()
 
     async def receive(self, text_data):
@@ -110,14 +117,21 @@ class PongConsumer(AsyncWebsocketConsumer):
         if isinstance(message, dict) and 'player' in message:
             player_id = list(message['player'].keys())[0]
             move_value = message['player'][player_id]
-            self.update_player_position(player_id, move_value)
-            await self.channel_layer.group_send(
-                self.group_name,
-                {
-                    'type': 'game_message',
-                    'message': self.get_normalized_game_state()
-                }
-            )
+            
+            if self.group_name in self.game_states:
+                self.update_player_position(player_id, move_value)
+                await self.channel_layer.group_send(
+                    self.group_name,
+                    {
+                        'type': 'game_message',
+                        'message': self.get_normalized_game_state()
+                    }
+                )
+            else:
+                await self.send(text_data=json.dumps({
+                    'error': f'Game state for group {self.group_name} not initialized.'
+                }))
+
 
     async def game_message(self, event):
         message = event['message']
