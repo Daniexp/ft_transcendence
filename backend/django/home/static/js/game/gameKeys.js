@@ -24,6 +24,7 @@ function sendPlayerMessage(uniqueId, value) {
 //SAME FOR 2 PLAYERS LOCALY BUT WE ADD NEW KEYs TO LISTEN IN ANOTHER FUNCTION
 
 async function handleKeysOnePlayer(event) {
+    event.preventDefault();
     if (event.key === 'ArrowUp' || event.keyCode === 38) {
         keysPressed['ArrowUp'] = true;
     } else if (event.key === 'ArrowDown' || event.keyCode === 40) {

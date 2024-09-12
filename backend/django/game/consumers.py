@@ -291,7 +291,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         ball_speed = self.game_states[self.group_name]['ball']['speed']
         player_position = self.game_states[self.group_name]['players'][player_id]['position']
         if player_id in self.game_states[self.group_name]['players'] and not self.check_collision(ball_position, player_position):
-            new_position_y = max(0, min(player_position[1] + float(move_value) * PLAYER_MOVE_INCREMENT  * (ball_speed/4), BOARD_HEIGHT - PLAYER_HEIGHT_Y))
+            new_position_y = max(0, min(player_position[1] + float(move_value) * PLAYER_MOVE_INCREMENT  * (ball_speed[1]/4), BOARD_HEIGHT - PLAYER_HEIGHT_Y))
             self.game_states[self.group_name]['players'][player_id]['position'][1] = new_position_y
 
             if self.check_collision(ball_position, player_position):
