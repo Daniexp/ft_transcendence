@@ -45,16 +45,14 @@ let exitOverwrite = 0;
 function startGame(mode) {
     hideShowGameSelect(".gameSelectionButtons", "hide");
 
-    if (mode === '1vs1' || mode === '2vs2') {
-        initWebSocket(mode);
-        exitOverwrite = 0;
-        hideShowGameSelect(".gamePong", "show");
-        document.querySelectorAll('.displayNone').forEach(rounds => {
-            rounds.classList.remove('displayNone');
-            rounds.style.display = "flex";
-        });
-        waitForGameStart(mode);
-    }
+    initWebSocket(mode);
+    exitOverwrite = 0;
+    hideShowGameSelect(".gamePong", "show");
+    document.querySelectorAll('.displayNone').forEach(rounds => {
+        rounds.classList.remove('displayNone');
+        rounds.style.display = "flex";
+    });
+    waitForGameStart(mode);
 }
 
 // Function to wait for the game to start
@@ -66,7 +64,7 @@ async function waitForGameStart(mode) {
     resetGameStats();
     resetRoundCircles();
 
-    if (mode === '1vs1') {
+    if (mode === '1vs1' || mode === "1vsIA") {
         const gameContainer = document.getElementById('gameContainer');
         if (gameContainer) {
             gameContainer.addEventListener('keydown', handleKeysOnePlayer);
@@ -216,7 +214,6 @@ function handleGameOver() {
     window.gameSocket = undefined;
     exitOverwrite = 1;
     gameRunning = 0;
-    resetRoundCircles();
     if (countdownTimeout) clearTimeout(countdownTimeout);
     const countdownElement = document.getElementById('countdown');
     countdownElement.style.display = 'none';

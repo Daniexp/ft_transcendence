@@ -6,7 +6,7 @@ from math import cos, sin, pi, copysign, sqrt
 
 # Constantes del juego con relación 1:3 entre X e Y
 GAME_TICK_RATE = 0.0005  # Velocidad de actualización del juego en segundos
-PLAYER_MOVE_INCREMENT = 2.5  # Incremento de movimiento del jugador
+PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
 BALL_ACCELERATION = 1.15  # Aceleración de la bola
 BALL_DECELERATION = 0.995  # Desaceleración mínima al rebotaball_speedr
 MAX_BALL_SPEED = 2.0  # Velocidad máxima de la bola
@@ -23,6 +23,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     group_id_counter = 0
     active_groups = {}
     game_states = {}
+    ia = 0
 
     async def connect(self):
         self.user_id = self.scope['url_route']['kwargs']['user_id']
@@ -49,8 +50,12 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         if len(self.active_groups[self.group_name]) == max_players:
             PongConsumer.group_id_counter += 1
+            if(max_players == 1):
+                await self.add_user("IA", self.channel_name)
+                self.active_groups[self.group_name].append("IA")
+                self.ia = 1
             self.init_game_state(self.group_name)
-            asyncio.create_task(self.game_loop(max_players))
+            asyncio.create_task(self.game_loop(max_players + self.ia))
 
             await self.channel_layer.group_send(
                 self.group_name,
@@ -67,10 +72,10 @@ class PongConsumer(AsyncWebsocketConsumer):
             return 2
         elif game_mode == '2vs2':
             return 4
-        return 2  
+        return 1 
 
     async def find_or_create_group(self, max_players):
-        for group_name, users in self.active_groups.items():
+        for group_name, users in self.active_groups.items(): # PARA EL 2vs2 hay que repensarlo
             if len(users) < max_players:
                 return group_name
 
@@ -86,6 +91,9 @@ class PongConsumer(AsyncWebsocketConsumer):
             if self.group_name in self.active_groups:
                 self.active_groups[self.group_name].remove(self.user_id)
                 
+                if "IA" in self.active_groups[self.group_name]:
+                    self.active_groups[self.group_name].remove("IA")
+                
                 if not self.active_groups[self.group_name]:
                     if self.group_name in self.game_states:
                         del self.game_states[self.group_name]
@@ -100,7 +108,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                         }
                     )
                 else:
-                    # Enviar mensaje de desconexión del usuario
                     await self.channel_layer.group_send(
                         self.group_name,
                         {
@@ -157,7 +164,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         players = self.active_groups.get(group_name, [])
         num_players = len(players)
 
-        x_positions = [BOARD_X_MARGIN, BOARD_WIDTH - PLAYER_WIDTH_X * 3 - BOARD_X_MARGIN] if num_players == 2 else []
+        x_positions = [BOARD_X_MARGIN, BOARD_WIDTH - PLAYER_WIDTH_X * 3 - BOARD_X_MARGIN] if num_players <= 2 else []  #TODO 2 vs 2 rework
 
         self.game_states[group_name] = {
             'players': {user_id: {'position': [x_positions[i], BOARD_HEIGHT // 2 - PLAYER_HEIGHT_Y // 2]} for i, user_id in enumerate(players)},
@@ -192,7 +199,11 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             while len(self.active_groups[self.group_name]) == num_players:
                 self.update_game_state(self.group_name)
-                
+                # AQUI IA;
+                # if self.ia:
+                    #
+
+
                 await self.channel_layer.group_send(self.group_name, {'type': 'game_message', 'message': self.get_normalized_game_state()})
                 await asyncio.sleep(GAME_TICK_RATE)
         except Exception:
@@ -226,9 +237,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         if not self.noMoreGoal:
             if ball['position'][0] <= -BALL_RADIUS * 2 * 3:
-                asyncio.create_task(self.handle_goal(group_name, 'right_player'))
+                await asyncio.create_task(self.handle_goal(group_name, 'right_player'))
             elif ball['position'][0] >= BOARD_WIDTH:
-                asyncio.create_task(self.handle_goal(group_name, 'left_player'))
+                await asyncio.create_task(self.handle_goal(group_name, 'left_player'))
 
     async def handle_goal(self, group_name, scored_by):
         self.noMoreGoal = 1
@@ -291,7 +302,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         ball_speed = self.game_states[self.group_name]['ball']['speed']
         player_position = self.game_states[self.group_name]['players'][player_id]['position']
         if player_id in self.game_states[self.group_name]['players'] and not self.check_collision(ball_position, player_position):
-            new_position_y = max(0, min(player_position[1] + float(move_value) * PLAYER_MOVE_INCREMENT  * (ball_speed[1]/4), BOARD_HEIGHT - PLAYER_HEIGHT_Y))
+            new_position_y = max(0, min(player_position[1] + float(move_value) * PLAYER_MOVE_INCREMENT, BOARD_HEIGHT - PLAYER_HEIGHT_Y))
             self.game_states[self.group_name]['players'][player_id]['position'][1] = new_position_y
 
             if self.check_collision(ball_position, player_position):
