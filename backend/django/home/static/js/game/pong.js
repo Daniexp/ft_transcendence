@@ -3,6 +3,30 @@ document.addEventListener("DOMContentLoaded", () => {
     loadHTML("/gameButtonsDisplay/", "placeholder");
 });
 
+
+function updateButtons(tab) {
+    const button1 = document.getElementById('butt1');
+    const button2 = document.getElementById('butt2');
+
+    if (tab === 'local') {
+        button1.textContent = '1 vs IA';
+        button2.textContent = '1 vs 1';
+        button1.setAttribute('onclick', 'startGame("1vsIA")');
+        button2.setAttribute('onclick', 'startGame("1vs1")');
+    } else if (tab === 'multiplayer') {
+        button1.textContent = 'Multiplayer IA';
+        button2.textContent = 'Multiplayer 1';
+        button1.setAttribute('onclick', 'startGame("multiplayerIA")');
+        button2.setAttribute('onclick', 'startGame("multiplayer1")');
+    } else if (tab === 'tournament') {
+        button1.textContent = 'Tournament IA';
+        button2.textContent = 'Tournament 1';
+        button1.setAttribute('onclick', 'startGame("tournamentIA")');
+        button2.setAttribute('onclick', 'startGame("tournament1")');
+    }
+}
+
+
 // Function to get or generate a unique ID
 function getOrGenerateUniqueID() {
     let uniqueID = localStorage.getItem('uniqueID');

@@ -25,16 +25,15 @@
     <nav class="navbar navbar-light custom-navbar">
         <div class="container-fluid">
             <div class="navbar-buttons">
-                <a class="btn custom-nav-btn" href="#">Local</a>
-                <a class="btn custom-nav-btn" href="#">Multiplayer</a>
-                <a class="btn custom-nav-btn" href="#">Tournament</a>
+                <a class="btn custom-nav-btn" href="#" onclick="updateButtons('local')">Local</a>
+                <a class="btn custom-nav-btn" href="#" onclick="updateButtons('multiplayer')">Multiplayer</a>
+                <a class="btn custom-nav-btn" href="#" onclick="updateButtons('tournament')">Tournament</a>
             </div>
         </div>
     </nav>
     
     <div class="button-row">
-        <button class="btn btn-custom" onclick="startGame('1vsIA')">1 vs IA</button>
-        <button class="btn btn-custom" onclick="startGame('1vs1')">1 vs 1</button>
+        <button class="btn btn-custom" id="butt1">1 vs IA</button>
+        <button class="btn btn-custom" id="butt2">1 vs 1</button>
     </div>
 </div>
-
