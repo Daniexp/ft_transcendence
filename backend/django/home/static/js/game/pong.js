@@ -39,12 +39,14 @@ let opponentRoundGoals = 0;
 let currentRound = 1;
 let countdownTimeout;
 let exitOverwrite = 0;
+let modo = "";
 
 // Function to start the game
 // Función para iniciar el juego según el modo seleccionado
 function startGame(mode) {
     hideShowGameSelect(".gameSelectionButtons", "hide");
 
+    modo = mode;
     initWebSocket(mode);
     exitOverwrite = 0;
     hideShowGameSelect(".gamePong", "show");
@@ -64,7 +66,7 @@ async function waitForGameStart(mode) {
     resetGameStats();
     resetRoundCircles();
 
-    if (mode === '1vs1' || mode === "1vsIA") {
+    if (mode === '1vs1' || mode === '1vsIA') {
         const gameContainer = document.getElementById('gameContainer');
         if (gameContainer) {
             gameContainer.addEventListener('keydown', handleKeysOnePlayer);
@@ -206,6 +208,15 @@ function handleGoal(data) {
     document.getElementById('score').innerHTML = `${playerRoundsWon} - ${opponentRoundsWon}`;
 }
 
+function handleClick() {
+    if (window.gameSocket != undefined && window.gameSocket.readyState === WebSocket.OPEN) 
+    {
+        window.gameSocket.close();
+        window.gameSocket = undefined;
+    }
+    startGame(modo);
+}
+
 // Function to handle game over
 function handleGameOver() {
     document.getElementById('gameContainer').removeEventListener('keydown', handleKeysOnePlayer);
@@ -219,6 +230,9 @@ function handleGameOver() {
     countdownElement.style.display = 'none';
     countdownElement.textContent = "";
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
+    document.getElementById("playAgain").removeEventListener("click", handleClick);
+    document.getElementById("playAgain").addEventListener("click", handleClick);
+    
 }
 
 // Function to reset the game

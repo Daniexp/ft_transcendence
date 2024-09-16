@@ -115,7 +115,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                             'message': "User disconnected"
                         }
                     )
-        
+        noMoreGoal = 1
         await self.close()
 
     async def receive(self, text_data):
@@ -237,9 +237,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         if not self.noMoreGoal:
             if ball['position'][0] <= -BALL_RADIUS * 2 * 3:
-                await asyncio.create_task(self.handle_goal(group_name, 'right_player'))
+                asyncio.create_task(self.handle_goal(group_name, 'right_player'))
             elif ball['position'][0] >= BOARD_WIDTH:
-                await asyncio.create_task(self.handle_goal(group_name, 'left_player'))
+                asyncio.create_task(self.handle_goal(group_name, 'left_player'))
 
     async def handle_goal(self, group_name, scored_by):
         self.noMoreGoal = 1
