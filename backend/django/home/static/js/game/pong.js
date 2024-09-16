@@ -62,22 +62,43 @@ async function waitForGameStart(mode) {
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
     document.getElementById('score').innerHTML = "0 - 0";
     document.getElementById('PongButton').addEventListener('click', gameOver);
-      
+
     resetGameStats();
     resetRoundCircles();
 
+    const gameContainer = document.getElementById('gameContainer');
+
+    const waitingMessage = document.createElement('div');
+    waitingMessage.id = 'waitingMessage';
+    waitingMessage.style.cssText = `
+        font-size: 2rem; 
+        text-align: center; 
+        position: absolute; 
+        width: 100%; 
+        height: 100%; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center;
+    `;
+    waitingMessage.innerText = "Waiting for player/s...";
+    gameContainer.appendChild(waitingMessage);
+
     if (mode === '1vs1' || mode === '1vsIA') {
-        const gameContainer = document.getElementById('gameContainer');
         if (gameContainer) {
             gameContainer.addEventListener('keydown', handleKeysOnePlayer);
             gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
         }
     }
-
+    
     while (gameRunning === 0) {
         await sleep(50);
     }
+
+    if (gameContainer.contains(waitingMessage)) {
+        gameContainer.removeChild(waitingMessage);
+    }
 }
+
 
 // Function to pause execution for a specified duration
 function sleep(ms) {
