@@ -1,124 +1,131 @@
-.navbar .navbar-brand {
+.navbar {
+    width: 100%;
+    background-color: #ffffff;
+    border-bottom: 2px solid black;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.navbar-brand {
     font-size: 2rem;
     font-weight: bold;
-    margin-left: 15rem;
+    color: black;
+    flex-grow: 1; /* Permite que el título ocupe espacio uniformemente */
+    text-align: center; /* Centra el título */
 }
 
-.navbar .navbar-nav .nav-item .nav-link {
-    padding-right: 0;
-}
-
+/* Estilo para el menú desplegable de perfil */
 .navbar .navbar-nav .nav-item .nav-link img {
     width: 3.5rem;
     height: 3.5rem;
     object-fit: cover;
     border-radius: 90%;
-    margin-right: 15rem;
 }
 
-.navbar .navbar-nav .nav-item .dropdown-menu {
-    right: 0; /* Alinea el menú con el borde derecho del contenedor del dropdown */
-    left: auto;
-    top: 100%; /* Posiciona el menú justo debajo del elemento activador */
-    transform: translateX(-15rem); /* Alinea el menú sin desplazamiento adicional */
-}
-
-.navbar .navbar-nav .nav-item .dropdown-toggle::after {
-    right: 0; /* Alinea el menú con el borde derecho del contenedor del dropdown */
-    visibility: hidden;
-    left: auto;
-    top: 100%; /* Posiciona el menú justo debajo del elemento activador */
-    transform: translateX(-15rem); /* Alinea el menú sin desplazamiento adicional */
-}
-
+/* Separador debajo de la barra de navegación */
 .navbar-divider {
     color: black;
     border-top: 1px solid black;
-    margin-top: 0;
-    margin: 0 auto;
-    width: 85%;
-}
-
-body, html {
-    height: 100%;
     margin: 0;
-    display: flex;
-    flex-direction: column;
+    margin-bottom: 20px;
+    width: 100%;
 }
 
-.container {
-    flex: 1;
+/* Estilo para la barra de navegación con tabs */
+.custom-navbar {
+    background-color: #ffffff;
+    padding: 10px 0;
+    border-bottom: 2px solid black;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    margin-top: 10%;
+    align-items: center;
 }
 
+.navbar-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0; /* Elimina cualquier espacio entre los botones */
+}
+
+.custom-nav-btn {
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+    font-size: 2rem;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    flex-grow: 1; /* Cada botón crece uniformemente */
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    margin: 0; /* Elimina márgenes que puedan afectar el tamaño */
+    min-width: 0; /* Permite que los botones se reduzcan si es necesario */
+}
+
+.custom-nav-btn:hover {
+    background-color: lightgray;
+    color: black;
+    border-color: lightgray;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Ajustes de los botones principales */
 .button-row {
     display: flex;
-    align-items: flex-start;
-    width: 80%;
+    justify-content: center;
     flex-wrap: wrap;
+    margin-top: 20px;
 }
 
 .btn-custom {
-    width: 45%; /* Ajusta el ancho según tus necesidades */
-    height: 600px; /* Ajusta la altura según tus necesidades */
-    margin: 10px;
+    width: calc(50% - 30px); /* Calcular el ancho para que siempre quepa en el espacio disponible */
+    height: 50vh; /* Ajuste de altura dinámico basado en el viewport */
+    margin: 15px;
     border-radius: 20px;
-    font-size: 24px; /* Tamaño de la fuente para el texto dentro del botón */
-    background-color: white; /* Color de fondo del botón */
-    color: black; /* Color del texto del botón */
-    border: 2px solid black; /* Borde del botón */
-    transition: background-color 0.3s, border-color 0.3s; /* Añadir transición para el cambio de color */
+    font-size: 2vw; /* Tamaño de la fuente relativo al ancho de la ventana */
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+    transition: background-color 0.3s, border-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0;
+    box-sizing: border-box;
+    gap: 0;
 }
 
 .btn-custom:hover {
-    background-color: lightgray; 
+    background-color: lightgray;
     border-color: lightgray;
 }
 
 .btn-custom:active, .btn-custom:focus {
-    background-color: lightgray; /* Color de fondo al hacer clic y al estar enfocado */
-    color: black; /* Cambiar el color del texto al hacer clic y al estar enfocado */
+    background-color: lightgray;
+    color: black;
     border-color: lightgray;
 }
 
+/* Estilos para pantallas pequeñas */
 @media (max-width: 768px) {
-    .navbar .navbar-brand {
-        margin-left: 0;
-        font-size: 1.5rem;
-    }
-
-    .navbar .navbar-nav .nav-item .nav-link img {
-        margin-right: 0;
-    }
-
-    .navbar-divider {
-        width: 100%;
-    }
-
-    .container {
-        margin-top: 5%;
-    }
-
-    .button-row {
-        width: 100%;
-        flex-direction: column;
-        align-items: center;
-    }
-
     .btn-custom {
-        width: 80%; /* Ajusta el ancho para pantallas más pequeñas */
-        height: 200px; /* Ajusta la altura para pantallas más pequeñas */
-        font-size: 18px; /* Tamaño de la fuente para pantallas más pequeñas */
+        width: calc(70% - 30px); /* Ajustar el ancho */
+        height: 30vh; /* Ajustar la altura */
+        font-size: 4vw; /* Cambiar el tamaño de la fuente */
     }
 }
 
 @media (max-width: 480px) {
     .btn-custom {
-        width: 90%; /* Ajusta el ancho para pantallas muy pequeñas */
-        height: 150px; /* Ajusta la altura para pantallas muy pequeñas */
-        font-size: 16px; /* Tamaño de la fuente para pantallas muy pequeñas */
+        width: calc(85% - 30px);
+        height: 20vh;
+        font-size: 5vw;
     }
 }
