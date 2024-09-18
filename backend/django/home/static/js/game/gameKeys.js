@@ -31,6 +31,15 @@ async function handleKeysOnePlayer(event) {
         keysPressed['ArrowDown'] = true;
         event.preventDefault();
     }
+    // if(mode === 'tournament'){
+    //     if (event.key === 'W' || event.keyCode === 38) {
+    //         keysPressed['W'] = true;
+    //         event.preventDefault();
+    //     } else if (event.key === 'S' || event.keyCode === 40) {
+    //         keysPressed['S'] = true;
+    //         event.preventDefault();
+    //     }
+    // }
 
     if (intervalId === null) {
         intervalId = setInterval(async () => {

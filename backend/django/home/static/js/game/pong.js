@@ -10,20 +10,15 @@ function updateButtons(tab) {
 
     if (tab === 'local') {
         button1.textContent = '1 vs IA';
-        button2.textContent = '1 vs 1';
         button1.setAttribute('onclick', 'startGame("1vsIA")');
-        button2.setAttribute('onclick', 'startGame("1vs1")');
+        button2.textContent = 'Tournament';
+        button2.setAttribute('onclick', 'startGame("tournament")');
     } else if (tab === 'multiplayer') {
-        button1.textContent = 'Multiplayer IA';
-        button2.textContent = 'Multiplayer 1';
-        button1.setAttribute('onclick', 'startGame("multiplayerIA")');
-        button2.setAttribute('onclick', 'startGame("multiplayer1")');
-    } else if (tab === 'tournament') {
-        button1.textContent = 'Tournament IA';
-        button2.textContent = 'Tournament 1';
-        button1.setAttribute('onclick', 'startGame("tournamentIA")');
-        button2.setAttribute('onclick', 'startGame("tournament1")');
-    }
+        button1.textContent = '1 vs 1';
+        button1.setAttribute('onclick', 'startGame("1vs1")');
+        button2.textContent = '2 vs 2';
+        button2.setAttribute('onclick', 'startGame("2vs2")');
+    } 
 }
 
 
@@ -107,11 +102,9 @@ async function waitForGameStart(mode) {
     waitingMessage.innerText = "Waiting for player/s...";
     gameContainer.appendChild(waitingMessage);
 
-    if (mode === '1vs1' || mode === '1vsIA') {
-        if (gameContainer) {
-            gameContainer.addEventListener('keydown', handleKeysOnePlayer);
-            gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
-        }
+    if (gameContainer) {
+        gameContainer.addEventListener('keydown', handleKeysOnePlayer);
+        gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
     }
     
     while (gameRunning === 0) {
