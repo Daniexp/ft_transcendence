@@ -91,7 +91,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.remove_user(self.user_id)
 
             if self.group_name in self.active_groups:
-                self.active_groups[self.group_name]["users"].remove(self.user_id)
+                if self.user_id in self.active_groups[self.group_name]["users"]:
+                    self.active_groups[self.group_name]["users"].remove(self.user_id)
                 
                 if "IA" in self.active_groups[self.group_name]:
                     self.active_groups[self.group_name]["users"].remove("IA")
@@ -217,6 +218,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
                 await self.channel_layer.group_send(self.group_name, {'type': 'game_message', 'message': self.get_normalized_game_state()})
                 await asyncio.sleep(GAME_TICK_RATE)
+            self.disconnect(0)
         except Exception:
             await self.disconnect(0)
 
@@ -283,6 +285,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                             'round_wins': self.game_states[group_name]['round_wins']
                         }
                     })
+                    self.disconnect()
                     return
 
         await self.wait_before_next_round(group_name)
