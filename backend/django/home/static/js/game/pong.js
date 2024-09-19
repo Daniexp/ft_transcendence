@@ -1,8 +1,6 @@
-// Event listener to load HTML content on page load
 document.addEventListener("DOMContentLoaded", () => {
     loadHTML("/gameButtonsDisplay/", "placeholder");
 });
-
 
 function updateButtons(tab) {
     const button1 = document.getElementById('butt1');
@@ -10,19 +8,17 @@ function updateButtons(tab) {
 
     if (tab === 'local') {
         button1.textContent = '1 vs IA';
-        button1.setAttribute('onclick', 'startGame("1vsIA")');
+        button1.onclick = () => startGame("1vsIA");
         button2.textContent = 'Tournament';
-        button2.setAttribute('onclick', 'startGame("tournament")');
+        button2.onclick = () => startGame("tournament");
     } else if (tab === 'multiplayer') {
         button1.textContent = '1 vs 1';
-        button1.setAttribute('onclick', 'startGame("1vs1")');
+        button1.onclick = () => startGame("1vs1");
         button2.textContent = '2 vs 2';
-        button2.setAttribute('onclick', 'startGame("2vs2")');
-    } 
+        button2.onclick = () => startGame("2vs2");
+    }
 }
 
-
-// Function to get or generate a unique ID
 function getOrGenerateUniqueID() {
     let uniqueID = localStorage.getItem('uniqueID');
     if (!uniqueID) {
@@ -32,7 +28,6 @@ function getOrGenerateUniqueID() {
     return uniqueID;
 }
 
-// Function to generate a UUID
 function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = Math.random() * 16 | 0;
@@ -41,14 +36,11 @@ function generateUUID() {
     });
 }
 
-// Function to show or hide game selection buttons
 function hideShowGameSelect(classSelector, mode) {
-    document.querySelectorAll(classSelector).forEach(button => {
-        button.style.display = mode === "show" ? 'block' : 'none';
-    });
+    const display = mode === "show" ? 'block' : 'none';
+    document.querySelectorAll(classSelector).forEach(button => button.style.display = display);
 }
 
-// Global variables
 const uniqueID = getOrGenerateUniqueID();
 let gameRunning = 0;
 let playerRoundsWon = 0;
@@ -60,11 +52,8 @@ let countdownTimeout;
 let exitOverwrite = 0;
 let modo = "";
 
-// Function to start the game
-// Función para iniciar el juego según el modo seleccionado
 function startGame(mode) {
     hideShowGameSelect(".gameSelectionButtons", "hide");
-
     modo = mode;
     initWebSocket(mode);
     exitOverwrite = 0;
@@ -76,17 +65,15 @@ function startGame(mode) {
     waitForGameStart(mode);
 }
 
-// Function to wait for the game to start
 async function waitForGameStart(mode) {
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
-    document.getElementById('score').innerHTML = "0 - 0";
-    document.getElementById('PongButton').addEventListener('click', gameOver);
+    document.getElementById('score').textContent = "0 - 0";
+    document.getElementById('PongButton').onclick = gameOver;
 
     resetGameStats();
     resetRoundCircles();
 
     const gameContainer = document.getElementById('gameContainer');
-
     const waitingMessage = document.createElement('div');
     waitingMessage.id = 'waitingMessage';
     waitingMessage.style.cssText = `
@@ -107,28 +94,25 @@ async function waitForGameStart(mode) {
         gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
     }
     
-    while (gameRunning === 0) {
-        await sleep(50);
-    }
+    await new Promise(resolve => {
+        const interval = setInterval(() => {
+            if (gameRunning) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 50);
+    });
 
     if (gameContainer.contains(waitingMessage)) {
         gameContainer.removeChild(waitingMessage);
     }
 }
 
-
-// Function to pause execution for a specified duration
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Function to initialize WebSocket connection
 function initWebSocket(mode) {
     const gameSocket = new WebSocket(`wss://${window.location.host}/ws/pong/${uniqueID}/${mode}/`);
     window.gameSocket = gameSocket;
 
     gameSocket.onopen = () => console.log('Conexión abierta');
-
     gameSocket.onmessage = event => {
         try {
             const data = JSON.parse(event.data);
@@ -137,12 +121,10 @@ function initWebSocket(mode) {
             console.error('Error al parsear el mensaje:', error);
         }
     };
-
     gameSocket.onerror = error => {
         console.error('Error en la conexión WebSocket:', error);
         resetGame();
     };
-
     gameSocket.onclose = () => {
         console.log('Conexión cerrada');
         if (exitOverwrite !== 1) {
@@ -151,7 +133,6 @@ function initWebSocket(mode) {
     };
 }
 
-// Function to handle messages received from WebSocket
 function handleMessage(data) {
     if (data && typeof data.message === 'object' && data.message !== null) {
         if (data.message.game_started) {
@@ -163,8 +144,6 @@ function handleMessage(data) {
             handleGoal(data.message);
         } else if (data.message.game_over) {
             handleGameOver();
-        } else {
-            console.log('Datos de jugadores no encontrados o no es un objeto:', data.message);
         }
     } else if (typeof data.message === 'string') {
         handleStringMessage(data.message);
@@ -173,17 +152,14 @@ function handleMessage(data) {
     }
 }
 
-// Function to handle string messages
 function handleStringMessage(message) {
-    console.log('Mensaje de texto recibido:', message);
+    console.log("MENSAJE DESCONEXION: ", message)
     if (message === "User disconnected") {
         handleGameOver();
     }
 }
 
-// Function to handle game start
 function handleGameStart(players) {
-    console.log('Juego iniciado: players=', players);
     const gameContainer = document.getElementById('gameContainer');
     if (gameContainer) {
         gameContainer.innerHTML = '';
@@ -198,12 +174,9 @@ function handleGameStart(players) {
         ball.id = "gameBall";
         gameContainer.appendChild(ball);
         startCountdown();
-    } else {
-        console.error('gameContainer no encontrado');
     }
 }
 
-// Function to update player positions
 function updatePlayerPositions(players) {
     const gameContainer = document.getElementById('gameContainer');
     if (gameContainer) {
@@ -213,27 +186,19 @@ function updatePlayerPositions(players) {
             if (playerDiv) {
                 playerDiv.style.left = `${player.position[0]}%`;
                 playerDiv.style.top = `${player.position[1]}%`;
-            } else {
-                console.error('Div no encontrado para el jugador:', key);
             }
         });
-    } else {
-        console.error('gameContainer no encontrado');
     }
 }
 
-// Function to update ball position
 function updateBallPosition(ball) {
     const ballDiv = document.getElementById("gameBall");
     if (ballDiv) {
         ballDiv.style.left = `${ball.position[0]}%`;
         ballDiv.style.top = `${ball.position[1]}%`;
-    } else {
-        console.error("Bola no encontrada en el DOM");
     }
 }
 
-// Function to handle goal scoring
 function handleGoal(data) {
     startCountdown();
     if (data.scored_by === 'left_player') {
@@ -243,37 +208,33 @@ function handleGoal(data) {
         opponentRoundGoals++;
         updateScoreCircles(opponentRoundGoals, false);
     }
-    document.getElementById('score').innerHTML = `${playerRoundsWon} - ${opponentRoundsWon}`;
+    document.getElementById('score').textContent = `${playerRoundsWon} - ${opponentRoundsWon}`;
 }
 
 function handleClick() {
-    if (window.gameSocket != undefined && window.gameSocket.readyState === WebSocket.OPEN) 
-    {
+    if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.close();
         window.gameSocket = undefined;
     }
     startGame(modo);
 }
 
-// Function to handle game over
 function handleGameOver() {
+    if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
+        window.gameSocket.close();
+        window.gameSocket = undefined;
+    }
     document.getElementById('gameContainer').removeEventListener('keydown', handleKeysOnePlayer);
     document.getElementById('gameContainer').removeEventListener('keyup', handleKeysUpOnePlayer);
-    window.gameSocket.close();
-    window.gameSocket = undefined;
     exitOverwrite = 1;
     gameRunning = 0;
     if (countdownTimeout) clearTimeout(countdownTimeout);
-    const countdownElement = document.getElementById('countdown');
-    countdownElement.style.display = 'none';
-    countdownElement.textContent = "";
+    document.getElementById('countdown').style.display = 'none';
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
     document.getElementById("playAgain").removeEventListener("click", handleClick);
     document.getElementById("playAgain").addEventListener("click", handleClick);
-    
 }
 
-// Function to reset the game
 function resetGame() {
     keysPressed['ArrowUp'] = false;
     keysPressed['ArrowDown'] = false;
@@ -296,7 +257,7 @@ function resetGame() {
     document.getElementById('PongButton').removeEventListener('click', gameOver);
 }
 
-// Function to start countdown before game begins
+
 function startCountdown() {
     const countdownElement = document.getElementById('countdown');
     countdownElement.style.display = 'flex';
@@ -306,10 +267,10 @@ function startCountdown() {
         if (countdownValue > 0) {
             countdownElement.textContent = countdownValue;
             countdownValue--;
-            countdownTimeout = setTimeout(updateCountdown, 1000);
+            setTimeout(updateCountdown, 1000);
         } else {
             countdownElement.textContent = 'Pong!';
-            countdownTimeout = setTimeout(() => {
+            setTimeout(() => {
                 countdownElement.style.display = 'none';
                 if (opponentRoundGoals + playerRoundGoals >= 3 || opponentRoundGoals === 2 || playerRoundGoals === 2) {
                     resetRoundGoals();
@@ -318,12 +279,15 @@ function startCountdown() {
                 gameRunning = 1;
             }, 1000);
         }
+        if (!window.gameSocket || window.gameSocket.readyState !== WebSocket.OPEN) {
+            handleGameOver();
+            return; 
+        }
     }
 
     updateCountdown();
 }
 
-// Function to update score circles
 function updateScoreCircles(score, isPlayer) {
     const roundWins = opponentRoundGoals + playerRoundGoals;
     if (isPlayer) {
@@ -341,10 +305,8 @@ function updateScoreCircles(score, isPlayer) {
             currentRound++;
         }
     }
-
 }
 
-// Function to update round circles for a specific side
 function updateRoundCircles(side, roundWins, won = true) {
     const circle = document.getElementById(`${side}Round${roundWins}`);
     if (circle) {
@@ -352,13 +314,11 @@ function updateRoundCircles(side, roundWins, won = true) {
     }
 }
 
-// Function to reset round goals
 function resetRoundGoals() {
     playerRoundGoals = 0;
     opponentRoundGoals = 0;
 }
 
-// Function to reset round circles
 function resetRoundCircles() {
     for (let i = 1; i <= 3; i++) {
         const leftCircle = document.getElementById('leftRound' + i);
@@ -372,17 +332,15 @@ function resetRoundCircles() {
     }
 }
 
-// Function to handle game over state
 function gameOver() {
     console.log("El juego ha terminado");
-    if (window.gameSocket != undefined && window.gameSocket.readyState === WebSocket.OPEN){
+    if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.close();
         window.gameSocket = undefined;
     }
     resetGame();
 }
 
-// Function to reset game stats
 function resetGameStats() {
     gameRunning = 0;
     playerRoundsWon = 0;
@@ -390,8 +348,7 @@ function resetGameStats() {
     playerRoundGoals = 0;
     opponentRoundGoals = 0;
     currentRound = 1;
-    const countdownElement = document.getElementById('countdown');
-    countdownElement.style.display = 'none';
-    countdownElement.textContent = "";
-    document.getElementById('score').innerHTML = "0 - 0";
+    document.getElementById('countdown').style.display = 'none';
+    document.getElementById('countdown').textContent = "";
+    document.getElementById('score').textContent = "0 - 0";
 }

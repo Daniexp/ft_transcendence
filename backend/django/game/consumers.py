@@ -5,12 +5,12 @@ import random
 from math import cos, sin, pi, copysign, sqrt
 
 # Constantes del juego con relación 1:3 entre X e Y
-GAME_TICK_RATE = 0.0005  # Velocidad de actualización del juego en segundos
+GAME_TICK_RATE = 0.001  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
 BALL_ACCELERATION = 1.15  # Aceleración de la bola
 BALL_DECELERATION = 0.995  # Desaceleración mínima al rebotaball_speedr
 MAX_BALL_SPEED = 2.0  # Velocidad máxima de la bola
-BALL_SPEED_RANGE = (0.15, 0.2)  # Rango de valores para determinar las velocidades iniciales
+BALL_SPEED_RANGE = (0.1, 0.4)  # Rango de valores para determinar las velocidades iniciales
 BALL_RADIUS = 1.15  # Radio de la pelota en X
 BOARD_WIDTH, BOARD_HEIGHT = 300, 100  # Dimensiones del tablero
 PLAYER_WIDTH_X = 1  # Ancho del jugador en X
@@ -50,7 +50,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         if len(self.active_groups[self.group_name]["users"]) == max_players:
             PongConsumer.group_id_counter += 1
-            if(max_players == 1):
+            if max_players == 1:
                 await self.add_user("IA", self.channel_name)
                 self.active_groups[self.group_name]["users"].append("IA")
                 self.ia = 1
@@ -81,11 +81,12 @@ class PongConsumer(AsyncWebsocketConsumer):
             if len(users) < max_players and mode == mode_curr:
                 return group_name
 
-        new_group_name = f'pongGame{PongConsumer.group_id_counter}'
-        self.active_groups[new_group_name] = {"users": [], "mode": mode_curr}
+        new_group_name = f'{mode_curr}_pongGame{PongConsumer.group_id_counter}'
+        self.active_groups[new_group_name] = {"users": [], "mode": mode_curr, "gameRunning": 0}
         return new_group_name
 
-    async def disconnect(self, close_code):
+
+    async def disconnect(self, close_code):    
         if hasattr(self, 'group_name'):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
             await self.remove_user(self.user_id)
@@ -98,6 +99,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     self.active_groups[self.group_name]["users"].remove("IA")
                 
                 if not self.active_groups[self.group_name]["users"]:
+                    self.active_groups[self.group_name]['gameRunning'] = 0
                     if self.group_name in self.game_states:
                         del self.game_states[self.group_name]
                     
@@ -111,15 +113,18 @@ class PongConsumer(AsyncWebsocketConsumer):
                         }
                     )
                 else:
-                    await self.channel_layer.group_send(
-                        self.group_name,
-                        {
-                            'type': 'game_message',
-                            'message': "User disconnected"
-                        }
-                    )
+                    if self.active_groups[self.group_name]['gameRunning']:
+                        print("ENTRO Y GAME:", self.active_groups[self.group_name]['gameRunning'])
+                        await self.channel_layer.group_send(
+                            self.group_name,
+                            {
+                                'type': 'game_message',
+                                'message': "User disconnected"
+                            }
+                        )
         noMoreGoal = 1
         await self.close()
+
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -187,6 +192,9 @@ class PongConsumer(AsyncWebsocketConsumer):
                 'speed': self.random_speed()
             }
         }
+        self.active_groups[group_name]['gameRunning'] = 1
+        print("PASO: ", self.active_groups[group_name]['gameRunning'])
+
 
     def normalize_coordinates(self, position):
         return [(position[0] / BOARD_WIDTH) * 100, (position[1] / BOARD_HEIGHT) * 100]
@@ -285,7 +293,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                             'round_wins': self.game_states[group_name]['round_wins']
                         }
                     })
-                    self.disconnect()
+                    self.gameRunning = 0
+                    self.disconnect(0)
                     return
 
         await self.wait_before_next_round(group_name)
@@ -299,11 +308,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(group_name, {'type': 'game_message', 'message': self.get_normalized_game_state()})
         
         await asyncio.sleep(3)
-
-        self.game_states[group_name]['ball'] = {
-            'position': [BOARD_WIDTH // 2, BOARD_HEIGHT // 2],
-            'speed': self.random_speed()
-        }
+        if group_name in self.game_states:
+            self.game_states[group_name]['ball'] = {
+                'position': [BOARD_WIDTH // 2, BOARD_HEIGHT // 2],
+                'speed': self.random_speed()
+            }
 
         await self.channel_layer.group_send(group_name, {'type': 'game_message', 'message': self.get_normalized_game_state()})
 
