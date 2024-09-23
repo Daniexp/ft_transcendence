@@ -1,6 +1,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import asyncio
 import json
+import time
 import random
 from math import cos, sin, pi, copysign, sqrt
 
@@ -17,6 +18,7 @@ PLAYER_WIDTH_X = 1  # Ancho del jugador en X
 PLAYER_HEIGHT_Y = 15  # Altura del jugador en Y
 PLAYER_AMP = pi / 6  # Grados del punto de foco
 BOARD_X_MARGIN = 3  # Margen de los jugadores al muro por posición inicial
+UPDATE_RATE_IA = 1
 
 class PongConsumer(AsyncWebsocketConsumer):
     users = {}
@@ -54,8 +56,11 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.add_user("IA", self.channel_name)
                 self.active_groups[self.group_name]["users"].append("IA")
                 self.ia = 1
+                max_players += self.ia
             self.init_game_state(self.group_name)
-            asyncio.create_task(self.game_loop(max_players + self.ia))
+            asyncio.create_task(self.game_loop(max_players))
+            if self.ia:
+               asyncio.create_task(self.move_ia(UPDATE_RATE_IA, max_players))
 
             await self.channel_layer.group_send(
                 self.group_name,
@@ -193,7 +198,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             }
         }
         self.active_groups[group_name]['gameRunning'] = 1
-        print("PASO: ", self.active_groups[group_name]['gameRunning'])
 
 
     def normalize_coordinates(self, position):
@@ -207,7 +211,21 @@ class PongConsumer(AsyncWebsocketConsumer):
                 'position': self.normalize_coordinates(state['ball']['position']),
                 'speed': state['ball']['speed']
             }
-        }
+        } 
+
+    async def move_ia(self, updateRate, num_players):
+        tick = time.monotonic()
+        print("ENTRA")
+
+        while len(self.active_groups[self.group_name]["users"]) == num_players:  
+            if (time.monotonic() - tick) >= updateRate:
+                tick = time.monotonic()
+                self.update_player_position('IA', random.choice([-1, 1]))
+                print("LOOP")            
+            else:
+                await asyncio.sleep(0.25)
+
+        return
 
     async def game_loop(self, num_players):
         try:
@@ -216,19 +234,11 @@ class PongConsumer(AsyncWebsocketConsumer):
             
             await self.wait_before_next_round(self.group_name)
             self.game_states[self.group_name]['ball']['speed'] = self.random_speed()
+            
+            
 
-            #print("EEEEEEY JOGADORES")
-            #print(self.game_states[group_name]['players'].items())
             while len(self.active_groups[self.group_name]["users"]) == num_players:
                 self.update_game_state(self.group_name)
-                # AQUI IA;
-                if self.ia:
-                    await asyncio.sleep(3)
-                    print("EY")
-                    self.update_player_position('IA', random.choice([-0.2, 0.2]))
-                    #
-
-
                 await self.channel_layer.group_send(self.group_name, {'type': 'game_message', 'message': self.get_normalized_game_state()})
                 await asyncio.sleep(GAME_TICK_RATE)
             self.disconnect(0)
