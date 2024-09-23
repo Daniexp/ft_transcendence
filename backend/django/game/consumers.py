@@ -217,10 +217,15 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.wait_before_next_round(self.group_name)
             self.game_states[self.group_name]['ball']['speed'] = self.random_speed()
 
+            #print("EEEEEEY JOGADORES")
+            #print(self.game_states[group_name]['players'].items())
             while len(self.active_groups[self.group_name]["users"]) == num_players:
                 self.update_game_state(self.group_name)
                 # AQUI IA;
-                # if self.ia:
+                if self.ia:
+                    await asyncio.sleep(3)
+                    print("EY")
+                    self.update_player_position('IA', random.choice([-0.2, 0.2]))
                     #
 
 
