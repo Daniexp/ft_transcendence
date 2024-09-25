@@ -1,6 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
-    loadHTML("/gameButtonsDisplay/", "placeholder");
+    console.log("DOM completamente cargado y analizado");
+    loadHTML("/gameButtonsDisplay/", "placeholder", () => {
+        console.log("Callback de loadHTML ejecutado");
+        const initButton = document.getElementById("initClick");
+        initButton.click();
+    });
 });
+
 
 function updateButtons(tab) {
     const button1 = document.getElementById('butt1');
@@ -219,6 +225,9 @@ function handleClick() {
     startGame(modo);
 }
 
+let countdownActive = false; 
+let countdownTimeoutId; 
+
 function handleGameOver() {
     if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.close();
@@ -230,12 +239,56 @@ function handleGameOver() {
     gameRunning = 0;
     if (countdownTimeout) clearTimeout(countdownTimeout);
     document.getElementById('countdown').style.display = 'none';
+    console.log("handleGameOver llamado");
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
     document.getElementById("playAgain").removeEventListener("click", handleClick);
     document.getElementById("playAgain").addEventListener("click", handleClick);
+    if (countdownTimeoutId) 
+        clearTimeout(countdownTimeoutId); 
+    countdownActive = false;
+}
+
+function startCountdown() {
+    if (countdownActive) return;
+    countdownActive = true;
+
+    const countdownElement = document.getElementById('countdown');
+    countdownElement.style.display = 'flex';
+    let countdownValue = 3;
+
+    function updateCountdown() {
+        if (countdownValue > 0) {
+            countdownElement.textContent = countdownValue;
+            countdownValue--;
+            countdownTimeoutId = setTimeout(updateCountdown, 1000);
+        } else {
+            countdownElement.textContent = 'Pong!';
+            countdownTimeoutId = setTimeout(() => {
+                countdownElement.style.display = 'none';
+                if (opponentRoundGoals + playerRoundGoals >= 3 || opponentRoundGoals === 2 || playerRoundGoals === 2) {
+                    resetRoundGoals();
+                    resetRoundCircles();
+                }
+                gameRunning = 1;
+                countdownActive = false;
+            }, 1000);
+        }
+
+        if (!window.gameSocket || window.gameSocket.readyState !== WebSocket.OPEN) {
+            if (exitOverwrite !== 1) {
+                window.gameSocket = undefined;
+                resetGame();
+            }
+            return; 
+        }
+    }
+
+    updateCountdown();
 }
 
 function resetGame() {
+    console.log("resetGame llamado");
+    hideShowGameSelect('.endButtons', 'hide');
     keysPressed['ArrowUp'] = false;
     keysPressed['ArrowDown'] = false;
     clearInterval(intervalId);
@@ -249,43 +302,12 @@ function resetGame() {
     const balls = document.getElementById('gameScoreBalls');
     balls.classList.add("displayNone");
     balls.style.display = "";
-    document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
     document.getElementById('score').innerHTML = "0 - 0";
     resetGameStats();
-    resetRoundCircles();
-    if (countdownTimeout) clearTimeout(countdownTimeout);
+    if (countdownTimeoutId) 
+        clearTimeout(countdownTimeoutId); 
+    countdownActive = false;
     document.getElementById('PongButton').removeEventListener('click', gameOver);
-}
-
-
-function startCountdown() {
-    const countdownElement = document.getElementById('countdown');
-    countdownElement.style.display = 'flex';
-    let countdownValue = 3;
-
-    function updateCountdown() {
-        if (countdownValue > 0) {
-            countdownElement.textContent = countdownValue;
-            countdownValue--;
-            setTimeout(updateCountdown, 1000);
-        } else {
-            countdownElement.textContent = 'Pong!';
-            setTimeout(() => {
-                countdownElement.style.display = 'none';
-                if (opponentRoundGoals + playerRoundGoals >= 3 || opponentRoundGoals === 2 || playerRoundGoals === 2) {
-                    resetRoundGoals();
-                    resetRoundCircles();
-                }
-                gameRunning = 1;
-            }, 1000);
-        }
-        if (!window.gameSocket || window.gameSocket.readyState !== WebSocket.OPEN) {
-            handleGameOver();
-            return; 
-        }
-    }
-
-    updateCountdown();
 }
 
 function updateScoreCircles(score, isPlayer) {

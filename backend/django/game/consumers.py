@@ -32,16 +32,18 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         existing_group = await self.get_user_group(self.user_id)
         if existing_group:
-            await self.disconnect(1)
+            await self.close()
             return
 
         max_players = self.get_max_players_for_mode(self.game_mode)
-
         self.group_name = await self.find_or_create_group(max_players, self.game_mode)
-        await self.add_user(self.user_id, self.channel_name)
+
+        if self.group_name not in self.active_groups:
+            self.active_groups[self.group_name] = {"users": []}
 
         self.active_groups[self.group_name]["users"].append(self.user_id)
 
+        await self.add_user(self.user_id, self.channel_name)
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
         await self.send(text_data=json.dumps({
@@ -66,6 +68,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                     }
                 }
             )
+
+
 
     def get_max_players_for_mode(self, game_mode):
         if game_mode == '1vs1':
@@ -166,7 +170,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.users.pop(user_id, None)
 
     async def get_user_group(self, user_id):
-        return next((group_name for group_name, users in self.active_groups.items() if user_id in users), None)
+        for group_name, group_data in self.active_groups.items():
+            if user_id in group_data.get("users", []):
+                return group_name
+        return None
+
 
     def random_speed(self):
         angle_ranges = [(0, pi / 4), (3 * pi / 4, 5 * pi / 4), (7 * pi / 4, 2 * pi)]
@@ -323,7 +331,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         ball_speed = self.game_states[self.group_name]['ball']['speed']
         player_position = self.game_states[self.group_name]['players'][player_id]['position']
         if player_id in self.game_states[self.group_name]['players'] and not self.check_collision(ball_position, player_position):
-            new_position_y = max(0, min(player_position[1] + float(move_value) * PLAYER_MOVE_INCREMENT, BOARD_HEIGHT - PLAYER_HEIGHT_Y))
+            finalMoveValue = 0.20
+            if move_value == "ArrowUp":
+                finalMoveValue *= -1
+            new_position_y = max(0, min(player_position[1] + finalMoveValue * PLAYER_MOVE_INCREMENT, BOARD_HEIGHT - PLAYER_HEIGHT_Y))
             self.game_states[self.group_name]['players'][player_id]['position'][1] = new_position_y
 
             if self.check_collision(ball_position, player_position):
