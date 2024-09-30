@@ -2,22 +2,29 @@ let players = [];
 let matchesQueue = [];
 let winner = "No one";
 
+const handlePlayerInput = (event) => {
+    const playerNameInput = document.getElementById('playerName');
+    if (event.key === 'Enter') {
+        console.log("Intentando agregar jugador:", playerNameInput.value);
+        addPlayer();
+    }
+};
+
 function showTournamentInput() {
     hideShowGameSelect(".gameSelectionButtons", "hide");
-    document.getElementById('PongButton').addEventListener("click", endTournament);
-    const tournamentContainer = document.getElementById('tournamentContainer');
+    const pongButton = document.getElementById('PongButton');
 
+    pongButton.addEventListener("click", endTournament); // Agrega el evento
+
+    const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('displayNone');
     tournamentContainer.classList.add('d-flex');
 
     const playerNameInput = document.getElementById('playerName');
-    playerNameInput.value = "";
-    playerNameInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            console.log("Intentando agregar jugador:", playerNameInput.value);
-            addPlayer();
-        }
-    });
+    playerNameInput.value = ""; 
+
+    
+    playerNameInput.addEventListener('keydown', handlePlayerInput);
 }
 
 function startTournament() {
@@ -26,20 +33,23 @@ function startTournament() {
         return;
     }
 
-    console.log("Iniciando el torneo con jugadores:", players);
+    const playerListDiv = document.getElementById('playerList');
+    while (playerListDiv.firstChild) {
+        playerListDiv.removeChild(playerListDiv.firstChild);
+    }
     const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('d-flex');
     tournamentContainer.classList.add('displayNone');
-
+    
+    console.log("Iniciando el torneo con jugadores:", players);
     setupMatches();
     playNextMatch();
 }
 
 function endTournament() {
-    console.log("Finalizando torneo...");
     players = [];
     matchesQueue = [];
-
+    
     if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.close();
         window.gameSocket = undefined;
@@ -52,6 +62,9 @@ function endTournament() {
 
     resetGame();
 
+    const playerNameInput = document.getElementById('playerName');
+    playerNameInput.removeEventListener('keydown', handlePlayerInput);
+
     const playerListDiv = document.getElementById('playerList');
     while (playerListDiv.firstChild) {
         playerListDiv.removeChild(playerListDiv.firstChild);
@@ -62,6 +75,7 @@ function endTournament() {
     tournamentContainer.classList.add('displayNone');
 
     hideShowGameSelect(".gameSelectionButtons", "show");
+    console.log("Finalizando torneo...");
 }
 
 function setupMatches() {
@@ -87,7 +101,6 @@ async function playNextMatch() {
     let player2 = match[1];
 
     console.log(`Iniciando partida entre ${player1} y ${player2}.`);
-    gameRunning = true;
 
     try {
         startGame("tournament"); 
@@ -96,16 +109,13 @@ async function playNextMatch() {
         if (player2) {
             players = players.filter(player => player !== player2); 
         }
-        
         if (winner !== 'No one') {
             console.log(`${winner} gana esta ronda!`);
             players.push(winner);
+            playNextMatch();
         }
-        
-        playNextMatch();
     } catch (error) {
         console.error("Error al jugar el partido:", error);
-        gameRunning = false;
     }
 }
 
