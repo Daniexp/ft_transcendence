@@ -1,12 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM completamente cargado y analizado");
     loadHTML("/gameButtonsDisplay/", "placeholder", () => {
-        console.log("Callback de loadHTML ejecutado");
         const initButton = document.getElementById("initClick");
         initButton.click();
+        document.getElementById('tournamentContainer').style.display = 'none';
     });
 });
-
 
 function updateButtons(tab) {
     const button1 = document.getElementById('butt1');
@@ -16,7 +15,7 @@ function updateButtons(tab) {
         button1.textContent = '1 vs IA';
         button1.onclick = () => startGame("1vsIA");
         button2.textContent = 'Tournament';
-        button2.onclick = () => startGame("tournament");
+        button2.onclick = showTournamentInput
     } else if (tab === 'multiplayer') {
         button1.textContent = '1 vs 1';
         button1.onclick = () => startGame("1vs1");
@@ -24,6 +23,7 @@ function updateButtons(tab) {
         button2.onclick = () => startGame("2vs2");
     }
 }
+
 
 function getOrGenerateUniqueID() {
     let uniqueID = localStorage.getItem('uniqueID');
@@ -64,10 +64,8 @@ function startGame(mode) {
     initWebSocket(mode);
     exitOverwrite = 0;
     hideShowGameSelect(".gamePong", "show");
-    document.querySelectorAll('.displayNone').forEach(rounds => {
-        rounds.classList.remove('displayNone');
-        rounds.style.display = "flex";
-    });
+    document.getElementById("gameScoreBalls").classList.remove('displayNone');
+    document.getElementById("gameScoreBalls").classList.add('flexStyle')
     waitForGameStart(mode);
 }
 
@@ -227,6 +225,7 @@ function handleClick() {
 
 let countdownActive = false; 
 let countdownTimeoutId; 
+let countdownValue = 3;
 
 function handleGameOver() {
     if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
@@ -249,13 +248,20 @@ function handleGameOver() {
 }
 
 function startCountdown() {
-    if (countdownActive) return;
+
+    if (countdownActive) {
+        clearTimeout(countdownTimeoutId);
+        countdownValue = 3;
+        updateCountdown();
+        return;
+    }
+
     countdownActive = true;
 
     const countdownElement = document.getElementById('countdown');
     countdownElement.style.display = 'flex';
-    let countdownValue = 3;
-
+    countdownValue = 3;
+    
     function updateCountdown() {
         if (countdownValue > 0) {
             countdownElement.textContent = countdownValue;
@@ -263,13 +269,15 @@ function startCountdown() {
             countdownTimeoutId = setTimeout(updateCountdown, 1000);
         } else {
             countdownElement.textContent = 'Pong!';
+
             countdownTimeoutId = setTimeout(() => {
                 countdownElement.style.display = 'none';
                 if (opponentRoundGoals + playerRoundGoals >= 3 || opponentRoundGoals === 2 || playerRoundGoals === 2) {
                     resetRoundGoals();
                     resetRoundCircles();
                 }
-                gameRunning = 1;
+
+                gameRunning = 1; 
                 countdownActive = false;
             }, 1000);
         }
@@ -299,9 +307,8 @@ function resetGame() {
     const countdownElement = document.getElementById('countdown');
     countdownElement.style.display = 'none';
     countdownElement.textContent = "";
-    const balls = document.getElementById('gameScoreBalls');
-    balls.classList.add("displayNone");
-    balls.style.display = "";
+    document.getElementById("gameScoreBalls").classList.add('displayNone');
+    document.getElementById("gameScoreBalls").classList.remove('flexStyle');
     document.getElementById('score').innerHTML = "0 - 0";
     resetGameStats();
     if (countdownTimeoutId) 
