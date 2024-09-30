@@ -23,7 +23,6 @@ function updateButtons(tab) {
     }
 }
 
-
 function getOrGenerateUniqueID() {
     let uniqueID = localStorage.getItem('uniqueID');
     if (!uniqueID) {
@@ -56,6 +55,7 @@ let currentRound = 1;
 let countdownTimeout;
 let exitOverwrite = 0;
 let modo = "";
+let countdownElement;
 
 function startGame(mode) {
     console.log("ENTER PARTY");
@@ -68,7 +68,6 @@ function startGame(mode) {
     document.getElementById("gameScoreBalls").classList.add('flexStyle')
     waitForGameStart(mode);
 }
-
 
 async function waitForGameStart(mode) {
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
@@ -97,14 +96,14 @@ async function waitForGameStart(mode) {
     if (gameContainer) {
         gameContainer.addEventListener('keydown', handleKeysOnePlayer);
         gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
-        if(mode == "tournament"){
+        if (mode == "tournament") {
             gameContainer.addEventListener('w', handleKeysOnePlayer);
             gameContainer.addEventListener('s', handleKeysUpOnePlayer);
             window.secondWeb = new WebSocket(`wss://${window.location.host}/ws/pong/${"local"}/${mode}/`);
             gameRunning = 1;
         }
     }
-    
+
     await new Promise(resolve => {
         const interval = setInterval(() => {
             if (gameRunning) {
@@ -185,6 +184,8 @@ function handleGameStart(players) {
         const ball = document.createElement('div');
         ball.id = "gameBall";
         gameContainer.appendChild(ball);
+
+        countdownElement = document.getElementById('countdown'); // Inicializar countdownElement aquí
         startCountdown();
     }
 }
@@ -245,7 +246,9 @@ function handleGameOver() {
     exitOverwrite = 1;
     gameRunning = 0;
     if (countdownTimeout) clearTimeout(countdownTimeout);
-    document.getElementById('countdown').style.display = 'none';
+    if (countdownElement) {
+        countdownElement.style.display = 'none';
+    }
     console.log("handleGameOver llamado");
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
     document.getElementById("playAgain").removeEventListener("click", handleClick);
@@ -253,15 +256,13 @@ function handleGameOver() {
     if (countdownTimeoutId) 
         clearTimeout(countdownTimeoutId); 
     countdownActive = false;
-    if(window.secondWeb != undefined)
-    {
+    if (window.secondWeb != undefined) {
         window.secondWeb.close();
         window.secondWeb = undefined;
     }
 }
 
 function startCountdown() {
-
     if (countdownActive) {
         clearTimeout(countdownTimeoutId);
         countdownValue = 3;
@@ -271,7 +272,10 @@ function startCountdown() {
 
     countdownActive = true;
 
-    const countdownElement = document.getElementById('countdown');
+    if (!countdownElement) {
+        countdownElement = document.getElementById('countdown'); // Asegúrate de inicializar aquí también
+    }
+    
     countdownElement.style.display = 'flex';
     countdownValue = 3;
     
@@ -319,9 +323,10 @@ function resetGame() {
     hideShowGameSelect('.gameSelectionButtons', 'show');
     hideShowGameSelect('.gamePong', 'hide');
     document.getElementById('gameContainer').innerHTML = "";
-    const countdownElement = document.getElementById('countdown');
-    countdownElement.style.display = 'none';
-    countdownElement.textContent = "";
+    if (countdownElement) {
+        countdownElement.style.display = 'none';
+        countdownElement.textContent = "";
+    }
     document.getElementById("gameScoreBalls").classList.add('displayNone');
     document.getElementById("gameScoreBalls").classList.remove('flexStyle');
     document.getElementById('score').innerHTML = "0 - 0";
@@ -330,8 +335,7 @@ function resetGame() {
         clearTimeout(countdownTimeoutId); 
     countdownActive = false;
     document.getElementById('PongButton').removeEventListener('click', gameOver);
-    if(window.secondWeb != undefined)
-    {
+    if (window.secondWeb != undefined) {
         window.secondWeb.close();
         window.secondWeb = undefined;
     }
@@ -397,7 +401,9 @@ function resetGameStats() {
     playerRoundGoals = 0;
     opponentRoundGoals = 0;
     currentRound = 1;
-    document.getElementById('countdown').style.display = 'none';
-    document.getElementById('countdown').textContent = "";
+    if (countdownElement) {
+        countdownElement.style.display = 'none';
+        countdownElement.textContent = "";
+    }
     document.getElementById('score').textContent = "0 - 0";
 }

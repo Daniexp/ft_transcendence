@@ -154,12 +154,12 @@ function addPlayer() {
         return;
     }
 
-    if (players.includes(playerName)) {
+    if (players.includes(playerName + ".")) {
         console.log("El jugador ya está registrado.");
         return;
     }
 
-    players.push(playerName);
+    players.push(playerName + ".");
     playerNameInput.value = "";
     updatePlayerList();
 }
