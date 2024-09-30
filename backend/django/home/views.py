@@ -79,19 +79,19 @@ def get_user_data(request, response):
 
 
 def home(request, response = ""):
-#    if response != "":
-#        print("response lleno")
-#        if isinstance(response, dict):
-#            if "access_token" in response:
-#                picture, login_name, id = get_user_data(request, response)
-#                if not picture and not login_name and not id:
-#                    return home(request)
-#                else:
-#                    register_user(request, login_name, id, response)
-#    else:
-#        print("response vacio")
-#        return login(request)
-    return render(request, 'home.html', {'picture': ""})
+    if response != "":
+        print("response lleno")
+        if isinstance(response, dict):
+            if "access_token" in response:
+                picture, login_name, id = get_user_data(request, response)
+                if not picture and not login_name and not id:
+                    return home(request)
+                else:
+                    register_user(request, login_name, id, response)
+    else:
+        print("response vacio")
+        return login(request)
+    return render(request, 'home.html', {'picture': picture})
 
 
 def loginPage(request):
