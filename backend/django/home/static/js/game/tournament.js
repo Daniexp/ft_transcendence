@@ -34,7 +34,6 @@ function addPlayer() {
     players.push(playerName);
     playerNameInput.value = "";
     updatePlayerList();
-    console.log("Jugador agregado:", playerName);
 }
 
 function startTournament() {
@@ -61,6 +60,10 @@ function endTournament() {
 }
 
 function playMatches(players) {
+    const tournamentContainer = document.getElementById('tournamentContainer');
+    tournamentContainer.classList.remove('d-flex');
+    tournamentContainer.classList.add('displayNone');
+
     let matches = [];
     for (let i = 0; i < players.length; i += 2) {
         if (i + 1 < players.length) {
@@ -80,23 +83,18 @@ async function playMatch(matches) {
         return;
     }
 
-    if (matches.length === 1) {
-        console.log("El torneo ha terminado. El ganador es " + matches[0][0]);
-        return; 
-    }
-
     let match = matches.shift(); 
     let player1 = match[0];
     let player2 = match[1];
 
-    if (player2) {
-        console.log(`Iniciando partida entre ${player1} y ${player2}.`);
-    } else {
-        console.log(`El jugador ${player1} avanza automáticamente.`);
-    }
+    console.log(`Iniciando partida entre ${player1} y ${player2}.`);
 
     await startGame("tournament");
+    console.log("Esperando a que la partida termine...");
+
+
     await waitForGameToEnd();
+
 
     let winner = player2 ? player1 : player1; 
     if (player2) {
@@ -113,6 +111,7 @@ async function waitForGameToEnd() {
         const checkGameRunning = setInterval(() => {
             if (gameRunning === 0) { 
                 clearInterval(checkGameRunning);
+                console.log("El juego ha terminado.");
                 resolve();
             }
         }, 100);
