@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOM completamente cargado y analizado");
     loadHTML("/gameButtonsDisplay/", "placeholder", () => {
         const initButton = document.getElementById("initClick");
         initButton.click();
@@ -59,6 +58,7 @@ let exitOverwrite = 0;
 let modo = "";
 
 function startGame(mode) {
+    console.log("ENTER PARTY");
     hideShowGameSelect(".gameSelectionButtons", "hide");
     modo = mode;
     initWebSocket(mode);
@@ -68,6 +68,7 @@ function startGame(mode) {
     document.getElementById("gameScoreBalls").classList.add('flexStyle')
     waitForGameStart(mode);
 }
+
 
 async function waitForGameStart(mode) {
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
@@ -96,6 +97,12 @@ async function waitForGameStart(mode) {
     if (gameContainer) {
         gameContainer.addEventListener('keydown', handleKeysOnePlayer);
         gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
+        if(mode == "tournament"){
+            gameContainer.addEventListener('w', handleKeysOnePlayer);
+            gameContainer.addEventListener('s', handleKeysUpOnePlayer);
+            window.secondWeb = new WebSocket(`wss://${window.location.host}/ws/pong/${"local"}/${mode}/`);
+            gameRunning = 1;
+        }
     }
     
     await new Promise(resolve => {
@@ -245,6 +252,11 @@ function handleGameOver() {
     if (countdownTimeoutId) 
         clearTimeout(countdownTimeoutId); 
     countdownActive = false;
+    if(window.secondWeb != undefined)
+    {
+        window.secondWeb.close();
+        window.secondWeb = undefined;
+    }
 }
 
 function startCountdown() {
@@ -315,6 +327,11 @@ function resetGame() {
         clearTimeout(countdownTimeoutId); 
     countdownActive = false;
     document.getElementById('PongButton').removeEventListener('click', gameOver);
+    if(window.secondWeb != undefined)
+    {
+        window.secondWeb.close();
+        window.secondWeb = undefined;
+    }
 }
 
 function updateScoreCircles(score, isPlayer) {

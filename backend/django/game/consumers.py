@@ -72,7 +72,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 
     def get_max_players_for_mode(self, game_mode):
-        if game_mode == '1vs1':
+        if game_mode == '1vs1' or game_mode == 'tournament':
             return 2
         elif game_mode == '2vs2':
             return 4
