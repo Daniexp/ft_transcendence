@@ -14,7 +14,7 @@ function updateButtons(tab) {
         button1.textContent = '1 vs IA';
         button1.onclick = () => startGame("1vsIA");
         button2.textContent = 'Tournament';
-        button2.onclick = showTournamentInput
+        button2.onclick = showTournamentInput;
     } else if (tab === 'multiplayer') {
         button1.textContent = '1 vs 1';
         button1.onclick = () => startGame("1vs1");
@@ -154,6 +154,7 @@ function handleMessage(data) {
         } else if (data.message.goal_scored) {
             handleGoal(data.message);
         } else if (data.message.game_over) {
+            winner = data.message.winner;
             handleGameOver();
         }
     } else if (typeof data.message === 'string') {
@@ -311,6 +312,8 @@ function resetGame() {
     hideShowGameSelect('.endButtons', 'hide');
     keysPressed['ArrowUp'] = false;
     keysPressed['ArrowDown'] = false;
+    keysPressed['w'] = false;
+    keysPressed['s'] = false;
     clearInterval(intervalId);
     intervalId = null;
     hideShowGameSelect('.gameSelectionButtons', 'show');
