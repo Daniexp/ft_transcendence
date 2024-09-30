@@ -273,7 +273,7 @@ function startCountdown() {
     countdownActive = true;
 
     if (!countdownElement) {
-        countdownElement = document.getElementById('countdown'); // Asegúrate de inicializar aquí también
+        countdownElement = document.getElementById('countdown'); 
     }
     
     countdownElement.style.display = 'flex';
