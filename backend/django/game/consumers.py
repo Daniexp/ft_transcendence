@@ -20,6 +20,7 @@ PLAYER_AMP = pi / 6  # Grados del punto de foco
 BOARD_X_MARGIN = 3  # Margen de los jugadores al muro por posición inicial
 UPDATE_RATE_IA = 1
 EPSILON = PLAYER_HEIGHT_Y / 2
+IA_LVL= 10
 
 class PongConsumer(AsyncWebsocketConsumer):
     users = {}
@@ -216,24 +217,49 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     def ia_needs_to_move(self, ball_position):
         player_position = self.game_states[self.group_name]['players']['IA']['position'][1]
+        
         if (ball_position > player_position and ball_position < player_position + PLAYER_HEIGHT_Y):
             return 0
         return 1
 
+    decidedBY = 0
+
+    def get_ball_point(self):
+        ball_speed = self.game_states[self.group_name]['ball']['speed']
+        ball_pos = self.game_states[self.group_name]['ball']['position']
+        
+        self.decidedBY = 0
+        if ball_speed[0] <= 0:
+            return BOARD_HEIGHT / 2
+        if ball_pos[0] >= BOARD_WIDTH / IA_LVL:
+            self.decidedBY = 1
+            return ball_pos[1] + ball_speed[1] * ((30 * ball_pos[0] / BOARD_WIDTH)) * BOARD_WIDTH / 30#((BOARD_WIDTH - ball_pos[0]) / (BOARD_WIDTH * 4 / 10) / 1000)
+        if ball_pos[1] < BOARD_HEIGHT / 3:
+            return BOARD_HEIGHT / 6
+        if ball_pos[1] > BOARD_HEIGHT * 2 / 3:
+            return BOARD_HEIGHT * 5 / 6
+        return BOARD_HEIGHT / 2
+
     async def move_ia(self, updateRate, num_players):
         tick = time.monotonic()
-
+        direction = 0
+        speedNow = 0
         ball_point = self.game_states[self.group_name]['ball']['position'][1] + BALL_RADIUS
         while len(self.active_groups[self.group_name]["users"]) == num_players:  
             player_position = self.game_states[self.group_name]['players']['IA']['position'][1]
             ia_has_to_move = self.ia_needs_to_move(ball_point)
+            
             if ia_has_to_move:
                 ia_mid = self.game_states[self.group_name]['players']['IA']['position'][1] + PLAYER_HEIGHT_Y / 2
                 direction = 1 if (ball_point - ia_mid >= 0) else -1
-                self.update_player_position('IA', 0.02 * direction)
+                self.update_player_position('IA', 0.2 * direction)
+                await asyncio.sleep(0.05)
 
-            tick = time.monotonic()
-            ball_point = self.game_states[self.group_name]['ball']['position'][1] + BALL_RADIUS if self.game_states[self.group_name]['ball']['speed'][0] > 0 else (BOARD_HEIGHT / 2)
+
+            if (time.monotonic() - tick >= 1):
+                tick = time.monotonic()
+                ball_point = self.get_ball_point()
+
             await asyncio.sleep(GAME_TICK_RATE)
                 
         return
