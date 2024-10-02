@@ -2,10 +2,17 @@ let players = [];
 let matchesQueue = [];
 let winner = "No one";
 
+function showMessage(message) {
+    const messageContainer = document.getElementById('messageContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.textContent = message;
+    messageDiv.className = 'message';
+    messageContainer.appendChild(messageDiv);
+}
+
 const handlePlayerInput = (event) => {
     const playerNameInput = document.getElementById('playerName');
     if (event.key === 'Enter') {
-        console.log("Intentando agregar jugador:", playerNameInput.value);
         addPlayer();
     }
 };
@@ -23,13 +30,12 @@ function showTournamentInput() {
     const playerNameInput = document.getElementById('playerName');
     playerNameInput.value = ""; 
 
-    
     playerNameInput.addEventListener('keydown', handlePlayerInput);
 }
 
 function startTournament() {
     if (players.length < 2) {
-        console.log("Se necesitan al menos dos jugadores para iniciar el torneo.");
+        showMessage("Se necesitan al menos dos jugadores para iniciar el torneo.");
         return;
     }
 
@@ -40,8 +46,8 @@ function startTournament() {
     const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('d-flex');
     tournamentContainer.classList.add('displayNone');
-    
-    console.log("Iniciando el torneo con jugadores:", players);
+
+    showMessage("Iniciando el torneo con jugadores: " + players.join(", "));
     setupMatches();
     playNextMatch();
 }
@@ -49,12 +55,12 @@ function startTournament() {
 function endTournament() {
     players = [];
     matchesQueue = [];
-    
+
     if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.close();
         window.gameSocket = undefined;
     }
-    
+
     if (window.secondWeb && window.secondWeb.readyState === WebSocket.OPEN) {
         window.secondWeb.close();
         window.secondWeb = undefined;
@@ -75,7 +81,7 @@ function endTournament() {
     tournamentContainer.classList.add('displayNone');
 
     hideShowGameSelect(".gameSelectionButtons", "show");
-    console.log("Finalizando torneo...");
+    showMessage("Finalizando torneo...");
 }
 
 function setupMatches() {
@@ -87,12 +93,12 @@ function setupMatches() {
             matchesQueue.push([players[i], null]);
         }
     }
-    console.log("Partidos a jugar:", matchesQueue);
+    showMessage("Partidos a jugar: " + matchesQueue.map(match => match.join(" vs ")).join(", "));
 }
 
 async function playNextMatch() {
     if (matchesQueue.length === 0) {
-        console.log("No hay más partidos por jugar.");
+        showMessage("The winner is: " + winner);
         return;
     }
 
@@ -100,7 +106,7 @@ async function playNextMatch() {
     let player1 = match[0];
     let player2 = match[1];
 
-    console.log(`Iniciando partida entre ${player1} y ${player2}.`);
+    showMessage(`Iniciando partida entre ${player1} y ${player2}.`);
 
     try {
         startGame("tournament"); 
@@ -110,7 +116,11 @@ async function playNextMatch() {
             players = players.filter(player => player !== player2); 
         }
         if (winner !== 'No one') {
-            console.log(`${winner} gana esta ronda!`);
+            if (winner == "left_player")
+                winner = player1;
+            else
+                winner = player2
+            showMessage(`${winner} gana esta ronda!`);
             players.push(winner);
             playNextMatch();
         }
@@ -124,7 +134,7 @@ async function waitForGameToEnd() {
         const checkGameRunning = setInterval(() => {
             if (!gameRunning) { 
                 clearInterval(checkGameRunning);
-                console.log("El juego ha terminado.");
+                showMessage("El juego ha terminado.");
                 resolve();
             }
         }, 100);
@@ -139,7 +149,7 @@ function updatePlayerList() {
 
     players.forEach((player) => {
         const playerDiv = document.createElement('div');
-        playerDiv.textContent = player;
+        playerDiv.textContent = player + ".";
         playerDiv.className = 'player-name';
         playerListDiv.appendChild(playerDiv);
     });
@@ -150,16 +160,16 @@ function addPlayer() {
     const playerName = playerNameInput.value.trim();
 
     if (playerName === "") {
-        console.log("No se puede agregar un nombre vacío.");
+        showMessage("No se puede agregar un nombre vacío.");
         return;
     }
 
-    if (players.includes(playerName + ".")) {
-        console.log("El jugador ya está registrado.");
+    if (players.includes(playerName)) {
+        showMessage("El jugador ya está registrado.");
         return;
     }
 
-    players.push(playerName + ".");
+    players.push(playerName);
     playerNameInput.value = "";
     updatePlayerList();
 }

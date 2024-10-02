@@ -211,14 +211,17 @@ function updateBallPosition(ball) {
 }
 
 function handleGoal(data) {
-    startCountdown();
+    let player;
+
     if (data.scored_by === 'left_player') {
         playerRoundGoals++;
-        updateScoreCircles(playerRoundGoals, true);
+        player = true;
     } else {
         opponentRoundGoals++;
-        updateScoreCircles(opponentRoundGoals, false);
+        player = false;
     }
+    startCountdown();
+    updateScoreCircles(playerRoundGoals, player);
     document.getElementById('score').textContent = `${playerRoundsWon} - ${opponentRoundsWon}`;
 }
 
