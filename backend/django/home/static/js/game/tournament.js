@@ -18,6 +18,13 @@ const handlePlayerInput = (event) => {
 };
 
 function showTournamentInput() {
+    players = [];
+    matchesQueue = [];
+
+    hideShowGameSelect('.endButtons', 'hide');
+    document.getElementById("gameScoreBalls").classList.add('displayNone');
+    document.getElementById("gameScoreBalls").classList.remove('flexStyle');
+    hideShowGameSelect('.gamePong', 'hide');
     hideShowGameSelect(".gameSelectionButtons", "hide");
     const pongButton = document.getElementById('PongButton');
 
@@ -53,8 +60,6 @@ function startTournament() {
 }
 
 function endTournament() {
-    players = [];
-    matchesQueue = [];
 
     if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.close();
