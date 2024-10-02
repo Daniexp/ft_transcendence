@@ -20,63 +20,64 @@ function sendPlayerMessage(uniqueId, value, sock) {
     sendMessage(sock, JSON.stringify(data));
 }
 
-async function handleKeysOnePlayer(event) {
-    if (event.key === 'ArrowUp' || event.keyCode === 38) {
-        keysPressed['ArrowUp'] = true;
+async function handleKeyStrokes(event) {
+    if (event.key === 'W' || event.keyCode === 87) {
+        keysPressed['W'] = true;
         event.preventDefault();
-    } else if (event.key === 'ArrowDown' || event.keyCode === 40) {
-        keysPressed['ArrowDown'] = true;
+    } else if (event.key === 'S' || event.keyCode === 83) {
+        keysPressed['S'] = true;
         event.preventDefault();
     }
     if (modo === 'tournament') {
-        if (event.key === 'w' || event.keyCode === 87) { 
-            keysPressed['W'] = true;
+        if (event.key === 'ArrowUp' || event.keyCode === 38) { 
+            keysPressed['ArrowUp'] = true;
             event.preventDefault();
-        } else if (event.key === 's' || event.keyCode === 83) {
-            keysPressed['S'] = true;
+        } else if (event.key === 'ArrowDown' || event.keyCode === 40) {
+            keysPressed['ArrowDown'] = true;
             event.preventDefault();
         }
     }
 
     if (intervalId === null) {
         intervalId = setInterval(() => {
-            if (keysPressed['ArrowUp']) {
+            if (keysPressed['W']) {
                 sendPlayerMessage(uniqueID, "ArrowUp", window.gameSocket);
-            } else if (keysPressed['ArrowDown']) {
+            } else if (keysPressed['S']) {
                 sendPlayerMessage(uniqueID, "ArrowDown", window.gameSocket);
             }
         }, 10);
     }
     if (secondIntervalId === null) {
         secondIntervalId = setInterval(() => {
-            if (keysPressed['W']) {
+            if (keysPressed['ArrowUp']) {
                 sendPlayerMessage('local', "ArrowUp", window.secondWeb);
-            } else if (keysPressed['S']) {
+            } else if (keysPressed['ArrowDown']) {
                 sendPlayerMessage('local', "ArrowDown", window.secondWeb);
             }
         }, 10);
     }
 }
 
-async function handleKeysUpOnePlayer(event) {
+async function handleKeysStop(event) {
+    if (event.key === 'W' || event.keyCode === 87) {
+        keysPressed['W'] = false;
+    } else if (event.key === 'S' || event.keyCode === 83) {
+        keysPressed['S'] = false;
+    }
     if (event.key === 'ArrowUp' || event.keyCode === 38) {
         keysPressed['ArrowUp'] = false;
     } else if (event.key === 'ArrowDown' || event.keyCode === 40) {
         keysPressed['ArrowDown'] = false;
     }
-    if (event.key === 'w' || event.keyCode === 87) {
-        keysPressed['W'] = false;
-    } else if (event.key === 's' || event.keyCode === 83) {
-        keysPressed['S'] = false;
-    }
 
-    if (!keysPressed['ArrowUp'] && !keysPressed['ArrowDown'] && !keysPressed['W'] && !keysPressed['S']) {
+    if (!keysPressed['W'] && !keysPressed['S'] && !keysPressed['ArrowUp'] && !keysPressed['ArrowDown']) {
         clearInterval(intervalId);
         intervalId = null;
         clearInterval(secondIntervalId);
         secondIntervalId = null;
     }
 }
+
 
 window.addEventListener("blur", () => {
     keysPressed = {};

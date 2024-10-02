@@ -1,0 +1,4 @@
+Test de todo responsive
+Test de todo multiBrowser
+Todos los mensajes del torneo
+Ready? boton previo a los matches

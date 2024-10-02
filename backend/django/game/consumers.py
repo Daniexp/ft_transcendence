@@ -208,6 +208,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         return [(position[0] / BOARD_WIDTH) * 100, (position[1] / BOARD_HEIGHT) * 100]
 
     def get_normalized_game_state(self):
+        if self.group_name not in self.game_states:
+            return None
+
         state = self.game_states[self.group_name]
         return {
             'players': {player_id: {'position': self.normalize_coordinates(data['position'])} for player_id, data in state['players'].items()},

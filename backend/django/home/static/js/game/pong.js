@@ -94,11 +94,9 @@ async function waitForGameStart(mode) {
     gameContainer.appendChild(waitingMessage);
 
     if (gameContainer) {
-        gameContainer.addEventListener('keydown', handleKeysOnePlayer);
-        gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
+        gameContainer.addEventListener('keydown', handleKeyStrokes);
+        gameContainer.addEventListener('keyup', handleKeysStop);
         if (mode == "tournament") {
-            gameContainer.addEventListener('w', handleKeysOnePlayer);
-            gameContainer.addEventListener('s', handleKeysUpOnePlayer);
             window.secondWeb = new WebSocket(`wss://${window.location.host}/ws/pong/${"local"}/${mode}/`);
             gameRunning = 1;
         }
@@ -241,8 +239,8 @@ function handleGameOver() {
         window.gameSocket.close();
         window.gameSocket = undefined;
     }
-    document.getElementById('gameContainer').removeEventListener('keydown', handleKeysOnePlayer);
-    document.getElementById('gameContainer').removeEventListener('keyup', handleKeysUpOnePlayer);
+    document.getElementById('gameContainer').removeEventListener('keydown', handleKeyStrokes);
+    document.getElementById('gameContainer').removeEventListener('keyup', handleKeysStop);
     exitOverwrite = 1;
     gameRunning = 0;
     if (countdownTimeout) clearTimeout(countdownTimeout);
@@ -253,6 +251,7 @@ function handleGameOver() {
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
     document.getElementById("playAgain").removeEventListener("click", handleClick);
     document.getElementById("playAgain").addEventListener("click", handleClick);
+
     if (countdownTimeoutId) 
         clearTimeout(countdownTimeoutId); 
     countdownActive = false;
