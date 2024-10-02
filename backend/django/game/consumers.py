@@ -20,7 +20,7 @@ PLAYER_AMP = pi / 6  # Grados del punto de foco
 BOARD_X_MARGIN = 3  # Margen de los jugadores al muro por posición inicial
 UPDATE_RATE_IA = 1
 EPSILON = PLAYER_HEIGHT_Y / 2
-IA_LVL= 10
+IA_LEVEL= 1
 
 class PongConsumer(AsyncWebsocketConsumer):
     users = {}
@@ -224,22 +224,34 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     decidedBY = 0
 
-    def get_ball_point(self):
-        ball_speed = self.game_states[self.group_name]['ball']['speed']
-        ball_pos = self.game_states[self.group_name]['ball']['position']
-        
-        self.decidedBY = 0
-        if ball_speed[0] <= 0:
-            return BOARD_HEIGHT / 2
-        if ball_pos[0] >= BOARD_WIDTH / IA_LVL:
-            self.decidedBY = 1
-            return ball_pos[1] + ball_speed[1] * ((30 * ball_pos[0] / BOARD_WIDTH)) * BOARD_WIDTH / 30#((BOARD_WIDTH - ball_pos[0]) / (BOARD_WIDTH * 4 / 10) / 1000)
-        if ball_pos[1] < BOARD_HEIGHT / 3:
-            return BOARD_HEIGHT / 6
-        if ball_pos[1] > BOARD_HEIGHT * 2 / 3:
-            return BOARD_HEIGHT * 5 / 6
-        return BOARD_HEIGHT / 2
+    def get_jump(self, ball_speed, ball_pos, jumps):
+        speed_x, speed_y = ball_speed
+        pos_x, pos_y = ball_pos
 
+        jumps -= 1
+        collision_y = ball_pos[1] + ball_speed[1] * (BOARD_WIDTH - ball_pos[0]) / ball_speed[0]
+        if collision_y > 0 and collision_y < BOARD_HEIGHT:
+            return collision_y
+        if collision_y <= 0:
+            cte = 0
+        elif collision_y >= BOARD_HEIGHT:
+            cte = BOARD_HEIGHT
+        collision_x = ball_pos[0] + ball_speed[0] * (cte - ball_pos[1]) / ball_speed[1]
+
+        if jumps == 0:
+            return collision_y
+        speed_y *= -1
+        pos_x = collision_x
+        pos_y = collision_y
+        return self.get_jump([speed_x, speed_y], [pos_x, pos_y], jumps)
+
+        
+    def normalize_vector(self, v):
+        mod = sqrt(pow(v[0], 2) + pow(v[1], 2))
+        if (mod == 0):
+            return [0, 0]
+        return [v[0] / mod, v[1] / mod]
+    
     async def move_ia(self, updateRate, num_players):
         tick = time.monotonic()
         direction = 0
@@ -253,12 +265,26 @@ class PongConsumer(AsyncWebsocketConsumer):
                 ia_mid = self.game_states[self.group_name]['players']['IA']['position'][1] + PLAYER_HEIGHT_Y / 2
                 direction = 1 if (ball_point - ia_mid >= 0) else -1
                 self.update_player_position('IA', 0.2 * direction)
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(0.01)
 
 
             if (time.monotonic() - tick >= 1):
                 tick = time.monotonic()
-                ball_point = self.get_ball_point()
+                ball_speed = self.game_states[self.group_name]['ball']['speed']
+                ball_pos = self.game_states[self.group_name]['ball']['position']
+                ball_speed_u = self.normalize_vector(ball_speed)
+                print("SPEED")
+                print(ball_speed_u)
+                if ball_speed[0] > 0:
+                    ball_point = self.get_jump(ball_speed_u, ball_pos, IA_LEVEL)
+                    if ball_point == 100:
+                        ball_point = BOARD_HEIGHT * 5 / 6
+                    elif ball_point == 0:
+                        ball_point = BOARD_HEIGHT / 6
+                else:
+                    ball_point = BOARD_HEIGHT / 2
+                print("PREDICT")
+                print(ball_point)
 
             await asyncio.sleep(GAME_TICK_RATE)
                 
