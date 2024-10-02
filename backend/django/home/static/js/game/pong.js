@@ -212,16 +212,19 @@ function updateBallPosition(ball) {
 
 function handleGoal(data) {
     let player;
+    let goals;
 
     if (data.scored_by === 'left_player') {
         playerRoundGoals++;
+        goals = playerRoundGoals
         player = true;
     } else {
         opponentRoundGoals++;
+        goals = opponentRoundGoals
         player = false;
     }
     startCountdown();
-    updateScoreCircles(playerRoundGoals, player);
+    updateScoreCircles(goals, player);
     document.getElementById('score').textContent = `${playerRoundsWon} - ${opponentRoundsWon}`;
 }
 
@@ -230,7 +233,10 @@ function handleClick() {
         window.gameSocket.close();
         window.gameSocket = undefined;
     }
-    startGame(modo);
+    if(modo == 'tournament')
+        showTournamentInput()
+    else
+        startGame(modo);
 }
 
 let countdownActive = false; 
@@ -285,20 +291,19 @@ function startCountdown() {
         if (countdownValue > 0) {
             countdownElement.textContent = countdownValue;
             countdownValue--;
-            countdownTimeoutId = setTimeout(updateCountdown, 1000);
+            countdownTimeoutId = setTimeout(updateCountdown, 900);
         } else {
             countdownElement.textContent = 'Pong!';
 
             countdownTimeoutId = setTimeout(() => {
                 countdownElement.style.display = 'none';
-                if (opponentRoundGoals + playerRoundGoals >= 3 || opponentRoundGoals === 2 || playerRoundGoals === 2) {
+                if (opponentRoundGoals + playerRoundGoals == 3 || opponentRoundGoals == 2 || playerRoundGoals == 2) {
                     resetRoundGoals();
                     resetRoundCircles();
                 }
-
                 gameRunning = 1; 
                 countdownActive = false;
-            }, 1000);
+            }, 400);
         }
 
         if (!window.gameSocket || window.gameSocket.readyState !== WebSocket.OPEN) {
