@@ -14,7 +14,7 @@ MAX_BALL_SPEED = 2.0  # Velocidad máxima de la bola
 BALL_SPEED_RANGE = (0.1, 0.2)  # Rango de valores para determinar las velocidades iniciales
 BALL_RADIUS = 1.15  # Radio de la pelota en X
 BOARD_WIDTH, BOARD_HEIGHT = 300, 100  # Dimensiones del tablero
-PLAYER_WIDTH_X = 1  # Ancho del jugador en X
+PLAYER_WIDTH = 1  # Ancho del jugador en X
 PLAYER_HEIGHT = 15  # Altura del jugador en Y
 PLAYER_AMP = pi / 6  # Grados del punto de foco
 BOARD_X_MARGIN = 3  # Margen de los jugadores al muro por posición inicial
@@ -193,7 +193,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         players = self.active_groups[group_name]["users"]
         num_players = len(players)
 
-        x_positions = [BOARD_X_MARGIN, BOARD_WIDTH - PLAYER_WIDTH_X * 3 - BOARD_X_MARGIN] if num_players <= 2 else [BOARD_X_MARGIN, BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.5, BOARD_WIDTH - PLAYER_WIDTH_X * 3 - (BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.5), BOARD_WIDTH - PLAYER_WIDTH_X * 3 - BOARD_X_MARGIN] 
+        x_positions = [BOARD_X_MARGIN, BOARD_WIDTH - PLAYER_WIDTH * 3 - BOARD_X_MARGIN] if num_players <= 2 else [BOARD_X_MARGIN, BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.5, BOARD_WIDTH - PLAYER_WIDTH * 3 - (BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.5), BOARD_WIDTH - PLAYER_WIDTH * 3 - BOARD_X_MARGIN] 
 
         print(x_positions)
 
@@ -266,8 +266,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             ia_mid = player_position + PLAYER_HEIGHT / 2
             
             if abs(ball_point - ia_mid) >= 0.2 *  PLAYER_MOVE_INCREMENT:
-                direction = 1 if (ball_point - ia_mid >= 0) else -1
-                self.update_player_position('IA', 0.2 * direction)
+                direction = "ArrowDown" if (ball_point - ia_mid >= 0) else "ArrowUp"
+                self.update_player_position('IA', direction)
                 await asyncio.sleep(0.01)
 
 
@@ -411,7 +411,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             if self.check_collision(ball_position, player_position):
                 ball_radius_x = BALL_RADIUS * 3
                 ball_radius_y = BALL_RADIUS * 3
-                player_width = PLAYER_WIDTH_X * 3
+                player_width = PLAYER_WIDTH * 3
                 player_height = PLAYER_HEIGHT
 
                 if ball_position[0] + ball_radius_x * 2 >= player_position[0] and ball_speed[0] > 0:
@@ -432,7 +432,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         ball_x, ball_y = ball_position
         ball_radius_x = BALL_RADIUS * 3
         player_x, player_y = player_position
-        player_width = PLAYER_WIDTH_X * 3
+        player_width = PLAYER_WIDTH * 3
 
         return (player_x <= ball_x + ball_radius_x * 2 <= player_x + player_width or
                 player_x <= ball_x <= player_x + player_width)
