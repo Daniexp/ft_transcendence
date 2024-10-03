@@ -61,6 +61,10 @@
     justify-content: center;
 }
 
+.flexStyle{
+    display: flex;
+}
+
 .displayNone{
     display: none;
 }
@@ -96,14 +100,27 @@
     background-color: white; 
     border-radius: 50%;
     border: 0.3vw solid black;
+    position: relative;
 }
 
 .roundCircle.won {
-    background-color: green;
+    background-color: black;
 }
 
 .roundCircle.lost {
-    background-color: red;
+    background-color: white;
+}
+
+.roundCircle.lost::after {
+    content: ""; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 0.3vw; 
+    background-color: black;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    z-index: 1;
 }
 
 .endButtons {
@@ -112,4 +129,61 @@
     text-align: center;
     width: 100%;
     padding: 10px;
+}
+
+#tournamentContainer {
+    border: 2px solid black;
+    border-radius: 7px;
+    padding: 10px;
+    background-color: white;
+    width: 80%;
+    height: 80vh;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+  
+}
+
+#playerName {
+    width: 80%; 
+    height: 10vh; 
+    font-size: 5em; 
+    text-align: left; 
+    margin-bottom: 20px; 
+    border: none; 
+    box-shadow: none; 
+}
+
+#playerList {
+    width: 100%; 
+    margin-top: 10px; 
+    max-height: calc(70vh - 150px); /* Ajusta para el espacio que ocupa el botón y el input */
+    overflow-y: auto; 
+    padding: 10px;
+}
+
+.player-name {
+    font-size: 5em; 
+    margin: 5px;
+}
+
+.player-name.small {
+    font-size: 3em; 
+}
+
+#readyButton {
+    width: 100%; 
+    max-width: 1000px; 
+    margin-top: auto; /* Empuja el botón a la parte inferior */
+    background-color: white; /* Fondo blanco */
+    color: black; /* Texto negro */
+    border: 2px solid black; /* Borde negro */
+    transition: background-color 0.3s; /* Transición suave */
+}
+
+#readyButton:hover {
+    background-color: lightgray;
+    color: black;
+    border-color: lightgray;
+    transition: background-color 0.3s, border-color 0.3s;
 }

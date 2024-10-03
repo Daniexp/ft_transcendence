@@ -5,12 +5,12 @@ import random
 from math import cos, sin, pi, copysign, sqrt
 
 # Constantes del juego con relación 1:3 entre X e Y
-GAME_TICK_RATE = 0.0005  # Velocidad de actualización del juego en segundos
+GAME_TICK_RATE = 0.001  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
 BALL_ACCELERATION = 1.15  # Aceleración de la bola
 BALL_DECELERATION = 0.995  # Desaceleración mínima al rebotaball_speedr
 MAX_BALL_SPEED = 2.0  # Velocidad máxima de la bola
-BALL_SPEED_RANGE = (0.15, 0.2)  # Rango de valores para determinar las velocidades iniciales
+BALL_SPEED_RANGE = (0.1, 0.4)  # Rango de valores para determinar las velocidades iniciales
 BALL_RADIUS = 1.15  # Radio de la pelota en X
 BOARD_WIDTH, BOARD_HEIGHT = 300, 100  # Dimensiones del tablero
 PLAYER_WIDTH_X = 1  # Ancho del jugador en X
@@ -23,31 +23,42 @@ class PongConsumer(AsyncWebsocketConsumer):
     group_id_counter = 0
     active_groups = {}
     game_states = {}
+    ia = 0
 
     async def connect(self):
         self.user_id = self.scope['url_route']['kwargs']['user_id']
+        self.game_mode = self.scope['url_route']['kwargs']['game_mode']
         await self.accept()
 
         existing_group = await self.get_user_group(self.user_id)
         if existing_group:
-            await self.disconnect(1)
+            await self.close()
             return
 
-        self.group_name = f'pongGame{PongConsumer.group_id_counter}'
-        await self.add_user(self.user_id, self.channel_name)
+        max_players = self.get_max_players_for_mode(self.game_mode)
+        self.group_name = await self.find_or_create_group(max_players, self.game_mode)
 
-        self.active_groups.setdefault(self.group_name, []).append(self.user_id)
-        
+        if self.group_name not in self.active_groups:
+            self.active_groups[self.group_name] = {"users": []}
+
+        self.active_groups[self.group_name]["users"].append(self.user_id)
+
+        await self.add_user(self.user_id, self.channel_name)
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        
+
         await self.send(text_data=json.dumps({
-            'message': f'Connected to group: {self.group_name} \nUser ID: {self.user_id}'
+            'message': f'Connected to group: {self.group_name} \nUser ID: {self.user_id} \nGame Mode: {self.game_mode}'
         }))
-        
-        if len(self.active_groups[self.group_name]) == 2:
+
+        if len(self.active_groups[self.group_name]["users"]) == max_players:
             PongConsumer.group_id_counter += 1
+            if max_players == 1:
+                await self.add_user("IA", self.channel_name)
+                self.active_groups[self.group_name]["users"].append("IA")
+                self.ia = 1
             self.init_game_state(self.group_name)
-            asyncio.create_task(self.game_loop(2))
+            asyncio.create_task(self.game_loop(max_players + self.ia))
+
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -58,15 +69,46 @@ class PongConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-    async def disconnect(self, close_code):
+
+
+    def get_max_players_for_mode(self, game_mode):
+        if game_mode == '1vs1' or game_mode == 'tournament':
+            return 2
+        elif game_mode == '2vs2':
+            return 4
+        return 1 
+
+    async def find_or_create_group(self, max_players, mode_curr):
+        for group_name, group_data in self.active_groups.items():
+            users = group_data["users"]
+            mode = group_data["mode"]
+            if len(users) < max_players and mode == mode_curr:
+                return group_name
+
+        new_group_name = f'{mode_curr}_pongGame{PongConsumer.group_id_counter}'
+        self.active_groups[new_group_name] = {"users": [], "mode": mode_curr, "gameRunning": 0}
+        return new_group_name
+
+
+    async def disconnect(self, close_code):    
         if hasattr(self, 'group_name'):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
             await self.remove_user(self.user_id)
 
             if self.group_name in self.active_groups:
-                self.active_groups[self.group_name].remove(self.user_id)
-                if not self.active_groups[self.group_name]:
+                if self.user_id in self.active_groups[self.group_name]["users"]:
+                    self.active_groups[self.group_name]["users"].remove(self.user_id)
+                
+                if "IA" in self.active_groups[self.group_name]:
+                    self.active_groups[self.group_name]["users"].remove("IA")
+                
+                if not self.active_groups[self.group_name]["users"]:
+                    self.active_groups[self.group_name]['gameRunning'] = 0
+                    if self.group_name in self.game_states:
+                        del self.game_states[self.group_name]
+                    
                     del self.active_groups[self.group_name]
+                    
                     await self.channel_layer.group_send(
                         self.group_name,
                         {
@@ -74,15 +116,19 @@ class PongConsumer(AsyncWebsocketConsumer):
                             'message': "Group has been emptied and removed"
                         }
                     )
-
-            await self.channel_layer.group_send(
-                self.group_name,
-                {
-                    'type': 'game_message',
-                    'message': "User disconnected"
-                }
-            )
+                else:
+                    if self.active_groups[self.group_name]['gameRunning']:
+                        print("ENTRO Y GAME:", self.active_groups[self.group_name]['gameRunning'])
+                        await self.channel_layer.group_send(
+                            self.group_name,
+                            {
+                                'type': 'game_message',
+                                'message': "User disconnected"
+                            }
+                        )
+        noMoreGoal = 1
         await self.close()
+
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -90,18 +136,32 @@ class PongConsumer(AsyncWebsocketConsumer):
         if isinstance(message, dict) and 'player' in message:
             player_id = list(message['player'].keys())[0]
             move_value = message['player'][player_id]
-            self.update_player_position(player_id, move_value)
-            await self.channel_layer.group_send(
-                self.group_name,
-                {
-                    'type': 'game_message',
-                    'message': self.get_normalized_game_state()
-                }
-            )
+            
+            if self.group_name in self.game_states:
+                self.update_player_position(player_id, move_value)
+                await self.channel_layer.group_send(
+                    self.group_name,
+                    {
+                        'type': 'game_message',
+                        'message': self.get_normalized_game_state()
+                    }
+                )
+            else:
+                await self.send(text_data=json.dumps({
+                    'error': f'Game state for group {self.group_name} not initialized.'
+                }))
+
 
     async def game_message(self, event):
         message = event['message']
-        await self.send(text_data=json.dumps({'message': message}))
+        try:
+            await self.send(text_data=json.dumps({
+                'message': message
+            }))
+        except Exception as e:
+            print(f"Error sending message: {e}")
+
+
 
     async def add_user(self, user_id, channel_name):
         self.users[user_id] = channel_name 
@@ -110,7 +170,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.users.pop(user_id, None)
 
     async def get_user_group(self, user_id):
-        return next((group_name for group_name, users in self.active_groups.items() if user_id in users), None)
+        for group_name, group_data in self.active_groups.items():
+            if user_id in group_data.get("users", []):
+                return group_name
+        return None
+
 
     def random_speed(self):
         angle_ranges = [(0, pi / 4), (3 * pi / 4, 5 * pi / 4), (7 * pi / 4, 2 * pi)]
@@ -120,25 +184,33 @@ class PongConsumer(AsyncWebsocketConsumer):
         return [random.choice([-1, 1]) * magnitude * cos(angle), random.choice([-1, 1]) * magnitude * sin(angle)]
 
     def init_game_state(self, group_name):
-        players = self.active_groups.get(group_name, [])
+        players = self.active_groups[group_name]["users"]
         num_players = len(players)
 
-        x_positions = [BOARD_X_MARGIN, BOARD_WIDTH - PLAYER_WIDTH_X * 3 - BOARD_X_MARGIN] if num_players == 2 else []
+        x_positions = [BOARD_X_MARGIN, BOARD_WIDTH - PLAYER_WIDTH_X * 3 - BOARD_X_MARGIN] if num_players <= 2 else [BOARD_X_MARGIN, BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.5, BOARD_WIDTH - PLAYER_WIDTH_X * 3 - (BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.5), BOARD_WIDTH - PLAYER_WIDTH_X * 3 - BOARD_X_MARGIN] 
+
+        print(x_positions)
 
         self.game_states[group_name] = {
             'players': {user_id: {'position': [x_positions[i], BOARD_HEIGHT // 2 - PLAYER_HEIGHT_Y // 2]} for i, user_id in enumerate(players)},
-            'scores': {player: 0 for player in players},
-            'round_wins': {player: 0 for player in players},
+            'scores': {'right_player': 0, 'left_player': 0},
+            'round_wins': {'right_player': 0, 'left_player': 0},
             'ball': {
                 'position': [BOARD_WIDTH // 2, BOARD_HEIGHT // 2],
                 'speed': self.random_speed()
             }
         }
+        self.active_groups[group_name]['gameRunning'] = 1
+        print("PASO: ", self.active_groups[group_name]['gameRunning'])
+
 
     def normalize_coordinates(self, position):
         return [(position[0] / BOARD_WIDTH) * 100, (position[1] / BOARD_HEIGHT) * 100]
 
     def get_normalized_game_state(self):
+        if self.group_name not in self.game_states:
+            return None
+
         state = self.game_states[self.group_name]
         return {
             'players': {player_id: {'position': self.normalize_coordinates(data['position'])} for player_id, data in state['players'].items()},
@@ -156,11 +228,16 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.wait_before_next_round(self.group_name)
             self.game_states[self.group_name]['ball']['speed'] = self.random_speed()
 
-            while len(self.active_groups[self.group_name]) == num_players:
+            while len(self.active_groups[self.group_name]["users"]) == num_players:
                 self.update_game_state(self.group_name)
-                
+                # AQUI IA;
+                # if self.ia:
+                    #
+
+
                 await self.channel_layer.group_send(self.group_name, {'type': 'game_message', 'message': self.get_normalized_game_state()})
                 await asyncio.sleep(GAME_TICK_RATE)
+            self.disconnect(0)
         except Exception:
             await self.disconnect(0)
 
@@ -199,11 +276,9 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def handle_goal(self, group_name, scored_by):
         self.noMoreGoal = 1
         players = list(self.game_states[group_name]['players'].keys())
-        if scored_by == 'right_player':
-            self.game_states[group_name]['scores'][players[0]] += 1
-        else:
-            self.game_states[group_name]['scores'][players[1]] += 1
-
+        
+        self.game_states[group_name]['scores'][scored_by] += 1
+        
         await self.channel_layer.group_send(group_name, {
             'type': 'game_message',
             'message': {
@@ -216,7 +291,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         for player, score in self.game_states[group_name]['scores'].items():
             if score >= 2:
                 self.game_states[group_name]['round_wins'][player] += 1
-                self.game_states[group_name]['scores'] = {p: 0 for p in players}
+                self.game_states[group_name]['scores'] = {'right_player': 0, 'left_player': 0}
 
                 if self.game_states[group_name]['round_wins'][player] >= 3:
                     self.game_states[group_name]['game_over'] = True
@@ -229,6 +304,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                             'round_wins': self.game_states[group_name]['round_wins']
                         }
                     })
+                    self.gameRunning = 0
+                    self.disconnect(0)
                     return
 
         await self.wait_before_next_round(group_name)
@@ -242,11 +319,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(group_name, {'type': 'game_message', 'message': self.get_normalized_game_state()})
         
         await asyncio.sleep(3)
-
-        self.game_states[group_name]['ball'] = {
-            'position': [BOARD_WIDTH // 2, BOARD_HEIGHT // 2],
-            'speed': self.random_speed()
-        }
+        if group_name in self.game_states:
+            self.game_states[group_name]['ball'] = {
+                'position': [BOARD_WIDTH // 2, BOARD_HEIGHT // 2],
+                'speed': self.random_speed()
+            }
 
         await self.channel_layer.group_send(group_name, {'type': 'game_message', 'message': self.get_normalized_game_state()})
 
@@ -257,7 +334,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         ball_speed = self.game_states[self.group_name]['ball']['speed']
         player_position = self.game_states[self.group_name]['players'][player_id]['position']
         if player_id in self.game_states[self.group_name]['players'] and not self.check_collision(ball_position, player_position):
-            new_position_y = max(0, min(player_position[1] + float(move_value) * PLAYER_MOVE_INCREMENT, BOARD_HEIGHT - PLAYER_HEIGHT_Y))
+            finalMoveValue = 0.20
+            if move_value == "ArrowUp":
+                finalMoveValue *= -1
+            new_position_y = max(0, min(player_position[1] + finalMoveValue * PLAYER_MOVE_INCREMENT, BOARD_HEIGHT - PLAYER_HEIGHT_Y))
             self.game_states[self.group_name]['players'][player_id]['position'][1] = new_position_y
 
             if self.check_collision(ball_position, player_position):

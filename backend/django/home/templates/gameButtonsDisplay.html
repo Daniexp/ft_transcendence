@@ -16,12 +16,34 @@
     <div id="gameContainer" class="gamePong" style="display: none;" tabindex="0"></div>
     <div id="countdown" class="gamePong"></div>
     <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap;">
-        <button class="btn btn-primary btn-custom endButtons" style="display: none; width: 20vw; height: 5vh; font-size: 1vh;" onclick="startGame('1vs1')">Play again.</button>
+        <button class="btn btn-primary btn-custom endButtons" style="display: none; width: 20vw; height: 5vh; font-size: 1vh;" id="playAgain">Play again.</button>
         <button class="btn btn-primary btn-custom endButtons" style="display: none; width: 20vw; height: 5vh; font-size: 1vh;" onclick="gameOver()">Home.</button>
     </div>
 </div>
 
-<div class="container gameContainerWrap">
-    <button class="btn btn-primary btn-custom gameSelectionButtons">1 vs IA</button>
-    <button class="btn btn-primary btn-custom gameSelectionButtons" onclick="startGame('1vs1')">1 vs 1</button>
+<div class="container gameContainerWrap gameSelectionButtons">
+    <nav class="navbar navbar-light custom-navbar">
+        <div class="container-fluid">
+            <div class="navbar-buttons">
+                <a class="btn custom-nav-btn" href="#" id="initClick" onclick="updateButtons('local')">Local</a>
+                <a class="btn custom-nav-btn" href="#" onclick="updateButtons('multiplayer')">Multiplayer</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="button-row">
+        <button class="btn btn-custom" id="butt1">1 vs IA</button>
+        <button class="btn btn-custom" id="butt2">Tournament</button>
+    </div>
 </div>
+
+<div id="tournamentContainer" class="displayNone container-fluid flex-column align-items-center">
+    <div class="input-group mb-3">
+        <input type="text" id="playerName" class="form-control" placeholder="Select player name." aria-label="Nombre del jugador"/>
+    </div>
+    <div id="playerList" class="d-flex flex-column align-items-start">
+    </div>
+    <button id="readyButton" class="btn btn-primary" onclick="startTournament()">Ready to start?</button>
+</div>
+
+<div id="messageContainer"></div>
