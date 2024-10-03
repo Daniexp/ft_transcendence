@@ -1,27 +1,34 @@
-.navbar {
-    width: 100%;
-    background-color: #ffffff;
-    border-bottom: 2px solid black;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-}
-
-.navbar-brand {
+.navbar .navbar-brand {
     font-size: 2rem;
     font-weight: bold;
     color: black;
-    flex-grow: 1; /* Permite que el título ocupe espacio uniformemente */
-    text-align: center; /* Centra el título */
+    text-align: center;
+    margin-left: 25vw;
 }
 
-/* Estilo para el menú desplegable de perfil */
-.navbar .navbar-nav .nav-item .nav-link img {
-    width: 3.5rem;
-    height: 3.5rem;
+.navbar #pictureButton {
+    display: inline-block;
+    padding: 0;
+    margin-right: 25vw;
+}
+
+.navbar #pictureButton img {
+    width: 5.5rem;
+    height: 5.5rem;
     object-fit: cover;
-    border-radius: 90%;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    display: block;
+}
+
+
+.dropdown-menu {
+    width: auto;      /* Ajusta el ancho al contenido */
+    height: auto;     /* Ajusta la altura al contenido */
+    padding: 0;       /* Elimina cualquier padding adicional en el dropdown */
+    min-width: auto;  /* Evita un ancho mínimo predefinido */
+    min-height: auto; 
+    margin-right: 25vw;
 }
 
 /* Separador debajo de la barra de navegación */
