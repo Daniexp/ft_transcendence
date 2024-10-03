@@ -11,14 +11,14 @@ function updateButtons(tab) {
     const button2 = document.getElementById('butt2');
 
     if (tab === 'local') {
-        button1.textContent = '1 vs IA';
+        button1.textContent = '1 vs IA.';
         button1.onclick = () => startGame("1vsIA");
-        button2.textContent = 'Tournament';
+        button2.textContent = 'Tournament.';
         button2.onclick = showTournamentInput;
     } else if (tab === 'multiplayer') {
-        button1.textContent = '1 vs 1';
+        button1.textContent = '1 vs 1.';
         button1.onclick = () => startGame("1vs1");
-        button2.textContent = '2 vs 2';
+        button2.textContent = '2 vs 2.';
         button2.onclick = () => startGame("2vs2");
     }
 }

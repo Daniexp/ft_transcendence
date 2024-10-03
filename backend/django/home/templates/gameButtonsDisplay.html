@@ -15,6 +15,9 @@
     </div>
     <div id="gameContainer" class="gamePong" style="display: none;" tabindex="0"></div>
     <div id="countdown" class="gamePong"></div>
+    <div id="distion" class="displayNone">
+        <button id="readyButtonGame" class="readyButton distion btn btn-primary" onclick="startTournamentGame()">Ready to play?</button> 
+    </div>
     <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap;">
         <button class="btn btn-primary btn-custom endButtons" style="display: none; width: 20vw; height: 5vh; font-size: 1vh;" id="playAgain">Play again.</button>
         <button class="btn btn-primary btn-custom endButtons" style="display: none; width: 20vw; height: 5vh; font-size: 1vh;" onclick="gameOver()">Home.</button>
@@ -43,7 +46,5 @@
     </div>
     <div id="playerList" class="d-flex flex-column align-items-start">
     </div>
-    <button id="readyButton" class="btn btn-primary" onclick="startTournament()">Ready to start?</button>
+    <button id="readyButton" class="readyButton btn btn-primary" onclick="startTournament()">Ready to start?</button>
 </div>
-
-<div id="messageContainer"></div>
