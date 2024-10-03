@@ -66,7 +66,6 @@ function startTournament() {
     tournamentContainer.classList.remove('d-flex');
     tournamentContainer.classList.add('displayNone');
 
-    setupMatches();
     playNextMatch();
 }
 
@@ -103,14 +102,18 @@ function endTournament() {
 
 function setupMatches() {
     matchesQueue = [];
-    for (let i = 0; i < players.length; i += 2) {
-        if (i + 1 < players.length) {
-            matchesQueue.push([players[i], players[i + 1]]);
-        } else {
-            matchesQueue.push([players[i], null]);
+
+    if (players.length > 1) {
+        for (let i = 0; i < players.length; i += 2) {
+            if (i + 1 < players.length) {
+                matchesQueue.push([players[i], players[i + 1]]);
+            } else {
+                matchesQueue.push([players[i], null]);
+            }
         }
     }
 }
+
 
 let player1
 let player2
@@ -122,16 +125,16 @@ async function startTournamentGame(){
     try {
         startGame("tournament"); 
         await waitForGameToEnd();
-
-        if (player2) {
-            players = players.filter(player => player !== player2); 
-        }
+        console.log(winner)
         if (winner !== 'No one') {
-            if (winner == "left_player")
+            if (winner == "left_player"){
                 winner = player1;
-            else
+                players = players.filter(player => player !== player2); 
+            }
+            else{
                 winner = player2
-            showMessage(`The winner is ${winner}!`);
+                players = players.filter(player => player !== player1); 
+            }
             players.push(winner);
             playNextMatch();
         }
@@ -141,13 +144,20 @@ async function startTournamentGame(){
 }
 
 async function playNextMatch() {
-    if (matchesQueue.length === 0) {
+    setupMatches();
+    let match = matchesQueue.shift();
+    
+    if (match.length == 1) {
+        showMessage(`Tournament winner ${players[0]}!`);
         return;
     }
-
-    let match = matchesQueue.shift();
     player1 = match[0];
     player2 = match[1];
+
+    if (player2 == null) {
+        players.push(player1);
+        return playNextMatch(); 
+    }
 
     showMessage(`${player1} VS ${player2}.`);
 

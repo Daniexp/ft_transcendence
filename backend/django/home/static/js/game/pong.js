@@ -257,7 +257,8 @@ function handleGameOver() {
         countdownElement.style.display = 'none';
     }
     console.log("handleGameOver llamado");
-    document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
+    if (modo != "tournament")
+        document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
     document.getElementById("playAgain").removeEventListener("click", handleClick);
     document.getElementById("playAgain").addEventListener("click", handleClick);
 
