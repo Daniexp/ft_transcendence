@@ -15,12 +15,11 @@ BALL_SPEED_RANGE = (0.1, 0.2)  # Rango de valores para determinar las velocidade
 BALL_RADIUS = 1.15  # Radio de la pelota en X
 BOARD_WIDTH, BOARD_HEIGHT = 300, 100  # Dimensiones del tablero
 PLAYER_WIDTH_X = 1  # Ancho del jugador en X
-PLAYER_HEIGHT_Y = 15  # Altura del jugador en Y
+PLAYER_HEIGHT = 15  # Altura del jugador en Y
 PLAYER_AMP = pi / 6  # Grados del punto de foco
 BOARD_X_MARGIN = 3  # Margen de los jugadores al muro por posición inicial
 UPDATE_RATE_IA = 1
-EPSILON = PLAYER_HEIGHT_Y / 2
-IA_LEVEL= 1
+IA_LEVEL = 2
 
 class PongConsumer(AsyncWebsocketConsumer):
     users = {}
@@ -191,7 +190,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         print(x_positions)
 
         self.game_states[group_name] = {
-            'players': {user_id: {'position': [x_positions[i], BOARD_HEIGHT // 2 - PLAYER_HEIGHT_Y // 2]} for i, user_id in enumerate(players)},
+            'players': {user_id: {'position': [x_positions[i], BOARD_HEIGHT // 2 - PLAYER_HEIGHT // 2]} for i, user_id in enumerate(players)},
             'scores': {'right_player': 0, 'left_player': 0},
             'round_wins': {'right_player': 0, 'left_player': 0},
             'ball': {
@@ -215,34 +214,28 @@ class PongConsumer(AsyncWebsocketConsumer):
             }
         } 
 
-    def ia_needs_to_move(self, ball_position):
-        player_position = self.game_states[self.group_name]['players']['IA']['position'][1]
-        
-        if (ball_position > player_position and ball_position < player_position + PLAYER_HEIGHT_Y):
-            return 0
-        return 1
-
-    decidedBY = 0
-
     def get_jump(self, ball_speed, ball_pos, jumps):
         speed_x, speed_y = ball_speed
         pos_x, pos_y = ball_pos
-
+        
         jumps -= 1
+
         collision_y = ball_pos[1] + ball_speed[1] * (BOARD_WIDTH - ball_pos[0]) / ball_speed[0]
-        if collision_y > 0 and collision_y < BOARD_HEIGHT:
-            return collision_y
         if collision_y <= 0:
             cte = 0
         elif collision_y >= BOARD_HEIGHT:
             cte = BOARD_HEIGHT
+        else:
+            return collision_y
+       
         collision_x = ball_pos[0] + ball_speed[0] * (cte - ball_pos[1]) / ball_speed[1]
 
         if jumps == 0:
             return collision_y
         speed_y *= -1
         pos_x = collision_x
-        pos_y = collision_y
+        pos_y = cte
+
         return self.get_jump([speed_x, speed_y], [pos_x, pos_y], jumps)
 
         
@@ -259,32 +252,29 @@ class PongConsumer(AsyncWebsocketConsumer):
         ball_point = self.game_states[self.group_name]['ball']['position'][1] + BALL_RADIUS
         while len(self.active_groups[self.group_name]["users"]) == num_players:  
             player_position = self.game_states[self.group_name]['players']['IA']['position'][1]
-            ia_has_to_move = self.ia_needs_to_move(ball_point)
+            ia_mid = player_position + PLAYER_HEIGHT / 2
             
-            if ia_has_to_move:
-                ia_mid = self.game_states[self.group_name]['players']['IA']['position'][1] + PLAYER_HEIGHT_Y / 2
+            if abs(ball_point - ia_mid) >= 0.2 *  PLAYER_MOVE_INCREMENT:
                 direction = 1 if (ball_point - ia_mid >= 0) else -1
                 self.update_player_position('IA', 0.2 * direction)
                 await asyncio.sleep(0.01)
 
 
-            if (time.monotonic() - tick >= 1):
+            if (time.monotonic() - tick >= UPDATE_RATE_IA):
                 tick = time.monotonic()
                 ball_speed = self.game_states[self.group_name]['ball']['speed']
                 ball_pos = self.game_states[self.group_name]['ball']['position']
                 ball_speed_u = self.normalize_vector(ball_speed)
-                print("SPEED")
-                print(ball_speed_u)
+              
                 if ball_speed[0] > 0:
                     ball_point = self.get_jump(ball_speed_u, ball_pos, IA_LEVEL)
-                    if ball_point == 100:
+                    if ball_point >= 100:
                         ball_point = BOARD_HEIGHT * 5 / 6
-                    elif ball_point == 0:
+                    elif ball_point <= 0:
                         ball_point = BOARD_HEIGHT / 6
                 else:
                     ball_point = BOARD_HEIGHT / 2
-                print("PREDICT")
-                print(ball_point)
+               
 
             await asyncio.sleep(GAME_TICK_RATE)
                 
@@ -323,8 +313,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         for player_id, player_data in self.game_states[group_name]['players'].items():
             if self.check_collision(ball['position'], player_data['position']) and self.countRetry >= 100:
-                paddle_center_y = player_data['position'][1] + PLAYER_HEIGHT_Y / 2
-                contact_point = (ball['position'][1] + BALL_RADIUS - paddle_center_y) / (PLAYER_HEIGHT_Y / 2)
+                paddle_center_y = player_data['position'][1] + PLAYER_HEIGHT / 2
+                contact_point = (ball['position'][1] + BALL_RADIUS - paddle_center_y) / (PLAYER_HEIGHT / 2)
 
                 self.countRetry = 0
             
@@ -401,14 +391,14 @@ class PongConsumer(AsyncWebsocketConsumer):
         ball_speed = self.game_states[self.group_name]['ball']['speed']
         player_position = self.game_states[self.group_name]['players'][player_id]['position']
         if player_id in self.game_states[self.group_name]['players'] and not self.check_collision(ball_position, player_position):
-            new_position_y = max(0, min(player_position[1] + float(move_value) * PLAYER_MOVE_INCREMENT, BOARD_HEIGHT - PLAYER_HEIGHT_Y))
+            new_position_y = max(0, min(player_position[1] + float(move_value) * PLAYER_MOVE_INCREMENT, BOARD_HEIGHT - PLAYER_HEIGHT))
             self.game_states[self.group_name]['players'][player_id]['position'][1] = new_position_y
 
             if self.check_collision(ball_position, player_position):
                 ball_radius_x = BALL_RADIUS * 3
                 ball_radius_y = BALL_RADIUS * 3
                 player_width = PLAYER_WIDTH_X * 3
-                player_height = PLAYER_HEIGHT_Y
+                player_height = PLAYER_HEIGHT
 
                 if ball_position[0] + ball_radius_x * 2 >= player_position[0] and ball_speed[0] > 0:
                     overlap_x = (ball_position[0] + ball_radius_x * 2) - player_position[0]
@@ -437,7 +427,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         ball_x, ball_y = ball_position
         ball_radius_y = BALL_RADIUS * 3
         player_x, player_y = player_position
-        player_height = PLAYER_HEIGHT_Y
+        player_height = PLAYER_HEIGHT
 
         return (player_y <= ball_y + ball_radius_y * 2 <= player_y + player_height or
                 player_y <= ball_y <= player_y + player_height)
