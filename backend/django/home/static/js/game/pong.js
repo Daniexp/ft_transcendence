@@ -1,5 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-    loadHTML("/gameButtonsDisplay/", "placeholder");
+    loadHTML("/gameButtonsDisplay/", "placeholder", () => {
+        const initButton = document.getElementById("initClick");
+        initButton.click();
+        document.getElementById('tournamentContainer').style.display = 'none';
+    });
 });
 
 function updateButtons(tab) {
@@ -10,7 +14,7 @@ function updateButtons(tab) {
         button1.textContent = '1 vs IA';
         button1.onclick = () => startGame("1vsIA");
         button2.textContent = 'Tournament';
-        button2.onclick = () => startGame("tournament");
+        button2.onclick = showTournamentInput;
     } else if (tab === 'multiplayer') {
         button1.textContent = '1 vs 1';
         button1.onclick = () => startGame("1vs1");
@@ -51,17 +55,17 @@ let currentRound = 1;
 let countdownTimeout;
 let exitOverwrite = 0;
 let modo = "";
+let countdownElement;
 
 function startGame(mode) {
+    console.log("ENTER PARTY");
     hideShowGameSelect(".gameSelectionButtons", "hide");
     modo = mode;
     initWebSocket(mode);
     exitOverwrite = 0;
     hideShowGameSelect(".gamePong", "show");
-    document.querySelectorAll('.displayNone').forEach(rounds => {
-        rounds.classList.remove('displayNone');
-        rounds.style.display = "flex";
-    });
+    document.getElementById("gameScoreBalls").classList.remove('displayNone');
+    document.getElementById("gameScoreBalls").classList.add('flexStyle')
     waitForGameStart(mode);
 }
 
@@ -90,10 +94,14 @@ async function waitForGameStart(mode) {
     gameContainer.appendChild(waitingMessage);
 
     if (gameContainer) {
-        gameContainer.addEventListener('keydown', handleKeysOnePlayer);
-        gameContainer.addEventListener('keyup', handleKeysUpOnePlayer);
+        gameContainer.addEventListener('keydown', handleKeyStrokes);
+        gameContainer.addEventListener('keyup', handleKeysStop);
+        if (mode == "tournament") {
+            window.secondWeb = new WebSocket(`wss://${window.location.host}/ws/pong/${"local"}/${mode}/`);
+            gameRunning = 1;
+        }
     }
-    
+
     await new Promise(resolve => {
         const interval = setInterval(() => {
             if (gameRunning) {
@@ -143,6 +151,7 @@ function handleMessage(data) {
         } else if (data.message.goal_scored) {
             handleGoal(data.message);
         } else if (data.message.game_over) {
+            winner = data.message.winner;
             handleGameOver();
         }
     } else if (typeof data.message === 'string') {
@@ -173,6 +182,8 @@ function handleGameStart(players) {
         const ball = document.createElement('div');
         ball.id = "gameBall";
         gameContainer.appendChild(ball);
+
+        countdownElement = document.getElementById('countdown'); // Inicializar countdownElement aquí
         startCountdown();
     }
 }
@@ -200,14 +211,20 @@ function updateBallPosition(ball) {
 }
 
 function handleGoal(data) {
-    startCountdown();
+    let player;
+    let goals;
+
     if (data.scored_by === 'left_player') {
         playerRoundGoals++;
-        updateScoreCircles(playerRoundGoals, true);
+        goals = playerRoundGoals
+        player = true;
     } else {
         opponentRoundGoals++;
-        updateScoreCircles(opponentRoundGoals, false);
+        goals = opponentRoundGoals
+        player = false;
     }
+    startCountdown();
+    updateScoreCircles(goals, player);
     document.getElementById('score').textContent = `${playerRoundsWon} - ${opponentRoundsWon}`;
 }
 
@@ -216,76 +233,119 @@ function handleClick() {
         window.gameSocket.close();
         window.gameSocket = undefined;
     }
-    startGame(modo);
+    if(modo == 'tournament')
+        showTournamentInput()
+    else
+        startGame(modo);
 }
+
+let countdownActive = false; 
+let countdownTimeoutId; 
+let countdownValue = 3;
 
 function handleGameOver() {
     if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.close();
         window.gameSocket = undefined;
     }
-    document.getElementById('gameContainer').removeEventListener('keydown', handleKeysOnePlayer);
-    document.getElementById('gameContainer').removeEventListener('keyup', handleKeysUpOnePlayer);
+    document.getElementById('gameContainer').removeEventListener('keydown', handleKeyStrokes);
+    document.getElementById('gameContainer').removeEventListener('keyup', handleKeysStop);
     exitOverwrite = 1;
     gameRunning = 0;
     if (countdownTimeout) clearTimeout(countdownTimeout);
-    document.getElementById('countdown').style.display = 'none';
+    if (countdownElement) {
+        countdownElement.style.display = 'none';
+    }
+    console.log("handleGameOver llamado");
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
     document.getElementById("playAgain").removeEventListener("click", handleClick);
     document.getElementById("playAgain").addEventListener("click", handleClick);
-}
 
-function resetGame() {
-    keysPressed['ArrowUp'] = false;
-    keysPressed['ArrowDown'] = false;
-    clearInterval(intervalId);
-    intervalId = null;
-    hideShowGameSelect('.gameSelectionButtons', 'show');
-    hideShowGameSelect('.gamePong', 'hide');
-    document.getElementById('gameContainer').innerHTML = "";
-    const countdownElement = document.getElementById('countdown');
-    countdownElement.style.display = 'none';
-    countdownElement.textContent = "";
-    const balls = document.getElementById('gameScoreBalls');
-    balls.classList.add("displayNone");
-    balls.style.display = "";
-    document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
-    document.getElementById('score').innerHTML = "0 - 0";
-    resetGameStats();
-    resetRoundCircles();
-    if (countdownTimeout) clearTimeout(countdownTimeout);
-    document.getElementById('PongButton').removeEventListener('click', gameOver);
+    if (countdownTimeoutId) 
+        clearTimeout(countdownTimeoutId); 
+    countdownActive = false;
+    if (window.secondWeb != undefined) {
+        window.secondWeb.close();
+        window.secondWeb = undefined;
+    }
 }
-
 
 function startCountdown() {
-    const countdownElement = document.getElementById('countdown');
-    countdownElement.style.display = 'flex';
-    let countdownValue = 3;
+    if (countdownActive) {
+        clearTimeout(countdownTimeoutId);
+        countdownValue = 3;
+        updateCountdown();
+        return;
+    }
 
+    countdownActive = true;
+
+    if (!countdownElement) {
+        countdownElement = document.getElementById('countdown'); 
+    }
+    
+    countdownElement.style.display = 'flex';
+    countdownValue = 3;
+    
     function updateCountdown() {
         if (countdownValue > 0) {
             countdownElement.textContent = countdownValue;
             countdownValue--;
-            setTimeout(updateCountdown, 1000);
+            countdownTimeoutId = setTimeout(updateCountdown, 900);
         } else {
             countdownElement.textContent = 'Pong!';
-            setTimeout(() => {
+
+            countdownTimeoutId = setTimeout(() => {
                 countdownElement.style.display = 'none';
-                if (opponentRoundGoals + playerRoundGoals >= 3 || opponentRoundGoals === 2 || playerRoundGoals === 2) {
+                if (opponentRoundGoals + playerRoundGoals == 3 || opponentRoundGoals == 2 || playerRoundGoals == 2) {
                     resetRoundGoals();
                     resetRoundCircles();
                 }
-                gameRunning = 1;
-            }, 1000);
+                gameRunning = 1; 
+                countdownActive = false;
+            }, 400);
         }
+
         if (!window.gameSocket || window.gameSocket.readyState !== WebSocket.OPEN) {
-            handleGameOver();
+            if (exitOverwrite !== 1) {
+                window.gameSocket = undefined;
+                resetGame();
+            }
             return; 
         }
     }
 
     updateCountdown();
+}
+
+function resetGame() {
+    console.log("resetGame llamado");
+    hideShowGameSelect('.endButtons', 'hide');
+    keysPressed['ArrowUp'] = false;
+    keysPressed['ArrowDown'] = false;
+    keysPressed['w'] = false;
+    keysPressed['s'] = false;
+    clearInterval(intervalId);
+    intervalId = null;
+    hideShowGameSelect('.gameSelectionButtons', 'show');
+    hideShowGameSelect('.gamePong', 'hide');
+    document.getElementById('gameContainer').innerHTML = "";
+    if (countdownElement) {
+        countdownElement.style.display = 'none';
+        countdownElement.textContent = "";
+    }
+    document.getElementById("gameScoreBalls").classList.add('displayNone');
+    document.getElementById("gameScoreBalls").classList.remove('flexStyle');
+    document.getElementById('score').innerHTML = "0 - 0";
+    resetGameStats();
+    if (countdownTimeoutId) 
+        clearTimeout(countdownTimeoutId); 
+    countdownActive = false;
+    document.getElementById('PongButton').removeEventListener('click', gameOver);
+    if (window.secondWeb != undefined) {
+        window.secondWeb.close();
+        window.secondWeb = undefined;
+    }
 }
 
 function updateScoreCircles(score, isPlayer) {
@@ -348,7 +408,9 @@ function resetGameStats() {
     playerRoundGoals = 0;
     opponentRoundGoals = 0;
     currentRound = 1;
-    document.getElementById('countdown').style.display = 'none';
-    document.getElementById('countdown').textContent = "";
+    if (countdownElement) {
+        countdownElement.style.display = 'none';
+        countdownElement.textContent = "";
+    }
     document.getElementById('score').textContent = "0 - 0";
 }

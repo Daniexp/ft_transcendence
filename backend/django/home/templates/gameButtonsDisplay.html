@@ -25,7 +25,7 @@
     <nav class="navbar navbar-light custom-navbar">
         <div class="container-fluid">
             <div class="navbar-buttons">
-                <a class="btn custom-nav-btn" href="#" onclick="updateButtons('local')">Local</a>
+                <a class="btn custom-nav-btn" href="#" id="initClick" onclick="updateButtons('local')">Local</a>
                 <a class="btn custom-nav-btn" href="#" onclick="updateButtons('multiplayer')">Multiplayer</a>
             </div>
         </div>
@@ -36,3 +36,14 @@
         <button class="btn btn-custom" id="butt2">Tournament</button>
     </div>
 </div>
+
+<div id="tournamentContainer" class="displayNone container-fluid flex-column align-items-center">
+    <div class="input-group mb-3">
+        <input type="text" id="playerName" class="form-control" placeholder="Select player name." aria-label="Nombre del jugador"/>
+    </div>
+    <div id="playerList" class="d-flex flex-column align-items-start">
+    </div>
+    <button id="readyButton" class="btn btn-primary" onclick="startTournament()">Ready to start?</button>
+</div>
+
+<div id="messageContainer"></div>

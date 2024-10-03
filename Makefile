@@ -7,7 +7,7 @@ ps:
 	docker-compose  ps
 down:
 	docker-compose down
-	find . -type d -name "__pycache__" -exec rm -r {} +
+	echo "y" | find . -type d -name "__pycache__" -exec rm -r {} +
 stop:
 	docker-compose  stop
 
