@@ -3,7 +3,6 @@ from django.shortcuts import redirect
 from django.http import JsonResponse
 from home import views
 import requests
-from .models import UserRegister
 from os import environ as env
 import json
 from django.http import HttpResponse
@@ -21,7 +20,6 @@ def is_token_active(response):
     data_request = requests.get("https://api.intra.42.fr/v2/me", data=response)
     if data_request.status_code == 200:
         user_data = data_request.json()
-        print(user_data)
         return 1
     return 0
     
@@ -31,7 +29,8 @@ def authRequest(request):
     if request.user.is_authenticated:
         active_token = is_token_active(request.user.api_data)
     if request.user.is_authenticated and active_token: 
-        response = UserRegister.objects.get(uid=request.user.uid)
+        #response = UserRegister.objects.get(uid=request.user.uid)
+        response = request.user
         return views.home(request, response.api_data)
     elif request.user.is_authenticated and not active_token:
         views.logout(request)

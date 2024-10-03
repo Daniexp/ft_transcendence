@@ -1,20 +1,20 @@
 services:
-  db:
-    build: 
-      context: ./database
-      args:
-        POSTGRES_DB: ${POSTGRES_DB}
-        DB_PSSWRD: ${DB_PSSWRD}
-    container_name: postgresql
-    env_file:
-      - .env
-    networks:
-      - Transcendence-network
-    healthcheck:
-      test: ["CMD", "pg_isready", "--host=localhost", "--username=postgres", "--port=5432"]
-      interval: 5s
-      timeout: 5s
-      retries: 7
+#  #db:
+#    build: 
+#      context: ./database
+#      args:
+#        POSTGRES_DB: ${POSTGRES_DB}
+#        DB_PSSWRD: ${DB_PSSWRD}
+#    container_name: postgresql
+#    env_file:
+#      - .env
+#    networks:
+#      - Transcendence-network
+#    healthcheck:
+#      test: ["CMD", "pg_isready", "--host=localhost", "--username=postgres", "--port=5432"]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 7
 
   web:
     build: 
@@ -28,9 +28,9 @@ services:
       - .env
     networks:
       - Transcendence-network
-    depends_on:
-      db:
-        condition: service_healthy
+    #depends_on:
+    #  db:
+    #    condition: service_healthy
 
 
   nginx:

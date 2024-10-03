@@ -84,7 +84,6 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Este backend funciona con el modelo de usuario personalizado
 ]
 
-AUTH_USER_MODEL = 'login.UserRegister'
 
 
 ROOT_URLCONF = 'project.urls'
