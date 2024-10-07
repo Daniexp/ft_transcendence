@@ -44,21 +44,15 @@ def get_user_data(request, response):
 
 def home(request, response = ""):
     if response != "":
-        print("response lleno")
         if isinstance(response, dict):
             if "access_token" in response:
                 picture, login_name, id = get_user_data(request, response)
                 if not picture and not login_name and not id:
                     return home(request)
                 else:
-                    print("PRE REGISTER")
-                    print(request.user)
                     request.user = PongUser(login_name, id, response)
                     request.user.is_authenticated = 1
-                    print("POST REGISTER")
-                    print(request.user.is_authenticated)
     else:
-        print("response vacio")
         return login(request)
     return render(request, 'home.html', {'picture': picture})
 

@@ -39,7 +39,6 @@ def authRequest(request):
     response = exchange_code(code, get_token_url)
 
     if "error" in response.json() or request.GET.get('error') or response.status_code != 200:
-        print("Hay error....")
         return views.login(request)
     return views.home(request, response.json())
 
@@ -82,5 +81,4 @@ def exchange_code(code, url):
     }
     
     response = requests.post(url, data=data, headers=headers)
-    print(response)
     return response
