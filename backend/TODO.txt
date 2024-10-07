@@ -1,7 +1,3 @@
 Test de todo responsive
 Test de todo multiBrowser
-BOTON MEDIO SELCTOR
 Test 2vs2 rebotar dos veces con un aliado
-Todos los mensajes del torneo
-Ready? boton previo a los matches
-Limpiar y preparar modelo final

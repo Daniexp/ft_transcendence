@@ -23,15 +23,14 @@
 
 
 .dropdown-menu {
-    width: auto;      /* Ajusta el ancho al contenido */
-    height: auto;     /* Ajusta la altura al contenido */
-    padding: 0;       /* Elimina cualquier padding adicional en el dropdown */
-    min-width: auto;  /* Evita un ancho mínimo predefinido */
+    width: auto;
+    height: auto;
+    padding: 0;       
+    min-width: auto;  
     min-height: auto; 
     margin-right: 25vw;
 }
 
-/* Separador debajo de la barra de navegación */
 .navbar-divider {
     color: black;
     border-top: 1px solid black;
@@ -40,7 +39,6 @@
     width: 100%;
 }
 
-/* Estilo para la barra de navegación con tabs */
 .custom-navbar {
     background-color: #ffffff;
     padding: 10px 0;
@@ -54,7 +52,7 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    gap: 0; /* Elimina cualquier espacio entre los botones */
+    gap: 0; 
 }
 
 .custom-nav-btn {
@@ -65,14 +63,16 @@
     border-radius: 5px;
     text-align: center;
     text-decoration: none;
-    flex-grow: 1; /* Cada botón crece uniformemente */
+    flex-basis: 50%;
+    flex-grow: 1; 
     padding: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     white-space: nowrap;
-    margin: 0; /* Elimina márgenes que puedan afectar el tamaño */
-    min-width: 0; /* Permite que los botones se reduzcan si es necesario */
+    margin: 0;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .custom-nav-btn:hover {
@@ -82,7 +82,15 @@
     transition: background-color 0.3s, border-color 0.3s;
 }
 
-/* Ajustes de los botones principales */
+.navbar-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    border-bottom: 2px solid black;
+    margin-bottom: 20px;
+}
+
 .button-row {
     display: flex;
     justify-content: center;
@@ -91,11 +99,11 @@
 }
 
 .btn-custom {
-    width: calc(50% - 30px); /* Calcular el ancho para que siempre quepa en el espacio disponible */
-    height: 50vh; /* Ajuste de altura dinámico basado en el viewport */
+    width: calc(50% - 30px);
+    height: 50vh;
     margin: 15px;
     border-radius: 20px;
-    font-size: 2vw; /* Tamaño de la fuente relativo al ancho de la ventana */
+    font-size: 2vw;
     background-color: white;
     color: black;
     border: 2px solid black;
@@ -119,6 +127,7 @@
     color: black;
     border-color: lightgray;
 }
+
 
 /* Estilos para pantallas pequeñas */
 @media (max-width: 768px) {

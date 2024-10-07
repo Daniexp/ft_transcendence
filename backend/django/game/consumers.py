@@ -5,7 +5,6 @@ import time
 import random
 from math import cos, sin, pi, copysign, sqrt
 
-# Constantes del juego con relación 1:3 entre X e Y
 GAME_TICK_RATE = 0.001  # Velocidad de actualización del juego en segundos
 PLAYER_MOVE_INCREMENT = 5  # Incremento de movimiento del jugador
 BALL_ACCELERATION = 1.15  # Aceleración de la bola
@@ -19,7 +18,7 @@ PLAYER_HEIGHT = 15  # Altura del jugador en Y
 PLAYER_AMP = pi / 6  # Grados del punto de foco
 BOARD_X_MARGIN = 3  # Margen de los jugadores al muro por posición inicial
 UPDATE_RATE_IA = 1
-IA_LEVEL = 2
+IA_LEVEL = 3
 
 class PongConsumer(AsyncWebsocketConsumer):
     users = {}
