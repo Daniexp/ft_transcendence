@@ -102,7 +102,6 @@ function endTournament() {
 
 function setupMatches() {
     matchesQueue = [];
-
     if (players.length > 1) {
         for (let i = 0; i < players.length; i += 2) {
             if (i + 1 < players.length) {
@@ -127,15 +126,10 @@ async function startTournamentGame(){
         await waitForGameToEnd();
         console.log(winner)
         if (winner !== 'No one') {
-            if (winner == "left_player"){
-                winner = player1;
+            if (winner == "left_player")
                 players = players.filter(player => player !== player2); 
-            }
-            else{
-                winner = player2
+            else
                 players = players.filter(player => player !== player1); 
-            }
-            players.push(winner);
             playNextMatch();
         }
     } catch (error) {
@@ -147,8 +141,9 @@ async function playNextMatch() {
     setupMatches();
     let match = matchesQueue.shift();
     
-    if (match.length == 1) {
+    if (match == null || match.length == 1) {
         showMessage(`Tournament winner ${players[0]}!`);
+        document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
         return;
     }
     player1 = match[0];
@@ -167,7 +162,6 @@ async function playNextMatch() {
     document.getElementById("gameScoreBalls").classList.add('flexStyle');
     hideShowGameSelect('.gamePong', 'show');
     document.getElementById('countdown').style.display = 'none';
-    document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
     resetRoundCircles()
 }
 

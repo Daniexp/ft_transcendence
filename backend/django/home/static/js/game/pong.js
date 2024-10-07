@@ -58,7 +58,6 @@ let modo = "";
 let countdownElement;
 
 function startGame(mode) {
-    console.log("ENTER PARTY");
     hideShowGameSelect(".gameSelectionButtons", "hide");
     modo = mode;
     initWebSocket(mode);
