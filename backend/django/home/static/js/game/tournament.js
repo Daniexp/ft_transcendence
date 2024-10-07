@@ -33,6 +33,14 @@ function showTournamentInput() {
     players = [];
     matchesQueue = [];
 
+    let gameRunning = parseInt(localStorage.getItem('gameRunning'));
+    if (gameRunning) {
+        alert('A game is already in progress. Please finish it before starting a new one.');
+        return;
+    }
+
+    localStorage.setItem('gameRunning', 1); 
+
     hideShowGameSelect('.endButtons', 'hide');
     document.getElementById("gameScoreBalls").classList.add('displayNone');
     document.getElementById("gameScoreBalls").classList.remove('flexStyle');
@@ -65,7 +73,7 @@ function startTournament() {
     const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('d-flex');
     tournamentContainer.classList.add('displayNone');
-
+    localStorage.setItem('gameRunning', 0); 
     playNextMatch();
 }
 
@@ -80,7 +88,7 @@ function endTournament() {
         window.secondWeb.close();
         window.secondWeb = undefined;
     }
-
+    localStorage.setItem('gameRunning', 0); 
     resetGame();
 
     const playerNameInput = document.getElementById('playerName');
@@ -124,7 +132,7 @@ async function startTournamentGame(){
     try {
         startGame("tournament"); 
         await waitForGameToEnd();
-        console.log(winner)
+
         if (winner !== 'No one') {
             if (winner == "left_player")
                 players = players.filter(player => player !== player2); 

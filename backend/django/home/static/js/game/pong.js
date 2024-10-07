@@ -3,6 +3,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const initButton = document.getElementById("initClick");
         initButton.click();
         document.getElementById('tournamentContainer').style.display = 'none';
+
+        if (localStorage.getItem('gameRunning') === null) {
+            localStorage.setItem('gameRunning', 0); 
+        }
     });
 });
 
@@ -46,7 +50,6 @@ function hideShowGameSelect(classSelector, mode) {
 }
 
 const uniqueID = getOrGenerateUniqueID();
-let gameRunning = 0;
 let playerRoundsWon = 0;
 let opponentRoundsWon = 0;
 let playerRoundGoals = 0;
@@ -58,6 +61,12 @@ let modo = "";
 let countdownElement;
 
 function startGame(mode) {
+    let gameRunning = parseInt(localStorage.getItem('gameRunning'));
+    if (gameRunning) {
+        alert('A game is already in progress. Please finish it before starting a new one.');
+        return;
+    }
+
     hideShowGameSelect(".gameSelectionButtons", "hide");
     modo = mode;
     initWebSocket(mode);
@@ -97,12 +106,12 @@ async function waitForGameStart(mode) {
         gameContainer.addEventListener('keyup', handleKeysStop);
         if (mode == "tournament") {
             window.secondWeb = new WebSocket(`wss://${window.location.host}/ws/pong/${"local"}/${mode}/`);
-            gameRunning = 1;
         }
     }
 
     await new Promise(resolve => {
         const interval = setInterval(() => {
+            let gameRunning = parseInt(localStorage.getItem('gameRunning'));
             if (gameRunning) {
                 clearInterval(interval);
                 resolve();
@@ -137,6 +146,7 @@ function initWebSocket(mode) {
         if (exitOverwrite !== 1) {
             resetGame();
         }
+        localStorage.setItem('gameRunning', 0);
     };
 }
 
@@ -168,6 +178,7 @@ function handleStringMessage(message) {
 }
 
 function handleGameStart(players) {
+    localStorage.setItem('gameRunning', 1);
     const gameContainer = document.getElementById('gameContainer');
     if (gameContainer) {
         gameContainer.innerHTML = '';
@@ -182,7 +193,7 @@ function handleGameStart(players) {
         ball.id = "gameBall";
         gameContainer.appendChild(ball);
 
-        countdownElement = document.getElementById('countdown'); // Inicializar countdownElement aquí
+        countdownElement = document.getElementById('countdown');
         startCountdown();
     }
 }
@@ -250,7 +261,7 @@ function handleGameOver() {
     document.getElementById('gameContainer').removeEventListener('keydown', handleKeyStrokes);
     document.getElementById('gameContainer').removeEventListener('keyup', handleKeysStop);
     exitOverwrite = 1;
-    gameRunning = 0;
+    localStorage.setItem('gameRunning', 0);
     if (countdownTimeout) clearTimeout(countdownTimeout);
     if (countdownElement) {
         countdownElement.style.display = 'none';
@@ -301,7 +312,6 @@ function startCountdown() {
                     resetRoundGoals();
                     resetRoundCircles();
                 }
-                gameRunning = 1; 
                 countdownActive = false;
             }, 400);
         }
@@ -311,6 +321,7 @@ function startCountdown() {
                 window.gameSocket = undefined;
                 resetGame();
             }
+            localStorage.setItem('gameRunning', 0);
             return; 
         }
     }
@@ -319,6 +330,7 @@ function startCountdown() {
 }
 
 function resetGame() {
+    localStorage.setItem('gameRunning', 0);
     console.log("resetGame llamado");
     hideShowGameSelect('.endButtons', 'hide');
     keysPressed['ArrowUp'] = false;
@@ -402,7 +414,7 @@ function gameOver() {
 }
 
 function resetGameStats() {
-    gameRunning = 0;
+    localStorage.setItem('gameRunning', 0);
     playerRoundsWon = 0;
     opponentRoundsWon = 0;
     playerRoundGoals = 0;

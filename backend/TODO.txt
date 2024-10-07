@@ -1,6 +1,5 @@
 Test de todo responsive
 Test de todo multiBrowser
-BOTON MEDIO SELCTOR
 Test 2vs2 rebotar dos veces con un aliado
 
 if someone playing and try start tournament explodes
