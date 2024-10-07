@@ -266,7 +266,6 @@ function handleGameOver() {
     if (countdownElement) {
         countdownElement.style.display = 'none';
     }
-    console.log("handleGameOver llamado");
     if (modo != "tournament")
         document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
     document.getElementById("playAgain").removeEventListener("click", handleClick);
@@ -331,7 +330,6 @@ function startCountdown() {
 
 function resetGame() {
     localStorage.setItem('gameRunning', 0);
-    console.log("resetGame llamado");
     hideShowGameSelect('.endButtons', 'hide');
     keysPressed['ArrowUp'] = false;
     keysPressed['ArrowDown'] = false;
@@ -405,7 +403,6 @@ function resetRoundCircles() {
 }
 
 function gameOver() {
-    console.log("El juego ha terminado");
     if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.close();
         window.gameSocket = undefined;
