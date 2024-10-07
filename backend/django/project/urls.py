@@ -26,9 +26,6 @@ urlpatterns = [
     path("logout/", views.logout, name='logout'),
     path("login/", loginViews.intraLogin, name="authentication"),
     path("loginPage/", views.loginPage , name="authentication"),
-    path("somethingHappened/", views.somethingHappened, name='somethingHappened'),
     path("auth/callback", loginViews.authRequest, name='loginSuccess'),
     path("gameButtonsDisplay/", gameViews.gameButtons , name='gameButtons'),
 ]
-
-#https://patata.com/admin/dfrwfwefwewefwfe

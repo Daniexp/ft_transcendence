@@ -1,5 +1,4 @@
 function loadHTML(url, placeholderID, callback) {
-    // REQUEST A LA VISTA
     if (document.getElementById(placeholderID).innerHTML === "") {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
@@ -7,7 +6,6 @@ function loadHTML(url, placeholderID, callback) {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     var htmlContent = xhr.responseText;
-                    // SUSTITUIR EL PLACEHOLDER DEL HTML POR EL NUEVO TEXTO
                     document.getElementById(placeholderID).innerHTML = htmlContent;
                     if (callback) {
                         callback();  

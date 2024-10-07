@@ -20,14 +20,9 @@ class PongUser:
     def __str__(self):
         return self.username
 
-# Create your views here.
 
 def login(request):
     return render(request, "index.html")
-
-#DECLAEANDO LA VISTA PARA LA REQUEST ENTRANTE
-def somethingHappened(request):
-    return render(request, 'aux.html')
 
 def logout(request):
     if (request.user.is_authenticated):

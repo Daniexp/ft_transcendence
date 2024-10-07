@@ -129,12 +129,11 @@
 }
 
 
-/* Estilos para pantallas pequeñas */
 @media (max-width: 768px) {
     .btn-custom {
-        width: calc(70% - 30px); /* Ajustar el ancho */
-        height: 30vh; /* Ajustar la altura */
-        font-size: 4vw; /* Cambiar el tamaño de la fuente */
+        width: calc(70% - 30px); 
+        height: 30vh;
+        font-size: 4vw;
     }
 }
 

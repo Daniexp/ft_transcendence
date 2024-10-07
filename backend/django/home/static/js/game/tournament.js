@@ -176,6 +176,7 @@ async function playNextMatch() {
 async function waitForGameToEnd() {
     return new Promise((resolve) => {
         const checkGameRunning = setInterval(() => {
+            let gameRunning = parseInt(localStorage.getItem('gameRunning'));
             if (!gameRunning) { 
                 clearInterval(checkGameRunning);
                 resolve();

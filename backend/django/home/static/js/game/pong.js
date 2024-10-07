@@ -32,6 +32,7 @@ function getOrGenerateUniqueID() {
     if (!uniqueID) {
         uniqueID = generateUUID();
         localStorage.setItem('uniqueID', uniqueID);
+        localStorage.setItem('gameRunning', 0);
     }
     return uniqueID;
 }
@@ -139,10 +140,10 @@ function initWebSocket(mode) {
     };
     gameSocket.onerror = error => {
         console.error('Error en la conexión WebSocket:', error);
+        localStorage.setItem('gameRunning', 0); 
         resetGame();
     };
     gameSocket.onclose = () => {
-        console.log('Conexión cerrada');
         if (exitOverwrite !== 1) {
             resetGame();
         }
@@ -171,7 +172,6 @@ function handleMessage(data) {
 }
 
 function handleStringMessage(message) {
-    console.log("MENSAJE DESCONEXION: ", message)
     if (message === "User disconnected") {
         handleGameOver();
     }

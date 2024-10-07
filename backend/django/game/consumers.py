@@ -18,7 +18,7 @@ PLAYER_HEIGHT = 15  # Altura del jugador en Y
 PLAYER_AMP = pi / 6  # Grados del punto de foco
 BOARD_X_MARGIN = 3  # Margen de los jugadores al muro por posición inicial
 UPDATE_RATE_IA = 1
-IA_LEVEL = 3
+IA_LEVEL = 5
 
 class PongConsumer(AsyncWebsocketConsumer):
     users = {}
