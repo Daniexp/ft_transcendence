@@ -123,7 +123,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                     )
                 else:
                     if self.active_groups[self.group_name]['gameRunning']:
-                        print("ENTRO Y GAME:", self.active_groups[self.group_name]['gameRunning'])
                         await self.channel_layer.group_send(
                             self.group_name,
                             {
@@ -194,7 +193,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         x_positions = [BOARD_X_MARGIN, BOARD_WIDTH - PLAYER_WIDTH * 3 - BOARD_X_MARGIN] if num_players <= 2 else [BOARD_X_MARGIN, BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.5, BOARD_WIDTH - PLAYER_WIDTH * 3 - (BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.5), BOARD_WIDTH - PLAYER_WIDTH * 3 - BOARD_X_MARGIN] 
 
-        print(x_positions)
 
         self.game_states[group_name] = {
             'players': {user_id: {'position': [x_positions[i], BOARD_HEIGHT // 2 - PLAYER_HEIGHT // 2]} for i, user_id in enumerate(players)},

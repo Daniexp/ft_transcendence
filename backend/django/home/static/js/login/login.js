@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", login_page());
 
 function login_page() {
     // REQUEST A LA VISTA
-    if(document.getElementById('placeholder').innerHTML === ""){
+    if(document.getElementById('placeholder') != null && document.getElementById('placeholder').innerHTML === ""){
         var xhr = new XMLHttpRequest();
         xhr.open('GET', '/login/', true);
         xhr.onreadystatechange = function() {
@@ -19,7 +19,9 @@ function login_page() {
         xhr.send();
     }
     else{
-        document.getElementById('placeholder').innerHTML = ""
+        if (document.getElementById('placeholder') != null) {
+            document.getElementById('placeholder').innerHTML = ""
+        }
     }
 }
 
