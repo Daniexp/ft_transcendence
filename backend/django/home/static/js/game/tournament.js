@@ -3,11 +3,23 @@ let matchesQueue = [];
 let winner = "No one";
 
 function showMessage(message) {
-    const messageContainer = document.getElementById('messageContainer');
+
+    removeMessage();
+
+    const messageContainer = document.getElementById('gameContainer');
     const messageDiv = document.createElement('div');
     messageDiv.textContent = message;
     messageDiv.className = 'message';
     messageContainer.appendChild(messageDiv);
+}
+
+function removeMessage() {
+    const messageContainer = document.getElementById('gameContainer');
+    
+    const existingMessage = messageContainer.querySelector('.message');
+    if (existingMessage) {
+        messageContainer.removeChild(existingMessage);
+    }
 }
 
 const handlePlayerInput = (event) => {
@@ -21,6 +33,14 @@ function showTournamentInput() {
     players = [];
     matchesQueue = [];
 
+    let gameRunning = parseInt(localStorage.getItem('gameRunning'));
+    if (gameRunning) {
+        alert('A game is already in progress. Please finish it before starting a new one.');
+        return;
+    }
+
+    localStorage.setItem('gameRunning', 1); 
+
     hideShowGameSelect('.endButtons', 'hide');
     document.getElementById("gameScoreBalls").classList.add('displayNone');
     document.getElementById("gameScoreBalls").classList.remove('flexStyle');
@@ -28,7 +48,7 @@ function showTournamentInput() {
     hideShowGameSelect(".gameSelectionButtons", "hide");
     const pongButton = document.getElementById('PongButton');
 
-    pongButton.addEventListener("click", endTournament); // Agrega el evento
+    pongButton.addEventListener("click", endTournament);
 
     const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('displayNone');
@@ -42,7 +62,7 @@ function showTournamentInput() {
 
 function startTournament() {
     if (players.length < 2) {
-        showMessage("Se necesitan al menos dos jugadores para iniciar el torneo.");
+        alert("Se necesitan al menos dos jugadores para iniciar el torneo.");
         return;
     }
 
@@ -53,9 +73,7 @@ function startTournament() {
     const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('d-flex');
     tournamentContainer.classList.add('displayNone');
-
-    showMessage("Iniciando el torneo con jugadores: " + players.join(", "));
-    setupMatches();
+    localStorage.setItem('gameRunning', 0); 
     playNextMatch();
 }
 
@@ -70,7 +88,7 @@ function endTournament() {
         window.secondWeb.close();
         window.secondWeb = undefined;
     }
-
+    localStorage.setItem('gameRunning', 0); 
     resetGame();
 
     const playerNameInput = document.getElementById('playerName');
@@ -84,49 +102,42 @@ function endTournament() {
     const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('d-flex');
     tournamentContainer.classList.add('displayNone');
+    document.getElementById("distion").classList.remove('d-flex');
+    document.getElementById("distion").classList.add('displayNone');
 
     hideShowGameSelect(".gameSelectionButtons", "show");
-    showMessage("Finalizando torneo...");
 }
 
 function setupMatches() {
     matchesQueue = [];
-    for (let i = 0; i < players.length; i += 2) {
-        if (i + 1 < players.length) {
-            matchesQueue.push([players[i], players[i + 1]]);
-        } else {
-            matchesQueue.push([players[i], null]);
+    if (players.length > 1) {
+        for (let i = 0; i < players.length; i += 2) {
+            if (i + 1 < players.length) {
+                matchesQueue.push([players[i], players[i + 1]]);
+            } else {
+                matchesQueue.push([players[i], null]);
+            }
         }
     }
-    showMessage("Partidos a jugar: " + matchesQueue.map(match => match.join(" vs ")).join(", "));
 }
 
-async function playNextMatch() {
-    if (matchesQueue.length === 0) {
-        showMessage("The winner is: " + winner);
-        return;
-    }
 
-    let match = matchesQueue.shift();
-    let player1 = match[0];
-    let player2 = match[1];
+let player1
+let player2
 
-    showMessage(`Iniciando partida entre ${player1} y ${player2}.`);
+async function startTournamentGame(){
+    document.getElementById("distion").classList.remove('d-flex');
+    document.getElementById("distion").classList.add('displayNone');
 
     try {
         startGame("tournament"); 
         await waitForGameToEnd();
 
-        if (player2) {
-            players = players.filter(player => player !== player2); 
-        }
         if (winner !== 'No one') {
             if (winner == "left_player")
-                winner = player1;
+                players = players.filter(player => player !== player2); 
             else
-                winner = player2
-            showMessage(`${winner} gana esta ronda!`);
-            players.push(winner);
+                players = players.filter(player => player !== player1); 
             playNextMatch();
         }
     } catch (error) {
@@ -134,12 +145,39 @@ async function playNextMatch() {
     }
 }
 
+async function playNextMatch() {
+    setupMatches();
+    let match = matchesQueue.shift();
+    
+    if (match == null || match.length == 1) {
+        showMessage(`Tournament winner ${players[0]}!`);
+        document.querySelectorAll('.endButtons').forEach(button => button.style.display = "flex");
+        return;
+    }
+    player1 = match[0];
+    player2 = match[1];
+
+    if (player2 == null) {
+        players.push(player1);
+        return playNextMatch(); 
+    }
+
+    showMessage(`${player1} VS ${player2}.`);
+
+    document.getElementById("distion").classList.remove('displayNone');
+    document.getElementById("distion").classList.add('d-flex');
+    document.getElementById("gameScoreBalls").classList.remove('displayNone');
+    document.getElementById("gameScoreBalls").classList.add('flexStyle');
+    hideShowGameSelect('.gamePong', 'show');
+    document.getElementById('countdown').style.display = 'none';
+    resetRoundCircles()
+}
+
 async function waitForGameToEnd() {
     return new Promise((resolve) => {
         const checkGameRunning = setInterval(() => {
             if (!gameRunning) { 
                 clearInterval(checkGameRunning);
-                showMessage("El juego ha terminado.");
                 resolve();
             }
         }, 100);
@@ -165,12 +203,12 @@ function addPlayer() {
     const playerName = playerNameInput.value.trim();
 
     if (playerName === "") {
-        showMessage("No se puede agregar un nombre vacío.");
+        alert("No se puede agregar un nombre vacío.");
         return;
     }
 
     if (players.includes(playerName)) {
-        showMessage("El jugador ya está registrado.");
+        alert("El jugador ya está registrado.");
         return;
     }
 
