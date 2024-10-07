@@ -54,6 +54,7 @@ def home(request, response = ""):
                     print("PRE REGISTER")
                     print(request.user)
                     request.user = PongUser(login_name, id, response)
+                    request.user.is_authenticated = 1
                     print("POST REGISTER")
                     print(request.user.is_authenticated)
     else:

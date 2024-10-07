@@ -112,19 +112,7 @@ ASGI_APPLICATION = 'project.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pongdb',  # TODO REGISTER ENV
-        'USER': 'postgres', # TODO REGISTER ENV
-        'PASSWORD': '1234',  # TODO REGISTER ENV 
-        'HOST': 'postgresql',  # TODO REGISTER ENV
-        'PORT': '5432',
-        'CONN_MAX_AGE': 60,
-    }
-}
 
 
 # Password validation
@@ -144,6 +132,14 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',  # Aquí defines el motor de la base de datos
+        'NAME': BASE_DIR / 'db.sqlite3',         # Ruta a la base de datos (en este caso SQLite)
+    }
+}
 
 
 # Internationalization
