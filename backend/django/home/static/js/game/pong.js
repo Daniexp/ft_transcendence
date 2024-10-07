@@ -78,6 +78,8 @@ function startGame(mode) {
     waitForGameStart(mode);
 }
 
+var visualGameRunning = 0;
+
 async function waitForGameStart(mode) {
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
     document.getElementById('score').textContent = "0 - 0";
@@ -110,12 +112,14 @@ async function waitForGameStart(mode) {
         }
     }
 
+    localStorage.setItem('gameRunning', 1);
+    
     await new Promise(resolve => {
         const interval = setInterval(() => {
-            let gameRunning = parseInt(localStorage.getItem('gameRunning'));
-            if (gameRunning) {
+            if (visualGameRuunning) {
                 clearInterval(interval);
                 resolve();
+                visualGameRunning = 0;
             }
         }, 50);
     });
@@ -154,6 +158,7 @@ function initWebSocket(mode) {
 function handleMessage(data) {
     if (data && typeof data.message === 'object' && data.message !== null) {
         if (data.message.game_started) {
+            visualGameRunning = 1
             handleGameStart(data.message.game_started);
         } else if (data.message.players) {
             updatePlayerPositions(data.message.players);
@@ -178,7 +183,6 @@ function handleStringMessage(message) {
 }
 
 function handleGameStart(players) {
-    localStorage.setItem('gameRunning', 1);
     const gameContainer = document.getElementById('gameContainer');
     if (gameContainer) {
         gameContainer.innerHTML = '';
