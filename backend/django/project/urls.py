@@ -21,7 +21,6 @@ from login import views as loginViews
 from game import views as gameViews
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path("", views.home , name='index'),
     path("logout/", views.logout, name='logout'),
     path("login/", loginViews.intraLogin, name="authentication"),
