@@ -15,10 +15,9 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret! TODO MOVE THIS WHERE IS NECESSARY 
-SECRET_KEY = 'django-insecure-!5f0zf0%=q$7n^$z-n52=uk=1m*&=9#q(1bx)qgy3y4@9(0xdf'
+SECRET_KEY = os.environ["DJANGO_KEY"]
 
-DEBUG = True
+#DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 

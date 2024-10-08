@@ -191,7 +191,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         players = self.active_groups[group_name]["users"]
         num_players = len(players)
 
-        x_positions = [BOARD_X_MARGIN, BOARD_WIDTH - PLAYER_WIDTH * 3 - BOARD_X_MARGIN] if num_players <= 2 else [BOARD_X_MARGIN, BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.5, BOARD_WIDTH - PLAYER_WIDTH * 3 - (BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.5), BOARD_WIDTH - PLAYER_WIDTH * 3 - BOARD_X_MARGIN] 
+        x_positions = [BOARD_X_MARGIN, BOARD_WIDTH - PLAYER_WIDTH * 3 - BOARD_X_MARGIN] if num_players <= 2 else [BOARD_X_MARGIN, BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.2, BOARD_WIDTH - PLAYER_WIDTH * 3 - (BOARD_X_MARGIN + (BALL_RADIUS * 2 * 3) * 1.2), BOARD_WIDTH - PLAYER_WIDTH * 3 - BOARD_X_MARGIN] 
 
 
         self.game_states[group_name] = {

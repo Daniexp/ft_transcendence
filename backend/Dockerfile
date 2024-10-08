@@ -13,6 +13,4 @@ WORKDIR /project
 
 COPY ./entrypoint.sh /entrypoint.sh
 
-#ENTRYPOINT [ "tail", "-f" ]
-
 ENTRYPOINT [ "bash", "/entrypoint.sh" ]

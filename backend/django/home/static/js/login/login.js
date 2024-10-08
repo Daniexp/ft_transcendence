@@ -28,6 +28,5 @@ function login() {
 }
 
 function logout() {
-    console.log("se pira");
     window.location.href = '/logout';
 }

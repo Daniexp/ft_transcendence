@@ -1,5 +1,4 @@
 services:
-
   web:
     build: 
       context: ./backend
@@ -28,7 +27,6 @@ services:
       - Transcendence-network
     depends_on:
       - web
-
 
 networks:
   Transcendence-network:

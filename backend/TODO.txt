@@ -1,4 +1,2 @@
-Test de todo responsive
 Test de todo multiBrowser
 Test 2vs2 rebotar dos veces con un aliado
-ver que hacer con la llave de las settings.py

@@ -1,3 +1,0 @@
-1. cambiar HOSTNAME por uri redirect
-2. cambiar AUTH_URL por url de autorizacion
-3. preguntarme por ello (doni)

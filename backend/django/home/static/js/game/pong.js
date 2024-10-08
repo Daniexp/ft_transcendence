@@ -78,7 +78,7 @@ function startGame(mode) {
     waitForGameStart(mode);
 }
 
-var visualGameRunning = 0;
+let visualGameRunning = 0;
 
 async function waitForGameStart(mode) {
     document.querySelectorAll('.endButtons').forEach(button => button.style.display = "none");
@@ -116,7 +116,7 @@ async function waitForGameStart(mode) {
     
     await new Promise(resolve => {
         const interval = setInterval(() => {
-            if (visualGameRuunning) {
+            if (visualGameRunning) {
                 clearInterval(interval);
                 resolve();
                 visualGameRunning = 0;

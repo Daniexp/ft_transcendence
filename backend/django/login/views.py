@@ -29,13 +29,11 @@ def authRequest(request):
     if request.user.is_authenticated:
         active_token = is_token_active(request.user.api_data)
     if request.user.is_authenticated and active_token: 
-        #response = UserRegister.objects.get(uid=request.user.uid)
         response = request.user
         return views.home(request, response.api_data)
     elif request.user.is_authenticated and not active_token:
         views.logout(request)
         return redirect("/")
-
     response = exchange_code(code, get_token_url)
 
     if "error" in response.json() or request.GET.get('error') or response.status_code != 200:
