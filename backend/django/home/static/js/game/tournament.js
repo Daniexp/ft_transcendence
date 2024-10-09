@@ -90,7 +90,7 @@ function endTournament() {
         window.secondWeb = undefined;
     }
     localStorage.setItem('gameRunning', 0); 
-        hideShowGameSelect(".gameSelectionButtons", "show");
+    hideShowGameSelect(".gameSelectionButtons", "show");
     showHome();
 }
 

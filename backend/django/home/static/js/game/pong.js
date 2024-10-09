@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         showTournamentInput();
                         break;
                     default:
-                        showHome(1);
+                        showHome(0);
                 }
             } else {
                 showHome(0);
