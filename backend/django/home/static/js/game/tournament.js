@@ -29,16 +29,17 @@ const handlePlayerInput = (event) => {
     }
 };
 
-function showTournamentInput() {
+function showTournamentInput(back) {
     players = [];
     matchesQueue = [];
 
-    let gameRunning = parseInt(localStorage.getItem('gameRunning'));
-    if (gameRunning) {
-        alert('A game is already in progress. Please finish it before starting a new one.');
-        return;
+    if(!back){
+        let gameRunning = parseInt(localStorage.getItem('gameRunning'));
+        if (gameRunning) {
+            alert('A game is already in progress on your account. Please finish it before starting a new one.');
+            return;
+        }
     }
-
     localStorage.setItem('gameRunning', 1); 
 
     hideShowGameSelect('.endButtons', 'hide');
@@ -52,13 +53,16 @@ function showTournamentInput() {
 
     const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('displayNone');
+    clearTimeoutCountDown();
     tournamentContainer.classList.add('d-flex');
 
     const playerNameInput = document.getElementById('playerName');
     playerNameInput.value = ""; 
 
     playerNameInput.addEventListener('keydown', handlePlayerInput);
-    history.pushState({ page: 3 }, "tournament", "?page=tournament");
+    if(!back){
+        history.pushState({ page: 3 }, "tournament", "?page=tournament");
+    }
 }
 
 function startTournament() {

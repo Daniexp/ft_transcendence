@@ -1,24 +1,40 @@
+var exitOverwrite = 0;
+
 document.addEventListener("DOMContentLoaded", () => {
     loadHTML("/gameButtonsDisplay/", "placeholder", () => {
         const initButton = document.getElementById("initClick");
         initButton.click();
         document.getElementById('tournamentContainer').style.display = 'none';
 
+        history.pushState({ page: 1 }, "home", "?page=home");
+
         if (localStorage.getItem('gameRunning') === null) {
             localStorage.setItem('gameRunning', 0); 
         }
-        history.pushState({ page: 1 }, "home", "?page=home");
+        
         window.addEventListener('popstate', function(event) {
+            
+            resetGameStats()
+            if (window.secondWeb != undefined) {
+                window.secondWeb.close();
+                window.secondWeb = undefined;
+            }
+            if (window.gameSocket != undefined) {
+                exitOverwrite = 1;
+                window.gameSocket.close();
+                window.gameSocket = undefined;
+            }
             if (event.state) {
                 switch (event.state.page) {
                     case 1:
                         showHome(1);
                         break;
                     case 2:
+                        alert('You cant reconnect to game, if you disconnect, you wont reconnected to the game');
                         showHome(1);
                         break;
                     case 3:
-                        showTournamentInput();
+                        showTournamentInput(1);
                         break;
                     default:
                         showHome(0);
@@ -38,7 +54,7 @@ function updateButtons(tab) {
         button1.textContent = '1 vs IA.';
         button1.onclick = () => startGame("1vsIA");
         button2.textContent = 'Tournament.';
-        button2.onclick = showTournamentInput;
+        button2.onclick = () => showTournamentInput(0);
     } else if (tab === 'multiplayer') {
         button1.textContent = '1 vs 1.';
         button1.onclick = () => startGame("1vs1");
@@ -77,15 +93,13 @@ let playerRoundGoals = 0;
 let opponentRoundGoals = 0;
 let currentRound = 1;
 let countdownTimeout;
-let exitOverwrite = 0;
 let modo = "";
 let countdownElement;
 
 function startGame(mode) {
-    history.pushState({ page: 2 }, "game", "?page=game");
     let gameRunning = parseInt(localStorage.getItem('gameRunning'));
     if (gameRunning) {
-        alert('A game is already in progress. Please finish it before starting a new one.');
+        alert('A game is already in progress on your account. Please finish it before starting a new one.');
         return;
     }
 
@@ -96,6 +110,7 @@ function startGame(mode) {
     hideShowGameSelect(".gamePong", "show");
     document.getElementById("gameScoreBalls").classList.remove('displayNone');
     document.getElementById("gameScoreBalls").classList.add('flexStyle')
+    history.pushState({ page: 2 }, "game", "?page=game");
     waitForGameStart(mode);
 }
 
@@ -165,12 +180,13 @@ function initWebSocket(mode) {
     window.gameSocket.onerror = error => {
         console.error('Error en la conexión WebSocket:', error);
         localStorage.setItem('gameRunning', 0); 
-        showHome(1);
+        showHome(0);
     };
     window.gameSocket.onclose = () => {
-        if (exitOverwrite !== 1) {
-            showHome(1);
+        if (exitOverwrite != 1) {
+            showHome(0);
         }
+        exitOverwrite = 0;
         localStorage.setItem('gameRunning', 0);
     };
 }
@@ -268,7 +284,7 @@ function handleClick() {
         window.gameSocket = undefined;
     }
     if(modo == 'tournament')
-        showTournamentInput()
+        showTournamentInput(0)
     else
         startGame(modo);
 }
@@ -377,7 +393,14 @@ function updateRoundCircles(side, roundWins, won = true) {
     }
 }
 
-function showHome(flag){
+function clearTimeoutCountDown(){
+    if (countdownTimeoutId) 
+        clearTimeout(countdownTimeoutId); 
+    countdownActive = false;
+    document.getElementById('countdown').style.display = 'none'; 
+}
+
+function showHome(back){
     hideShowGameSelect('.endButtons', 'hide');
     keysPressed['ArrowUp'] = false;
     keysPressed['ArrowDown'] = false;
@@ -393,25 +416,16 @@ function showHome(flag){
     document.getElementById("gameScoreBalls").classList.add('displayNone');
     document.getElementById("gameScoreBalls").classList.remove('flexStyle');
     document.getElementById('score').innerHTML = "0 - 0";
-    if (countdownTimeoutId) 
-        clearTimeout(countdownTimeoutId); 
-    countdownActive = false;
+    clearTimeoutCountDown();
     const tournamentContainer = document.getElementById('tournamentContainer');
     if(tournamentContainer)
         hideTournament();
-    if (localStorage.getItem('gameRunning') == 1 && flag) {
+    if (localStorage.getItem('gameRunning') == 1 && back) {
         localStorage.setItem('gameRunning', 0); 
-        if (window.secondWeb != undefined) {
-            window.secondWeb.close();
-            window.secondWeb = undefined;
-        }
-        if (window.gameSocket != undefined) {
-            window.gameSocket.close();
-            window.gameSocket = undefined;
-        }
-        resetGameStats()
     }
-    history.pushState({ page: 1 }, "home", "?page=home");
+    else if(!back){
+        history.pushState({ page: 1 }, "home", "?page=home");
+    }
 }
 
 function resetRoundGoals() {
