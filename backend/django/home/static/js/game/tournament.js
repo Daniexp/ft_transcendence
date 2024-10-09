@@ -58,6 +58,7 @@ function showTournamentInput() {
     playerNameInput.value = ""; 
 
     playerNameInput.addEventListener('keydown', handlePlayerInput);
+    history.pushState({ page: 3 }, "tournament", "?page=tournament");
 }
 
 function startTournament() {
@@ -89,23 +90,23 @@ function endTournament() {
         window.secondWeb = undefined;
     }
     localStorage.setItem('gameRunning', 0); 
-    resetGame();
+        hideShowGameSelect(".gameSelectionButtons", "show");
+    showHome();
+}
 
-    const playerNameInput = document.getElementById('playerName');
-    playerNameInput.removeEventListener('keydown', handlePlayerInput);
-
-    const playerListDiv = document.getElementById('playerList');
-    while (playerListDiv.firstChild) {
-        playerListDiv.removeChild(playerListDiv.firstChild);
-    }
-
+function hideTournament(){
     const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('d-flex');
     tournamentContainer.classList.add('displayNone');
     document.getElementById("distion").classList.remove('d-flex');
     document.getElementById("distion").classList.add('displayNone');
-
-    hideShowGameSelect(".gameSelectionButtons", "show");
+    document.getElementById('PongButton').removeEventListener('click', gameOver);
+    const playerNameInput = document.getElementById('playerName');
+    playerNameInput.removeEventListener('keydown', handlePlayerInput);
+    const playerListDiv = document.getElementById('playerList');
+    while (playerListDiv.firstChild) {
+        playerListDiv.removeChild(playerListDiv.firstChild);
+    }
 }
 
 function setupMatches() {

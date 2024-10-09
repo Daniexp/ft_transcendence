@@ -7,6 +7,26 @@ document.addEventListener("DOMContentLoaded", () => {
         if (localStorage.getItem('gameRunning') === null) {
             localStorage.setItem('gameRunning', 0); 
         }
+        history.pushState({ page: 1 }, "home", "?page=home");
+        window.addEventListener('popstate', function(event) {
+            if (event.state) {
+                switch (event.state.page) {
+                    case 1:
+                        showHome(1);
+                        break;
+                    case 2:
+                        showHome(1);
+                        break;
+                    case 3:
+                        showTournamentInput();
+                        break;
+                    default:
+                        showHome(1);
+                }
+            } else {
+                showHome(0);
+            }
+        });
     });
 });
 
@@ -62,6 +82,7 @@ let modo = "";
 let countdownElement;
 
 function startGame(mode) {
+    history.pushState({ page: 2 }, "game", "?page=game");
     let gameRunning = parseInt(localStorage.getItem('gameRunning'));
     if (gameRunning) {
         alert('A game is already in progress. Please finish it before starting a new one.');
@@ -130,11 +151,10 @@ async function waitForGameStart(mode) {
 }
 
 function initWebSocket(mode) {
-    const gameSocket = new WebSocket(`wss://${window.location.host}/ws/pong/${uniqueID}/${mode}/`);
-    window.gameSocket = gameSocket;
+    window.gameSocket  = new WebSocket(`wss://${window.location.host}/ws/pong/${uniqueID}/${mode}/`);
 
-    gameSocket.onopen = () => console.log('Conexión abierta');
-    gameSocket.onmessage = event => {
+    window.gameSocket.onopen = () => console.log('Conexión abierta');
+    window.gameSocket.onmessage = event => {
         try {
             const data = JSON.parse(event.data);
             handleMessage(data);
@@ -142,14 +162,14 @@ function initWebSocket(mode) {
             console.error('Error al parsear el mensaje:', error);
         }
     };
-    gameSocket.onerror = error => {
+    window.gameSocket.onerror = error => {
         console.error('Error en la conexión WebSocket:', error);
         localStorage.setItem('gameRunning', 0); 
-        resetGame();
+        showHome(1);
     };
-    gameSocket.onclose = () => {
+    window.gameSocket.onclose = () => {
         if (exitOverwrite !== 1) {
-            resetGame();
+            showHome(1);
         }
         localStorage.setItem('gameRunning', 0);
     };
@@ -266,7 +286,6 @@ function handleGameOver() {
     document.getElementById('gameContainer').removeEventListener('keyup', handleKeysStop);
     exitOverwrite = 1;
     localStorage.setItem('gameRunning', 0);
-    if (countdownTimeout) clearTimeout(countdownTimeout);
     if (countdownElement) {
         countdownElement.style.display = 'none';
     }
@@ -322,7 +341,7 @@ function startCountdown() {
         if (!window.gameSocket || window.gameSocket.readyState !== WebSocket.OPEN) {
             if (exitOverwrite !== 1) {
                 window.gameSocket = undefined;
-                resetGame();
+                showHome(1);
             }
             localStorage.setItem('gameRunning', 0);
             return; 
@@ -330,36 +349,6 @@ function startCountdown() {
     }
 
     updateCountdown();
-}
-
-function resetGame() {
-    localStorage.setItem('gameRunning', 0);
-    hideShowGameSelect('.endButtons', 'hide');
-    keysPressed['ArrowUp'] = false;
-    keysPressed['ArrowDown'] = false;
-    keysPressed['w'] = false;
-    keysPressed['s'] = false;
-    clearInterval(intervalId);
-    intervalId = null;
-    hideShowGameSelect('.gameSelectionButtons', 'show');
-    hideShowGameSelect('.gamePong', 'hide');
-    document.getElementById('gameContainer').innerHTML = "";
-    if (countdownElement) {
-        countdownElement.style.display = 'none';
-        countdownElement.textContent = "";
-    }
-    document.getElementById("gameScoreBalls").classList.add('displayNone');
-    document.getElementById("gameScoreBalls").classList.remove('flexStyle');
-    document.getElementById('score').innerHTML = "0 - 0";
-    resetGameStats();
-    if (countdownTimeoutId) 
-        clearTimeout(countdownTimeoutId); 
-    countdownActive = false;
-    document.getElementById('PongButton').removeEventListener('click', gameOver);
-    if (window.secondWeb != undefined) {
-        window.secondWeb.close();
-        window.secondWeb = undefined;
-    }
 }
 
 function updateScoreCircles(score, isPlayer) {
@@ -388,6 +377,43 @@ function updateRoundCircles(side, roundWins, won = true) {
     }
 }
 
+function showHome(flag){
+    hideShowGameSelect('.endButtons', 'hide');
+    keysPressed['ArrowUp'] = false;
+    keysPressed['ArrowDown'] = false;
+    keysPressed['w'] = false;
+    keysPressed['s'] = false;
+    hideShowGameSelect('.gameSelectionButtons', 'show');
+    hideShowGameSelect('.gamePong', 'hide');
+    document.getElementById('gameContainer').innerHTML = "";
+    if (countdownElement) {
+        countdownElement.style.display = 'none';
+        countdownElement.textContent = "";
+    }
+    document.getElementById("gameScoreBalls").classList.add('displayNone');
+    document.getElementById("gameScoreBalls").classList.remove('flexStyle');
+    document.getElementById('score').innerHTML = "0 - 0";
+    if (countdownTimeoutId) 
+        clearTimeout(countdownTimeoutId); 
+    countdownActive = false;
+    const tournamentContainer = document.getElementById('tournamentContainer');
+    if(tournamentContainer)
+        hideTournament();
+    if (localStorage.getItem('gameRunning') == 1 && flag) {
+        localStorage.setItem('gameRunning', 0); 
+        if (window.secondWeb != undefined) {
+            window.secondWeb.close();
+            window.secondWeb = undefined;
+        }
+        if (window.gameSocket != undefined) {
+            window.gameSocket.close();
+            window.gameSocket = undefined;
+        }
+        resetGameStats()
+    }
+    history.pushState({ page: 1 }, "home", "?page=home");
+}
+
 function resetRoundGoals() {
     playerRoundGoals = 0;
     opponentRoundGoals = 0;
@@ -411,7 +437,7 @@ function gameOver() {
         window.gameSocket.close();
         window.gameSocket = undefined;
     }
-    resetGame();
+    showHome(1);
 }
 
 function resetGameStats() {
