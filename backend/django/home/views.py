@@ -21,6 +21,7 @@ class PongUser:
         return self.username
 
 
+
 def login(request):
     return render(request, "index.html")
 
@@ -38,17 +39,12 @@ def get_user_data(request, response):
 
 
 def home(request, response = ""):
-    if request.user.is_authenticated:
-        picture, login_name, id = get_user_data(request, response)
-    elif response != "" :
+    if response != "" :
         if isinstance(response, dict):
             if "access_token" in response:
                 picture, login_name, id = get_user_data(request, response)
                 if not picture and not login_name and not id:
                     return home(request)
-                else:
-                    request.user = PongUser(login_name, id, response)
-                    request.user.is_authenticated = 1
     else:
         return login(request)
     return render(request, 'home.html', {'picture': picture})

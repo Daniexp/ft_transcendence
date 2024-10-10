@@ -1,5 +1,8 @@
-var exitOverwrite = 0;
 
+var exitOverwrite = 0;
+const urlParams = new URLSearchParams(window.location.search);
+export const codeValue = urlParams.get('code');
+export let winner = "No one";
 var prevState = null;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
         initButton.click();
         document.getElementById('tournamentContainer').style.display = 'none';
 
-        history.pushState({ page: 1 }, "home", "?page=home");
+        history.pushState({ page: 1 }, "home", `?page=home&code=${codeValue}`);
 
         if (localStorage.getItem('gameRunning') === null) {
             localStorage.setItem('gameRunning', 0); 
@@ -52,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-function updateButtons(tab) {
+export function updateButtons(tab) {
     const button1 = document.getElementById('butt1');
     const button2 = document.getElementById('butt2');
 
@@ -68,6 +71,7 @@ function updateButtons(tab) {
         button2.onclick = () => startGame("2vs2");
     }
 }
+window.updateButtons = updateButtons;
 
 function getOrGenerateUniqueID() {
     let uniqueID = localStorage.getItem('uniqueID');
@@ -87,22 +91,22 @@ function generateUUID() {
     });
 }
 
-function hideShowGameSelect(classSelector, mode) {
+export function hideShowGameSelect(classSelector, mode) {
     const display = mode === "show" ? 'block' : 'none';
     document.querySelectorAll(classSelector).forEach(button => button.style.display = display);
 }
+window.hideShowGameSelect = hideShowGameSelect
 
-const uniqueID = getOrGenerateUniqueID();
+export const uniqueID = getOrGenerateUniqueID();
+export let modo = "";
 let playerRoundsWon = 0;
 let opponentRoundsWon = 0;
 let playerRoundGoals = 0;
 let opponentRoundGoals = 0;
 let currentRound = 1;
-let countdownTimeout;
-let modo = "";
 let countdownElement;
 
-function startGame(mode) {
+export function startGame(mode) {
     let gameRunning = parseInt(localStorage.getItem('gameRunning'));
     if (gameRunning) {
         alert('A game is already in progress on your account. Please finish it before starting a new one.');
@@ -116,9 +120,10 @@ function startGame(mode) {
     hideShowGameSelect(".gamePong", "show");
     document.getElementById("gameScoreBalls").classList.remove('displayNone');
     document.getElementById("gameScoreBalls").classList.add('flexStyle')
-    history.pushState({ page: 2 }, "game", "?page=game");
+    history.pushState({ page: 2 }, "game", `?page=game&code=${codeValue}`);
     waitForGameStart(mode);
 }
+window.startGame = startGame
 
 let visualGameRunning = 0;
 
@@ -399,19 +404,16 @@ function updateRoundCircles(side, roundWins, won = true) {
     }
 }
 
-function clearTimeoutCountDown(){
+export function clearTimeoutCountDown(){
     if (countdownTimeoutId) 
         clearTimeout(countdownTimeoutId); 
     countdownActive = false;
     document.getElementById('countdown').style.display = 'none'; 
 }
+window.clearTimeoutCountDown = clearTimeoutCountDown
 
-function showHome(back){
+export function showHome(back){
     hideShowGameSelect('.endButtons', 'hide');
-    keysPressed['ArrowUp'] = false;
-    keysPressed['ArrowDown'] = false;
-    keysPressed['w'] = false;
-    keysPressed['s'] = false;
     hideShowGameSelect('.gameSelectionButtons', 'show');
     hideShowGameSelect('.gamePong', 'hide');
     document.getElementById('gameContainer').innerHTML = "";
@@ -419,6 +421,7 @@ function showHome(back){
         countdownElement.style.display = 'none';
         countdownElement.textContent = "";
     }
+    handleKeysReset();
     document.getElementById("gameScoreBalls").classList.add('displayNone');
     document.getElementById("gameScoreBalls").classList.remove('flexStyle');
     document.getElementById('score').innerHTML = "0 - 0";
@@ -430,16 +433,17 @@ function showHome(back){
         localStorage.setItem('gameRunning', 0); 
     }
     else if(!back){
-        history.pushState({ page: 1 }, "home", "?page=home");
+        history.pushState({ page: 1 }, "home", `?page=home&code=${codeValue}`);
     }
 }
+window.showHome = showHome
 
 function resetRoundGoals() {
     playerRoundGoals = 0;
     opponentRoundGoals = 0;
 }
 
-function resetRoundCircles() {
+export function resetRoundCircles() {
     for (let i = 1; i <= 3; i++) {
         const leftCircle = document.getElementById('leftRound' + i);
         const rightCircle = document.getElementById('rightRound' + i);
@@ -451,14 +455,16 @@ function resetRoundCircles() {
         }
     }
 }
+window.resetRoundCircles = resetRoundCircles
 
-function gameOver() {
+export function gameOver() {
     if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.close();
         window.gameSocket = undefined;
     }
     showHome(1);
 }
+window.gameOver = gameOver
 
 function resetGameStats() {
     localStorage.setItem('gameRunning', 0);

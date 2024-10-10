@@ -22,23 +22,32 @@ def is_token_active(response):
         user_data = data_request.json()
         return 1
     return 0
-    
+
+users = []
 
 def authRequest(request):
     code = request.GET.get('code')
-    if request.user.is_authenticated:
-        active_token = is_token_active(request.user.api_data)
-    if request.user.is_authenticated and active_token: 
-        response = request.user
-        return views.home(request, response.api_data)
-    elif request.user.is_authenticated and not active_token:
-        views.logout(request)
-        return redirect("/")
-    response = exchange_code(code, get_token_url)
+    
+    if not code:
+        return views.home(request, "")
+    
+    user_found = next((user for user in users if user.get('code') == code), None)
 
-    if "error" in response.json() or request.GET.get('error') or response.status_code != 200:
+    if user_found and "access_token" in user_found:
+        return views.home(request, user_found)
+
+    response = exchange_code(code, get_token_url)
+    user_data = response.json()
+
+    if "error" in user_data or request.GET.get('error') or response.status_code != 200:
         return views.login(request)
-    return views.home(request, response.json())
+
+    user_data['code'] = code
+    users.append(user_data)
+
+    return views.home(request, user_data)
+
+
 
 def getProfilePicture(data_request):
     if data_request.status_code == 200:

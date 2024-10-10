@@ -1,6 +1,9 @@
+
+import { handleKeysReset } from './gameKeys.js';
+import {codeValue, winner} from './pong.js';
+
 let players = [];
 let matchesQueue = [];
-let winner = "No one";
 
 function showMessage(message) {
 
@@ -32,7 +35,7 @@ const handlePlayerInput = (event) => {
 
 var setRunningZero = 0;
 
-function showTournamentInput(back) {
+export function showTournamentInput(back) {
     players = [];
     matchesQueue = [];
 
@@ -55,11 +58,12 @@ function showTournamentInput(back) {
 
     playerNameInput.addEventListener('keydown', handlePlayerInput);
     if(!back){
-        history.pushState({ page: 3 }, "tournament", "?page=tournament");
+        history.pushState({ page: 3 }, "tournament", `?page=tournament&code=${codeValue}`);
     }
 }
+window.showTournamentInput = showTournamentInput;
 
-function startTournament() {
+export function startTournament() {
     setRunningZero = 1;
     let gameRunning = parseInt(localStorage.getItem('gameRunning'));
     if (players.length < 2) {
@@ -80,8 +84,9 @@ function startTournament() {
     tournamentContainer.classList.add('displayNone');
     playNextMatch();
 }
+window.startTournament = startTournament
 
-function endTournament() {
+export function endTournament() {
 
     if (window.gameSocket && window.gameSocket.readyState === WebSocket.OPEN) {
         window.gameSocket.close();
@@ -96,10 +101,12 @@ function endTournament() {
         localStorage.setItem('gameRunning', 0); 
         setRunningZero = 0;
     }
+    handleKeysReset();
     showHome(0);
 }
+window.endTournament = endTournament
 
-function hideTournament(){
+export function hideTournament(){
     const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('d-flex');
     tournamentContainer.classList.add('displayNone');
@@ -113,6 +120,7 @@ function hideTournament(){
         playerListDiv.removeChild(playerListDiv.firstChild);
     }
 }
+window.hideTournament = hideTournament;
 
 function setupMatches() {
     matchesQueue = [];
@@ -131,7 +139,7 @@ function setupMatches() {
 let player1
 let player2
 
-async function startTournamentGame(){
+export async function startTournamentGame(){
     document.getElementById("distion").classList.remove('d-flex');
     document.getElementById("distion").classList.add('displayNone');
     localStorage.setItem('gameRunning', 0);
@@ -151,6 +159,7 @@ async function startTournamentGame(){
         console.error("Error al jugar el partido:", error);
     }
 }
+window.startTournamentGame = startTournamentGame;
 
 async function playNextMatch() {
     setupMatches();

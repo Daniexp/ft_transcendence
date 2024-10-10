@@ -1,3 +1,5 @@
+import {modo, uniqueID} from './pong.js';
+
 let keysPressed = {};
 let intervalId = null; 
 let secondIntervalId = null; 
@@ -57,8 +59,9 @@ async function handleKeyStrokes(event) {
         }, 10);
     }
 }
+window.handleKeyStrokes = handleKeyStrokes
 
-async function handleKeysStop(event) {
+export async function handleKeysStop(event) {
     if (event.key === 'W' || event.keyCode === 87) {
         keysPressed['W'] = false;
     } else if (event.key === 'S' || event.keyCode === 83) {
@@ -77,6 +80,19 @@ async function handleKeysStop(event) {
         secondIntervalId = null;
     }
 }
+window.handleKeysStop = handleKeysStop
+
+export async function handleKeysReset(event) {
+    keysPressed['W'] = false;
+    keysPressed['S'] = false;
+    keysPressed['ArrowUp'] = false;
+    keysPressed['ArrowDown'] = false;
+    clearInterval(intervalId);
+    intervalId = null;
+    clearInterval(secondIntervalId);
+    secondIntervalId = null;
+}
+window.handleKeysReset = handleKeysReset
 
 
 window.addEventListener("blur", () => {
