@@ -1,5 +1,7 @@
 var exitOverwrite = 0;
 
+var prevState = null;
+
 document.addEventListener("DOMContentLoaded", () => {
     loadHTML("/gameButtonsDisplay/", "placeholder", () => {
         const initButton = document.getElementById("initClick");
@@ -14,13 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
         
         window.addEventListener('popstate', function(event) {
             
+            exitOverwrite = 1;
             resetGameStats()
             if (window.secondWeb != undefined) {
                 window.secondWeb.close();
                 window.secondWeb = undefined;
             }
             if (window.gameSocket != undefined) {
-                exitOverwrite = 1;
                 window.gameSocket.close();
                 window.gameSocket = undefined;
             }
@@ -31,7 +33,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                     case 2:
                         alert('You cant reconnect to game, if you disconnect, you wont reconnected to the game');
-                        showHome(1);
+                        if (prevState == 3)
+                            showTournamentInput(0);
+                        else
+                            showHome(0);
                         break;
                     case 3:
                         showTournamentInput(1);
@@ -39,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     default:
                         showHome(0);
                 }
+                prevState = event.state.page;
             } else {
                 showHome(0);
             }

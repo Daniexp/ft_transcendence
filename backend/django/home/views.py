@@ -38,7 +38,9 @@ def get_user_data(request, response):
 
 
 def home(request, response = ""):
-    if response != "":
+    if request.user.is_authenticated:
+        picture, login_name, id = get_user_data(request, response)
+    elif response != "" :
         if isinstance(response, dict):
             if "access_token" in response:
                 picture, login_name, id = get_user_data(request, response)

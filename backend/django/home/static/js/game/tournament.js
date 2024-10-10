@@ -29,18 +29,12 @@ const handlePlayerInput = (event) => {
     }
 };
 
+
+var setRunningZero = 0;
+
 function showTournamentInput(back) {
     players = [];
     matchesQueue = [];
-
-    if(!back){
-        let gameRunning = parseInt(localStorage.getItem('gameRunning'));
-        if (gameRunning) {
-            alert('A game is already in progress on your account. Please finish it before starting a new one.');
-            return;
-        }
-    }
-    localStorage.setItem('gameRunning', 1); 
 
     hideShowGameSelect('.endButtons', 'hide');
     document.getElementById("gameScoreBalls").classList.add('displayNone');
@@ -66,8 +60,14 @@ function showTournamentInput(back) {
 }
 
 function startTournament() {
+    setRunningZero = 1;
+    let gameRunning = parseInt(localStorage.getItem('gameRunning'));
     if (players.length < 2) {
-        alert("Se necesitan al menos dos jugadores para iniciar el torneo.");
+        alert("Need at least 2 players to start a tournament.");
+        return;
+    }
+    if (gameRunning) {
+        alert('A game is already in progress on your account. Please finish it before starting a new one.');
         return;
     }
 
@@ -78,7 +78,6 @@ function startTournament() {
     const tournamentContainer = document.getElementById('tournamentContainer');
     tournamentContainer.classList.remove('d-flex');
     tournamentContainer.classList.add('displayNone');
-    localStorage.setItem('gameRunning', 0); 
     playNextMatch();
 }
 
@@ -93,9 +92,11 @@ function endTournament() {
         window.secondWeb.close();
         window.secondWeb = undefined;
     }
-    localStorage.setItem('gameRunning', 0); 
-    hideShowGameSelect(".gameSelectionButtons", "show");
-    showHome();
+    if(setRunningZero){
+        localStorage.setItem('gameRunning', 0); 
+        setRunningZero = 0;
+    }
+    showHome(0);
 }
 
 function hideTournament(){
@@ -133,6 +134,7 @@ let player2
 async function startTournamentGame(){
     document.getElementById("distion").classList.remove('d-flex');
     document.getElementById("distion").classList.add('displayNone');
+    localStorage.setItem('gameRunning', 0);
 
     try {
         startGame("tournament"); 
@@ -153,6 +155,7 @@ async function startTournamentGame(){
 async function playNextMatch() {
     setupMatches();
     let match = matchesQueue.shift();
+    localStorage.setItem('gameRunning', 1);
     
     if (match == null || match.length == 1) {
         showMessage(`Tournament winner ${players[0]}!`);
