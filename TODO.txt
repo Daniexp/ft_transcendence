@@ -1,0 +1,5 @@
+1. puede dejar la cuenta pillada:
+	- ir a 1vsIA
+	- abrir otra sesion
+	- cerrar la 1vsIA
+	- tratar de jugar 1vsIA en la pantalla restante
