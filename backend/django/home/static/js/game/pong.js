@@ -14,11 +14,22 @@ document.addEventListener("DOMContentLoaded", () => {
         history.pushState({ page: 1 }, "home", `?page=home&code=${codeValue}`);
 
         if (localStorage.getItem('gameRunning') === null) {
-            localStorage.setItem('gameRunning', 0); 
+            localStorage.setItem('gameRunning', 0);
         }
-        
+
+        window.addEventListener('beforeunload', function (event) {
+            if (window.secondWeb != undefined) {
+                window.secondWeb.close();
+                window.secondWeb = undefined;
+            }
+            if (window.gameSocket != undefined) {
+                window.gameSocket.close();
+                window.gameSocket = undefined;
+            }
+        });
+
         window.addEventListener('popstate', function(event) {
-            
+            console.log("MANOLO PIES SUAVES") 
             exitOverwrite = 1;
             resetGameStats()
             if (window.secondWeb != undefined) {
