@@ -64,6 +64,7 @@ export function showTournamentInput(back) {
 window.showTournamentInput = showTournamentInput;
 
 export function startTournament() {
+    isAuthentificated()
     setRunningZero = 1;
     let gameRunning = parseInt(localStorage.getItem('gameRunning'));
     if (players.length < 2) {
@@ -140,6 +141,7 @@ let player1
 let player2
 
 export async function startTournamentGame(){
+    isAuthentificated();
     document.getElementById("distion").classList.remove('d-flex');
     document.getElementById("distion").classList.add('displayNone');
     localStorage.setItem('gameRunning', 0);
@@ -162,6 +164,7 @@ export async function startTournamentGame(){
 window.startTournamentGame = startTournamentGame;
 
 async function playNextMatch() {
+    isAuthentificated();
     setupMatches();
     let match = matchesQueue.shift();
     localStorage.setItem('gameRunning', 1);

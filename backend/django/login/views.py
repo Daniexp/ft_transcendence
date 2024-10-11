@@ -48,7 +48,6 @@ def authRequest(request):
     return views.home(request, user_data)
 
 
-
 def getProfilePicture(data_request):
     if data_request.status_code == 200:
         user_data = data_request.json()

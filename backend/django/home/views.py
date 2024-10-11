@@ -28,7 +28,7 @@ def login(request):
 def logout(request):
     if (request.user.is_authenticated):
         auth_logout(request)
-    return redirect('/')
+    return home(request)
 
 def get_user_data(request, response):
     data_request = requests.get("https://api.intra.42.fr/v2/me", data=response)

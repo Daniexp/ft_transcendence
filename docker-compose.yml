@@ -10,6 +10,11 @@ services:
       - .env
     networks:
       - Transcendence-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/healthcheck"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   nginx:
     build:
@@ -24,7 +29,8 @@ services:
     networks:
       - Transcendence-network
     depends_on:
-      - web
+      web: 
+        condition: service_healthy
 
 networks:
   Transcendence-network:

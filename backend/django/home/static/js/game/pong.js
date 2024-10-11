@@ -1,6 +1,6 @@
 
 var exitOverwrite = 0;
-const urlParams = new URLSearchParams(window.location.search);
+let urlParams = new URLSearchParams(window.location.search);
 export const codeValue = urlParams.get('code');
 export let winner = "No one";
 var prevState = null;
@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
         initButton.click();
         document.getElementById('tournamentContainer').style.display = 'none';
 
+        sessionStorage.setItem('Authentificated', 'true');
+        
         history.pushState({ page: 1 }, "home", `?page=home&code=${codeValue}`);
 
         if (localStorage.getItem('gameRunning') === null) {
@@ -18,6 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         window.addEventListener('beforeunload', function (event) {
+            isAuthentificated();
+
             if (window.secondWeb != undefined) {
                 window.secondWeb.close();
                 window.secondWeb = undefined;
@@ -29,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         window.addEventListener('popstate', function(event) {
-            console.log("MANOLO PIES SUAVES") 
             exitOverwrite = 1;
             resetGameStats()
             if (window.secondWeb != undefined) {
@@ -40,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.gameSocket.close();
                 window.gameSocket = undefined;
             }
+            isAuthentificated();
             if (event.state) {
                 switch (event.state.page) {
                     case 1:
@@ -62,9 +66,16 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 showHome(0);
             }
+            
         });
     });
 });
+
+export function isAuthentificated(){
+    if(sessionStorage.getItem('Authentificated') == null)
+        logout();
+}
+window.isAuthentificated = isAuthentificated;
 
 export function updateButtons(tab) {
     const button1 = document.getElementById('butt1');
@@ -118,6 +129,9 @@ let currentRound = 1;
 let countdownElement;
 
 export function startGame(mode) {
+
+    isAuthentificated();
+
     let gameRunning = parseInt(localStorage.getItem('gameRunning'));
     if (gameRunning) {
         alert('A game is already in progress on your account. Please finish it before starting a new one.');
@@ -424,6 +438,9 @@ export function clearTimeoutCountDown(){
 window.clearTimeoutCountDown = clearTimeoutCountDown
 
 export function showHome(back){
+    
+    isAuthentificated();
+
     hideShowGameSelect('.endButtons', 'hide');
     hideShowGameSelect('.gameSelectionButtons', 'show');
     hideShowGameSelect('.gamePong', 'hide');
