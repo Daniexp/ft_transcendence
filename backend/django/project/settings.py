@@ -28,8 +28,6 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-SSL_CERTIFICATE = os.path.join('/etc/ssl/certs', 'Server.crt')
-SSL_KEY = os.path.join('/etc/ssl/certs', 'server.key')
 
 INSTALLED_APPS = [
     'daphne',
